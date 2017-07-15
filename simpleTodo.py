@@ -11,6 +11,7 @@ app=Flask(__name__)
 
 if "OPENSHIFT_MONGODB_DB_HOST" in os.environ :
     app.config['MONGO_HOST']=os.environ.get("OPENSHIFT_MONGODB_DB_HOST")
+    app.config['MONGO_DBNAME']="simpletodo"
 
 if "OPENSHIFT_MONGODB_DB_PORT" in os.environ :
     app.config['MONGO_PORT']=os.environ.get("OPENSHIFT_MONGODB_DB_PORT")
