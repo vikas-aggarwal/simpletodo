@@ -67,7 +67,7 @@
   view.dateString=$.datepicker.formatDate(dateFormat,dateValue)
   view.todo_id=task.todo_id
   
-  if(dateValue.getTime() < sysDate.getTime() && dateValue.toDateString() == sysDate.toDateString())
+  if(dateValue.getTime() < sysDate.getTime() && dateValue.toDateString() != sysDate.toDateString())
   {
 			   $('#tasklistdata').append(Mustache.render(template, view));
   }
