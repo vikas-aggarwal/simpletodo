@@ -48,7 +48,7 @@ def get_todo(todo_id):
 def create_todos():
     data=request.get_json();
     if 'due_date' in data:
-        data['due_date']=datetime.fromtimestamp(data['due_date'])
+        data['due_date']=datetime.utcfromtimestamp(data['due_date'])
     max_data = list(mongo.db.todos.aggregate([{"$group":{"_id": "","max_id": { "$max": "$todo_id" }}}]));
     max_todo_id=1
     for item in list(max_data):
@@ -68,7 +68,7 @@ def create_todos():
 def update_or_create_todo(todo_id): #id is not auto generated
     data=request.get_json();
     if 'due_date' in data:
-        data['due_date']=datetime.fromtimestamp(data['due_date'])
+        data['due_date']=datetime.utcfromtimestamp(data['due_date'])
     data['todo_id']=todo_id
     mongo.db.todos.update_one({'todo_id':todo_id},{'$set': data});
     return jsonify(json.loads(dumps(data)))
