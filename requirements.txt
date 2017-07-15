@@ -1,0 +1,4 @@
+Flask==0.12.2
+Flask-PyMongo==0.5.1
+python-dateutil==2.6.0
+
