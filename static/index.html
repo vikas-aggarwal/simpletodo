@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css"/>
+<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min.css">
+<link rel = "stylesheet" href = "https://rawgithub.com/arschmitz/jquery-mobile-datepicker-wrapper/master/jquery.mobile.datepicker.css" />
+
+<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="https://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min.js"></script>
+<script src = "https://rawgithub.com/jquery/jquery-ui/1.10.4/ui/jquery.ui.datepicker.js"></script>
+<script src = "https://rawgithub.com/arschmitz/jquery-mobile-datepicker-wrapper/master/jquery.mobile.datepicker.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>   
+   </head>
+
+  <body>
+    <div data-role="page" id="mainpage">
+      <div data-role="header">
+	<h1>Tasks</h1>
+      </div>
+      <div data-role="main" class="ui-content" id="tasklist">
+	
+      </div>
+</div>
+
+<div data-role="page" id="create">
+  <div data-role="main" class="ui-content">
+    <a href="#pageone">Go to Page One</a>
+  </div>
+</div>
+
+
+<div data-role="page" id="edit">
+  <div data-role="main" class="ui-content">
+    <a href="#pagetwo">Go to Page Two</a>
+  </div>
+</div>
+
+<script type="text/javascript">
+  dateFormat='dd-M-yy';
+  template='<li data-icon="false"><a href="#">{{taskName}}<p>{{taskFrequency}}</p><p class="ui-li-aside"><span id="{{todo_id}}_label">{{dateString}}&nbsp;</span><input type="text" hidden="hidden" id="{{todo_id}}_date" data-role="date" readonly="readonly" value="{{dateString}}"></p></a></li>';
+  $.datepicker.setDefaults({dateFormat: dateFormat,showOn: "button",
+  buttonImage: "https://cdnjs.cloudflare.com/ajax/libs/Zebra_datepicker/1.9.4/images/calendar.png",
+  buttonImageOnly: true,
+  buttonText: "Select date"});
+ 
+  tasks={};
+  $.ajax('../todos').done(
+  function(data){
+  $('#tasklist').append('<ul data-role="listview" id="tasklistdata"></ul>')
+  $('#tasklist').trigger("create")
+  tasks=data
+  sysDate=new Date();
+
+  $('#tasklistdata').append('<li data-role="list-divider">Pending</li>')
+  for(t in data) //Pending
+  {
+  task = data[t];
+  dateValue=new Date(0);
+  dateValue.setUTCSeconds(task.due_date['$date']/1000);
+  var view={};
+  view.taskName=task.task;
+  view.taskFrequency=task.frequency;
+  view.dateString=$.datepicker.formatDate(dateFormat,dateValue)
+  view.todo_id=task.todo_id
+  
+  if(dateValue.getTime() < sysDate.getTime())
+  {
+			   $('#tasklistdata').append(Mustache.render(template, view));
+  }
+  
+
+   }
+
+  $('#tasklistdata').append('<li data-role="list-divider">Today</li>')
+  for(t in data) //Today
+  {
+  task = data[t];
+  dateValue=new Date(0);
+  dateValue.setUTCSeconds(task.due_date['$date']/1000);
+  var view={};
+  view.taskName=task.task;
+  view.taskFrequency=task.frequency;
+  view.dateString=$.datepicker.formatDate(dateFormat,dateValue)
+  view.todo_id=task.todo_id
+  
+
+  if(dateValue.toDateString() == sysDate.toDateString())
+  {
+			   $('#tasklistdata').append(Mustache.render(template, view));
+  }
+  
+
+ }
+
+
+  $('#tasklistdata').append('<li data-role="list-divider">Upcoming</li>')
+  for(t in data) //Upcoming
+  {
+  task = data[t];
+  dateValue=new Date(0);
+  dateValue.setUTCSeconds(task.due_date['$date']/1000);
+  var view={};
+  view.taskName=task.task;
+  view.taskFrequency=task.frequency;
+  view.dateString=$.datepicker.formatDate(dateFormat,dateValue)
+  view.todo_id=task.todo_id
+  
+
+  if(dateValue.getTime() > sysDate.getTime() && dateValue.toDateString() != sysDate.toDateString())
+  {
+			   $('#tasklistdata').append(Mustache.render(template, view));
+  }
+  
+
+   }
+
+
+			   
+
+
+			   
+  $('#tasklistdata').listview("refresh")
+    $('#tasklistdata').ready(function(){$("input[id$='_date']").datepicker({onSelect :
+
+    function(dateStr,datePickerObject)
+    {
+
+    todo_id=datePickerObject.id.substring(0,datePickerObject.id.indexOf("_"))
+    $("#"+todo_id+"_label").html(dateStr)
+    newDate=$.datepicker.parseDate(dateFormat,dateStr)
+    data={'due_date':Math.floor(newDate.getTime()/1000)}
+    $.ajax({url:'../todos/'+todo_id,type:"POST",data:JSON.stringify(data),contentType:"application/json"}).done(
+    function(data)
+    {
+      console.log(data)
+    }
+    )
+    }
+
+
+    })})
+
+  })
+</script>
+
+
+  </body>
+  
+  
+</html>
