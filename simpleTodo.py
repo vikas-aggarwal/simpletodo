@@ -8,10 +8,10 @@ import os
 from datetime import datetime
 
 app=Flask(__name__)
-if os.environ.has_key("OPENSHIFT_MONGODB_DB_HOST"):
+if "OPENSHIFT_MONGODB_DB_HOST" in os.environ :
     app.config['MONGO_HOST']=os.environ.get("OPENSHIFT_MONGODB_DB_HOST")
 
-if os.environ.has_key("OPENSHIFT_MONGODB_DB_PORT"):
+if "OPENSHIFT_MONGODB_DB_PORT" in os.environ :
     app.config['MONGO_PORT']=os.environ.get("OPENSHIFT_MONGODB_DB_PORT")
     
 mongo=PyMongo(app)
