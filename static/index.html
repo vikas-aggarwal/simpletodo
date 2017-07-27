@@ -20,15 +20,28 @@
     <div data-role="page" id="mainpage">
       <div data-role="header">
 	<h1>Tasks</h1>
+	<a href="#create" data-icon="plus" class="ui-btn-right">New</a>
       </div>
       <div data-role="main" class="ui-content" id="tasklist">
 	
       </div>
 </div>
 
-<div data-role="page" id="create">
+    <div data-role="page" id="create">
+      <div data-role="header">
+	<h1>New Task</h1>
+	<a href="#mainpage" data-icon="back">Back</a>
+      </div>
   <div data-role="main" class="ui-content">
-    <a href="#pageone">Go to Page One</a>
+    
+      <label for="taskTitle">Title:</label>
+      <input type="text" name="taskTitle" id="taskTitle">
+      <label for="freq">Frequency:</label>
+      <input type="text" name="freq" id="freq">
+      <label for="dueDate">Due Date:</label>
+      <span><input type="text" name="dueDate" id="dueDate"></span>
+      <button class="ui-btn" id="createSubmitBtn">Submit</button>
+      
   </div>
 </div>
 
@@ -46,7 +59,27 @@
   buttonImage: "https://cdnjs.cloudflare.com/ajax/libs/Zebra_datepicker/1.9.4/images/calendar.png",
   buttonImageOnly: true,
   buttonText: "Select date"});
- 
+
+
+  $("#dueDate").datepicker();
+  $("#createSubmitBtn").bind("click",function(e)
+  {
+  var subData={};
+  subData.task=$("#taskTitle").val();
+  subData.frequency=$("#freq").val();
+  subData.due_date=$("#dueDate").datepicker("getDate").getTime()/1000
+
+  $.ajax({type:'POST',url:'../todos',data:JSON.stringify(subData),contentType:"application/json"}).done(
+  function(data)
+  {
+  console.log(data);
+  $( ":mobile-pagecontainer" ).pagecontainer( "change", "#mainpage" );
+  }
+  )
+  
+
+  })
+  
   tasks={};
   $.ajax('../todos').done(
   function(data){
