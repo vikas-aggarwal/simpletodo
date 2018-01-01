@@ -70,7 +70,7 @@ def update_or_create_todo(todo_id): #id is not auto generated
     if 'due_date' in data:
         data['due_date']=datetime.utcfromtimestamp(data['due_date'])
     data['todo_id']=todo_id
-    mongo.db.todos.update_one({'todo_id':todo_id},{'$set': data});
+    mongo.db.todos.update_one({'todo_id':todo_id},{'$set': data},upsert=True);
     return jsonify(json.loads(dumps(data)))
 
 
