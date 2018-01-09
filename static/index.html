@@ -54,7 +54,7 @@
 
 <script type="text/javascript">
   dateFormat='dd-M-yy';
-  template='<li data-icon="false"><a href="#">{{taskName}}<p>{{taskFrequency}}</p><p class="ui-li-aside"><span id="{{todo_id}}_label">{{dateString}}&nbsp;</span><input type="text" hidden="hidden" id="{{todo_id}}_date" data-role="date" readonly="readonly" value="{{dateString}}"></p></a></li>';
+  template='<li data-icon="false"><a href="#"><div class="ui-grid-a"><div class="ui-block-a" style="overflow:hidden">{{taskName}}<p>{{taskFrequency}}</p></div><div class="ui-block-b"><p style="float:right"><span id="{{todo_id}}_label">{{dateString}}&nbsp;</span><input type="text" hidden="hidden" id="{{todo_id}}_date" data-role="date" readonly="readonly" value="{{dateString}}"></p></div></div></a></li>';
   $.datepicker.setDefaults({dateFormat: dateFormat,showOn: "button",
   buttonImage: "https://cdnjs.cloudflare.com/ajax/libs/Zebra_datepicker/1.9.4/images/calendar.png",
   buttonImageOnly: true,
