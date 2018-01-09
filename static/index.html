@@ -54,7 +54,7 @@
 
 <script type="text/javascript">
   dateFormat='dd-M-yy';
-  template='<li data-icon="false"><a href="#"><div class="ui-grid-a"><div class="ui-block-a" style="overflow:hidden">{{taskName}}<p>{{taskFrequency}}</p></div><div class="ui-block-b"><p style="float:right"><span id="{{todo_id}}_label">{{dateString}}&nbsp;</span><input type="text" hidden="hidden" id="{{todo_id}}_date" data-role="date" readonly="readonly" value="{{dateString}}"></p></div></div></a></li>';
+  template='<li data-icon="false" data-region-id="{{todo_id}}_region"><a href="#"><div class="ui-grid-a"><div class="ui-block-a" style="overflow:hidden">{{taskName}}<p>{{taskFrequency}}</p></div><div class="ui-block-b"><p style="float:right"><span id="{{todo_id}}_label">{{dateString}}&nbsp;</span><input type="text" hidden="hidden" id="{{todo_id}}_date" data-role="date" readonly="readonly" value="{{dateString}}"></p></div></div></a></li>';
   $.datepicker.setDefaults({dateFormat: dateFormat,showOn: "button",
   buttonImage: "https://cdnjs.cloudflare.com/ajax/libs/Zebra_datepicker/1.9.4/images/calendar.png",
   buttonImageOnly: true,
@@ -176,8 +176,28 @@
 
 
     })})
+    $('#tasklistdata').ready(function(){
+    $("#tasklistdata li").on("taphold",function(event){
 
-  })
+    
+    objectId=event.currentTarget.attributes['data-region-id'].value;
+    objectId=objectId.substr(0,objectId.indexOf('_'))
+    taskToDelete = tasks.find(function(f){if(f.todo_id==objectId){return true}});
+    var d = confirm("Delete : "+taskToDelete.task+"?")
+    if(d==true)
+    {
+        $.ajax({url:"../todos/"+objectId,method:"DELETE"})
+        $("[data-region-id='"+objectId+"_region'] a").get(0).style.background="brown"
+    }
+
+    })
+    })
+
+
+    
+    })
+
+var temp;    
 </script>
 
 
