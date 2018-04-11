@@ -5,7 +5,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css"/>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css"/>
 <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min.css">
 <link rel = "stylesheet" href = "https://rawgithub.com/arschmitz/jquery-mobile-datepicker-wrapper/master/jquery.mobile.datepicker.css" />
 
@@ -52,9 +52,37 @@
   </div>
 </div>
 
+<script type="text/html" id="listview-template">
+  <li data-region-id="{{todo_id}}_region">
+    <div class="ui-grid-a">
+    <div class="ui-block-a">
+      <h3 class="ui-li-header">{{taskName}}</h3>
+      <p>{{taskFrequency}}</p>
+    </div>
+    <div class="ui-block-b">
+      <p style="float:right;width: 16px;margin-left: 10px;">
+	    <img id="{{todo_id}}_loading" src="loading.gif" style="float:right;display:none"/>
+	    <img id="{{todo_id}}_success" src="check.png" style="float:right;display:none"/>
+	    <img id="{{todo_id}}_failed" src="alert.png" style="float:right;display:none"/>
+      </p>
+	  
+      <p style="float:right">
+	    <span id="{{todo_id}}_label">{{dateString}}&nbsp;</span>
+	    <input type="text" hidden="hidden" id="{{todo_id}}_date" data-role="date" readonly="readonly" value="{{dateString}}">
+	  </p>
+	  
+    </div>
+    
+    </div>
+    
+
+  </li>
+</script>
+
+
 <script type="text/javascript">
   dateFormat='dd-M-yy';
-  template='<li data-icon="false" data-region-id="{{todo_id}}_region"><a href="#"><div class="ui-grid-a"><div class="ui-block-a" style="overflow:hidden">{{taskName}}<p>{{taskFrequency}}</p></div><div class="ui-block-b"><p style="float:right"><span id="{{todo_id}}_label">{{dateString}}&nbsp;</span><input type="text" hidden="hidden" id="{{todo_id}}_date" data-role="date" readonly="readonly" value="{{dateString}}"></p></div></div></a></li>';
+  template=document.getElementById("listview-template").innerHTML;
   $.datepicker.setDefaults({dateFormat: dateFormat,showOn: "button",
   buttonImage: "https://cdnjs.cloudflare.com/ajax/libs/Zebra_datepicker/1.9.4/images/calendar.png",
   buttonImageOnly: true,
@@ -163,13 +191,23 @@
     {
 
     todo_id=datePickerObject.id.substring(0,datePickerObject.id.indexOf("_"))
+    $("#"+todo_id+"_loading").css("display","");
     $("#"+todo_id+"_label").html(dateStr)
     newDate=$.datepicker.parseDate(dateFormat,dateStr)
     data={'due_date':Math.floor(newDate.getTime()/1000)}
     $.ajax({url:'../todos/'+todo_id,type:"POST",data:JSON.stringify(data),contentType:"application/json"}).done(
     function(data)
     {
+    $("#"+todo_id+"_loading").css("display","none");
+    $("#"+todo_id+"_success").css("display","");
       console.log(data)
+    }
+    ).fail(
+    function()
+    {
+    $("#"+todo_id+"_loading").css("display","none");
+    $("#"+todo_id+"_failed").css("display","");
+    
     }
     )
     }
