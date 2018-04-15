@@ -32,31 +32,53 @@
 	<h1>New Task</h1>
 	<a href="#mainpage" data-icon="back">Back</a>
       </div>
-  <div data-role="main" class="ui-content">
+      <div data-role="main" class="ui-content" id="create_content">
+	
+	
+	<button class="ui-btn" id="createSubmitBtn">Submit</button>
+	
+      </div>
+    </div>
     
-      <label for="taskTitle">Title:</label>
-      <input type="text" name="taskTitle" id="taskTitle">
-      <label for="freq">Frequency:</label>
-      <input type="text" name="freq" id="freq">
-      <label for="dueDate">Due Date:</label>
-      <span><input type="text" name="dueDate" id="dueDate"></span>
-      <button class="ui-btn" id="createSubmitBtn">Submit</button>
-      
-  </div>
-</div>
+    
+    <div data-role="page" id="edit">
+      <div data-role="header">
+	<h1>Edit Task</h1>
+	<a href="#mainpage" data-icon="back">Back</a>
+      </div>
+      <div data-role="main" class="ui-content" id="edit_content">
+	<input type="hidden" name="edit_todo_id" id="edit_todo_id" value="0">
+	<button class="ui-btn" id="editSubmitBtn">Submit</button>
+      </div>
+    </div>
 
 
-<div data-role="page" id="edit">
-  <div data-role="main" class="ui-content">
-    <a href="#pagetwo">Go to Page Two</a>
-  </div>
-</div>
+<script type="text/html" id="task_form_template">
+  <label for="taskTitle">Title:</label>
+  <input type="text" name="taskTitle" id="{{action}}_taskTitle">
+  <label for="freq">Frequency:</label>
+  <input type="text" name="freq" id="{{action}}_freq">
+  <label for="dueDate">Due Date:</label>
+  <span><input type="text" name="dueDate" id="{{action}}_dueDate" /></span>
+  <fieldset data-role="controlgroup" data-type="horizontal">
+    <legend>Choose Slot:</legend>
+    <input type="radio" name="{{action}}_slot" id="{{action}}_slotNone" value="{{action}}_slotNone" checked="checked"/><label for="{{action}}_slotNone">None</label>
+    <input type="radio" name="{{action}}_slot" id="{{action}}_slot1" value="{{action}}_slot1" /><label for="{{action}}_slot1">1</label>
+    <input type="radio" name="{{action}}_slot" id="{{action}}_slot2" value="{{action}}_slot2" /><label for="{{action}}_slot2">2</label>
+    <input type="radio" name="{{action}}_slot" id="{{action}}_slot3" value="{{action}}_slot3" /><label for="{{action}}_slot3">3</label>
+    <input type="radio" name="{{action}}_slot" id="{{action}}_slot4" value="{{action}}_slot4" /><label for="{{action}}_slot4">4</label>
+    <input type="radio" name="{{action}}_slot" id="{{action}}_slot5" value="{{action}}_slot5" /><label for="{{action}}_slot5">5</label>
+    <input type="radio" name="{{action}}_slot" id="{{action}}_slot6" value="{{action}}_slot6" /><label for="{{action}}_slot6">6</label>
+  </fieldset>
+</script>
+
+
 
 <script type="text/html" id="listview-template">
   <li data-region-id="{{todo_id}}_region">
     <div class="ui-grid-a">
     <div class="ui-block-a">
-      <h3 class="ui-li-header">{{taskName}}</h3>
+      <a id="{{todo_id}}_edit_link"><h3 class="ui-li-header" style="display:inline" >{{taskName}}</h3></a>
       <p>{{taskFrequency}}</p>
     </div>
     <div class="ui-block-b">
@@ -72,15 +94,25 @@
 	  </p>
 	  
     </div>
-    
+   
     </div>
-    
+   
 
   </li>
 </script>
 
 
 <script type="text/javascript">
+
+  $("#create").page({
+	beforecreate : function(){$("#create_content").prepend(Mustache.render($("#task_form_template").text(),{"action":"create"}))}
+  })
+
+    $("#edit").page({
+	beforecreate : function(){$("#edit_content").prepend(Mustache.render($("#task_form_template").text(),{"action":"edit"}))}
+  })
+
+  
   dateFormat='dd-M-yy';
   template=document.getElementById("listview-template").innerHTML;
   $.datepicker.setDefaults({dateFormat: dateFormat,showOn: "button",
@@ -89,14 +121,17 @@
   buttonText: "Select date"});
 
 
-  $("#dueDate").datepicker();
+  $("#create_dueDate").datepicker();
+  $("#edit_dueDate").datepicker();
   $("#createSubmitBtn").bind("click",function(e)
   {
   var subData={};
-  subData.task=$("#taskTitle").val();
-  subData.frequency=$("#freq").val();
-  subData.due_date=$("#dueDate").datepicker("getDate").getTime()/1000
-
+  subData.task=$("#create_taskTitle").val();
+  subData.frequency=$("#create_freq").val();
+  subData.due_date=$("#create_dueDate").datepicker("getDate").getTime()/1000
+  subData.timeSlot=$("input[name='create_slot']:checked").val();
+  subData.timeSlot=subData.timeSlot.substring(subData.timeSlot.indexOf("slot")+4)
+  
   $.ajax({type:'POST',url:'../todos',data:JSON.stringify(subData),contentType:"application/json"}).done(
   function(data)
   {
@@ -107,6 +142,51 @@
   
 
   })
+
+
+
+
+  $("#editSubmitBtn").bind("click",function(e)
+  {
+  var subData={};
+  subData.task=$("#edit_taskTitle").val();
+  subData.frequency=$("#edit_freq").val();
+  subData.due_date=$("#edit_dueDate").datepicker("getDate").getTime()/1000
+  subData.timeSlot=$("input[name='edit_slot']:checked").val();
+  subData.timeSlot=subData.timeSlot.substring(subData.timeSlot.indexOf("slot")+4)
+  todo_id=$("#edit_todo_id").val();
+  
+  $.ajax({type:'POST',url:'../todos/'+todo_id,data:JSON.stringify(subData),contentType:"application/json"}).done(
+  function(data)
+  {
+  console.log(data);
+  $( ":mobile-pagecontainer" ).pagecontainer( "change", "#mainpage" );
+  }
+  )
+  
+
+  })
+
+
+  function renderTasks(tasks)
+  {
+  for(t in tasks)
+  {
+  task = tasks[t];
+  var view={};
+  view.taskName=task.task;
+  view.taskFrequency=task.frequency;
+  dateValue=new Date(0);
+  dateValue.setUTCSeconds(task.due_date['$date']/1000);
+  view.dateString=$.datepicker.formatDate(dateFormat,dateValue)
+  view.todo_id=task.todo_id
+  view.timeSlot=task.timeSlot || 'None'
+  $('#tasklistdata').append(Mustache.render(template, view));
+  }
+
+  }
+
+
   
   tasks={};
   $.ajax('../todos').done(
@@ -116,75 +196,106 @@
   tasks=data
   sysDate=new Date();
 
+
+
+  function taskComparedToToday(task)
+  {
+  dateValue=new Date(0);
+  dateValue.setUTCSeconds(task.due_date['$date']/1000);
+  if(dateValue.getTime() < sysDate.getTime() && dateValue.toDateString() != sysDate.toDateString())
+			   {
+			   return -1;
+			   }
+			   else   if(dateValue.toDateString() == sysDate.toDateString())
+			   {
+			     return 0;
+			   }
+			   else
+			   {
+			   return 1;
+			   }
+  
+  }
+
+  /* Pending tasks */
+
+  
   $('#tasklistdata').append('<li data-role="list-divider">Pending</li>')
+  pendingTasks=[];
   for(t in data) //Pending
   {
   task = data[t];
-  dateValue=new Date(0);
-  dateValue.setUTCSeconds(task.due_date['$date']/1000);
-  var view={};
-  view.taskName=task.task;
-  view.taskFrequency=task.frequency;
-  view.dateString=$.datepicker.formatDate(dateFormat,dateValue)
-  view.todo_id=task.todo_id
-  
-  if(dateValue.getTime() < sysDate.getTime() && dateValue.toDateString() != sysDate.toDateString())
-  {
-			   $('#tasklistdata').append(Mustache.render(template, view));
-  }
-  
-
+     
+  if(taskComparedToToday(task)<0)
+   {
+    pendingTasks.push(task);
+   }
+			   
    }
 
+  renderTasks(pendingTasks);
+			   
+
+
+  /* Today's Tasks */
+  todaysTasks=[];
   $('#tasklistdata').append('<li data-role="list-divider">Today</li>')
   for(t in data) //Today
   {
   task = data[t];
-  dateValue=new Date(0);
-  dateValue.setUTCSeconds(task.due_date['$date']/1000);
-  var view={};
-  view.taskName=task.task;
-  view.taskFrequency=task.frequency;
-  view.dateString=$.datepicker.formatDate(dateFormat,dateValue)
-  view.todo_id=task.todo_id
   
-
-  if(dateValue.toDateString() == sysDate.toDateString())
+  if(taskComparedToToday(task)==0)
   {
-			   $('#tasklistdata').append(Mustache.render(template, view));
+	todaysTasks.push(task);
   }
   
 
- }
+				 }
+				 todaysTasks.sort(function(a,b)
+				 {
+				 if(a.timeSlot==undefined)
+				 {
+				 return 1;
+				 }
+				 if(b.timeSlot==undefined)
+				 {
+				 return -1;
+				 }
+				 if(a.timeSlot < b.timeSlot)
+						 {
+						 return -1;
+						 }
+						 else if(a.timeSlot==b.timeSlot)
+						 {
+						 return 0;
+						 }
+						 return 1;
+				 });
+  renderTasks(todaysTasks);
 
-
+  /* Upcoming Tasks */
+  upcomingTasks=[];
   $('#tasklistdata').append('<li data-role="list-divider">Upcoming</li>')
   for(t in data) //Upcoming
   {
   task = data[t];
-  dateValue=new Date(0);
-  dateValue.setUTCSeconds(task.due_date['$date']/1000);
-  var view={};
-  view.taskName=task.task;
-  view.taskFrequency=task.frequency;
-  view.dateString=$.datepicker.formatDate(dateFormat,dateValue)
-  view.todo_id=task.todo_id
-  
 
-  if(dateValue.getTime() > sysDate.getTime() && dateValue.toDateString() != sysDate.toDateString())
+  if(taskComparedToToday(task)>0)
   {
-			   $('#tasklistdata').append(Mustache.render(template, view));
+	upcomingTasks.push(task);
   }
   
 
    }
+   renderTasks(upcomingTasks);
+
+			   
 
 
 			   
+    $('#tasklistdata').listview("refresh");
 
-
-			   
-  $('#tasklistdata').listview("refresh")
+    
     $('#tasklistdata').ready(function(){$("input[id$='_date']").datepicker({onSelect :
 
     function(dateStr,datePickerObject)
@@ -225,7 +336,7 @@
     if(d==true)
     {
         $.ajax({url:"../todos/"+objectId,method:"DELETE"})
-        $("[data-region-id='"+objectId+"_region'] a").get(0).style.background="brown"
+        $("[data-region-id='"+objectId+"_region'] div.ui-grid-a").get(0).style.background="brown"
     }
 
     })
@@ -233,7 +344,37 @@
 
 
     
-    })
+				 })
+				 $('#tasklistdata').ready(function(){
+				 
+				 $("#tasklist").on("click","[id$='edit_link']",function(event)
+				 {
+
+				 todo_id=event.currentTarget.id;
+				 todo_id=todo_id.substring(0,todo_id.indexOf("_"));
+				 $("#edit_todo_id").val(todo_id);
+				 $.ajax('../todos/'+todo_id).done(
+				 function(data){
+				 task=data[0];
+				 $("#edit_taskTitle").val(task.task);
+				 $("#edit_freq").val(task.frequency);
+				 dateValue=new Date(0);
+				 dateValue.setUTCSeconds(task.due_date['$date']/1000);
+				 console.log(task);
+				 console.log(dateValue);
+				 $("#edit_dueDate").datepicker("setDate",dateValue)
+				 $("#edit_slot"+(task.timeSlot||'None')).prop("checked",true);
+				 $("input[name='edit_slot']").checkboxradio("refresh")
+				 $( ":mobile-pagecontainer" ).pagecontainer( "change", "#edit" );
+				 })
+				 
+				 }
+
+				 )
+				 })
+
+
+				 
 
 var temp;    
 </script>
