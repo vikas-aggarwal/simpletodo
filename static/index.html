@@ -188,7 +188,9 @@
 	  dateValue.setUTCSeconds(task.due_date['$date']/1000);
 	  if(dateValue.getTime() > sysDate.getTime())
 	  {
-	      return Math.round((dateValue.getTime()-sysDate.getTime())/(24*60*60*1000));
+	      //+1 beacuse task due date is considered at 00:00 hrs, but we want at 23:59 hrs while calculating days
+	      return Math.round((dateValue.getTime()-sysDate.getTime())/(24*60*60*1000))+1;
+	      
       	      
 	  }
       }
