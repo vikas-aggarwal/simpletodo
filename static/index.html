@@ -54,13 +54,13 @@
 
 
 <script type="text/html" id="task_form_template">
-  <label for="taskTitle">Title:</label>
-  <input type="text" name="taskTitle" id="{{action}}_taskTitle">
-  <label for="freq">Frequency:</label>
-  <input type="text" name="freq" id="{{action}}_freq">
-  <label for="dueDate">Due Date:</label>
-  <span><input type="text" name="dueDate" id="{{action}}_dueDate" /></span>
-  <fieldset data-role="controlgroup" data-type="horizontal">
+    <label for="taskTitle">Title:</label>
+    <input type="text" name="taskTitle" id="{{action}}_taskTitle">
+    <label for="freq">Frequency:</label>
+    <input type="text" name="freq" id="{{action}}_freq">
+    <label for="dueDate">Due Date:</label>
+    <span><input type="text" name="dueDate" id="{{action}}_dueDate" /></span>
+    <fieldset data-role="controlgroup" data-type="horizontal">
     <legend>Choose Slot:</legend>
     <input type="radio" name="{{action}}_slot" id="{{action}}_slotNone" value="{{action}}_slotNone" checked="checked"/><label for="{{action}}_slotNone">None</label>
     <input type="radio" name="{{action}}_slot" id="{{action}}_slot1" value="{{action}}_slot1" /><label for="{{action}}_slot1">1</label>
@@ -69,7 +69,9 @@
     <input type="radio" name="{{action}}_slot" id="{{action}}_slot4" value="{{action}}_slot4" /><label for="{{action}}_slot4">4</label>
     <input type="radio" name="{{action}}_slot" id="{{action}}_slot5" value="{{action}}_slot5" /><label for="{{action}}_slot5">5</label>
     <input type="radio" name="{{action}}_slot" id="{{action}}_slot6" value="{{action}}_slot6" /><label for="{{action}}_slot6">6</label>
-  </fieldset>
+    </fieldset>
+    <label for="remindBefore">Remind Before (Days):</label>
+    <input type="text" name="remindBeforeDays" id="{{action}}_remindBeforeDays">
 </script>
 
 
@@ -94,7 +96,9 @@
 	  </p>
 	  
     </div>
-   
+    <div class="ui-block-b">
+    <p style="margin-right: 26px;text-align: right;color:green">{{dueIn}}</p>
+    </div>
     </div>
    
 
@@ -125,67 +129,143 @@
   $("#edit_dueDate").datepicker();
   $("#createSubmitBtn").bind("click",function(e)
   {
-  var subData={};
-  subData.task=$("#create_taskTitle").val();
-  subData.frequency=$("#create_freq").val();
-  subData.due_date=$("#create_dueDate").datepicker("getDate").getTime()/1000
-  subData.timeSlot=$("input[name='create_slot']:checked").val();
-  subData.timeSlot=subData.timeSlot.substring(subData.timeSlot.indexOf("slot")+4)
+      var subData={};
+      subData.task=$("#create_taskTitle").val();
+      subData.frequency=$("#create_freq").val();
+      subData.due_date=$("#create_dueDate").datepicker("getDate").getTime()/1000
+      subData.timeSlot=$("input[name='create_slot']:checked").val();
+      subData.timeSlot=subData.timeSlot.substring(subData.timeSlot.indexOf("slot")+4)
+      subData.remindBeforeDays=$("#create_remindBeforeDays").val();
+      $.ajax({type:'POST',url:'../todos',data:JSON.stringify(subData),contentType:"application/json"}).done(
+	  function(data)
+	  {
+	      console.log(data);
+	      $( ":mobile-pagecontainer" ).pagecontainer( "change", "#mainpage" );
+	  }
+      )
+      
+      
+  });
   
-  $.ajax({type:'POST',url:'../todos',data:JSON.stringify(subData),contentType:"application/json"}).done(
-  function(data)
-  {
-  console.log(data);
-  $( ":mobile-pagecontainer" ).pagecontainer( "change", "#mainpage" );
-  }
-  )
-  
-
-  })
-
 
 
 
   $("#editSubmitBtn").bind("click",function(e)
   {
-  var subData={};
-  subData.task=$("#edit_taskTitle").val();
-  subData.frequency=$("#edit_freq").val();
-  subData.due_date=$("#edit_dueDate").datepicker("getDate").getTime()/1000
-  subData.timeSlot=$("input[name='edit_slot']:checked").val();
-  subData.timeSlot=subData.timeSlot.substring(subData.timeSlot.indexOf("slot")+4)
-  todo_id=$("#edit_todo_id").val();
+      var subData={};
+      subData.task=$("#edit_taskTitle").val();
+      subData.frequency=$("#edit_freq").val();
+      subData.due_date=$("#edit_dueDate").datepicker("getDate").getTime()/1000
+      subData.timeSlot=$("input[name='edit_slot']:checked").val();
+      subData.timeSlot=subData.timeSlot.substring(subData.timeSlot.indexOf("slot")+4)
+      subData.remindBeforeDays=$("#edit_remindBeforeDays").val();
+      todo_id=$("#edit_todo_id").val();
   
-  $.ajax({type:'POST',url:'../todos/'+todo_id,data:JSON.stringify(subData),contentType:"application/json"}).done(
-  function(data)
-  {
-  console.log(data);
-  $( ":mobile-pagecontainer" ).pagecontainer( "change", "#mainpage" );
-  }
+      $.ajax({type:'POST',url:'../todos/'+todo_id,data:JSON.stringify(subData),contentType:"application/json"}).done(
+	  function(data)
+	  {
+	      console.log(data);
+	      $( ":mobile-pagecontainer" ).pagecontainer( "change", "#mainpage" );
+	  }
   )
+      
+      
+  });
+
+
+
+  function calculateRemainingDays(task)
+  {
+      if("remindBeforeDays" in task && !isNaN(task.remindBeforeDays))
+      {
+	  //remindBeforeDays should be positive
+	  if(parseInt(task.remindBeforeDays,10) <= 0)
+	  {
+	      return 0;
+	  }
+	  
+	  var dateValue=new Date(0);
+	  dateValue.setUTCSeconds(task.due_date['$date']/1000);
+	  if(dateValue.getTime() > sysDate.getTime())
+	  {
+	      return Math.round((dateValue.getTime()-sysDate.getTime())/(24*60*60*1000));
+      	      
+	  }
+      }
+
+      return 0;
+  }
+
+    function taskComparedToToday(task)
+  {
+      var dateValue=new Date(0);
+      dateValue.setUTCSeconds(task.due_date['$date']/1000);
+      if(dateValue.getTime() < sysDate.getTime() && dateValue.toDateString() != sysDate.toDateString())
+      {
+	  return -1;
+      }
+      else   if(dateValue.toDateString() == sysDate.toDateString())
+      {
+	  return 0;
+      }
+      else
+      {
+	  return 1;
+      }
   
+  }
 
-  })
 
+function taskToBeRemindedToday(task)
+{
+    if(taskComparedToToday(task) > 0 && "remindBeforeDays" in task && !isNaN(task.remindBeforeDays))
+    {
+	//remindBeforeDays should be positive
+	if(parseInt(task.remindBeforeDays,10) <= 0)
+	{
+	    return false;
+	}
+	
+	var dateValue=new Date(0);
+	dateValue.setUTCSeconds(task.due_date['$date']/1000);
+	dateValue.setUTCDate(dateValue.getUTCDate()-parseInt(task.remindBeforeDays,10));
+	if(dateValue.getTime() <= sysDate.getTime())
+	{
+	    return true;
+      	    
+	}
+    }
+    return false;
+}
+
+  
 
   function renderTasks(tasks)
   {
-  for(t in tasks)
-  {
-  task = tasks[t];
-  var view={};
-  view.taskName=task.task;
-  view.taskFrequency=task.frequency;
-  dateValue=new Date(0);
-  dateValue.setUTCSeconds(task.due_date['$date']/1000);
-  view.dateString=$.datepicker.formatDate(dateFormat,dateValue)
-  view.todo_id=task.todo_id
-  view.timeSlot=task.timeSlot || 'None'
-  $('#tasklistdata').append(Mustache.render(template, view));
+      for(t in tasks)
+      {
+	  task = tasks[t];
+	  var view={};
+	  view.taskName=task.task;
+	  view.taskFrequency=task.frequency;
+	  dateValue=new Date(0);
+	  dateValue.setUTCSeconds(task.due_date['$date']/1000);
+	  view.dateString=$.datepicker.formatDate(dateFormat,dateValue)
+	  view.todo_id=task.todo_id
+	  view.timeSlot=task.timeSlot || 'None'
+	  if(taskToBeRemindedToday(task))
+	  {
+	      var remainingDays = calculateRemainingDays(task);
+	      if(remainingDays>0)
+	      {
+		  view.dueIn="Due in "+remainingDays+" days";
+	      }
+	  }
+	  $('#tasklistdata').append(Mustache.render(template, view));
+      }
+      
   }
-
-  }
-
+  
 
   
   tasks={};
@@ -198,24 +278,6 @@
 
 
 
-  function taskComparedToToday(task)
-  {
-  dateValue=new Date(0);
-  dateValue.setUTCSeconds(task.due_date['$date']/1000);
-  if(dateValue.getTime() < sysDate.getTime() && dateValue.toDateString() != sysDate.toDateString())
-			   {
-			   return -1;
-			   }
-			   else   if(dateValue.toDateString() == sysDate.toDateString())
-			   {
-			     return 0;
-			   }
-			   else
-			   {
-			   return 1;
-			   }
-  
-  }
 
   /* Pending tasks */
 
@@ -238,41 +300,41 @@
 
 
   /* Today's Tasks */
-  todaysTasks=[];
-  $('#tasklistdata').append('<li data-role="list-divider">Today</li>')
-  for(t in data) //Today
-  {
-  task = data[t];
-  
-  if(taskComparedToToday(task)==0)
-  {
-	todaysTasks.push(task);
-  }
-  
-
-				 }
-				 todaysTasks.sort(function(a,b)
-				 {
-				 if(a.timeSlot==undefined)
-				 {
-				 return 1;
-				 }
-				 if(b.timeSlot==undefined)
-				 {
-				 return -1;
-				 }
-				 if(a.timeSlot < b.timeSlot)
-						 {
-						 return -1;
-						 }
-						 else if(a.timeSlot==b.timeSlot)
-						 {
-						 return 0;
-						 }
-						 return 1;
-				 });
-  renderTasks(todaysTasks);
-
+      todaysTasks=[];
+      $('#tasklistdata').append('<li data-role="list-divider">Today</li>')
+      for(t in data) //Today
+      {
+	  task = data[t];
+	  
+	  if(taskComparedToToday(task)==0 || taskToBeRemindedToday(task))
+	  {
+	      todaysTasks.push(task);
+	  }
+	  
+	  
+      }
+      todaysTasks.sort(function(a,b)
+		       {
+			   if(a.timeSlot==undefined)
+			   {
+			       return 1;
+			   }
+			   if(b.timeSlot==undefined)
+			   {
+			       return -1;
+			   }
+			   if(a.timeSlot < b.timeSlot)
+			   {
+			       return -1;
+			   }
+			   else if(a.timeSlot==b.timeSlot)
+			   {
+			       return 0;
+			   }
+			   return 1;
+		       });
+      renderTasks(todaysTasks);
+      
   /* Upcoming Tasks */
   upcomingTasks=[];
   $('#tasklistdata').append('<li data-role="list-divider">Upcoming</li>')
@@ -280,7 +342,7 @@
   {
   task = data[t];
 
-  if(taskComparedToToday(task)>0)
+      if(taskComparedToToday(task)>0 && !taskToBeRemindedToday(task)) //reminded tasks already in Todays list
   {
 	upcomingTasks.push(task);
   }
@@ -358,6 +420,7 @@
 				 task=data[0];
 				 $("#edit_taskTitle").val(task.task);
 				 $("#edit_freq").val(task.frequency);
+				 $("#edit_remindBeforeDays").val(task.remindBeforeDays);
 				 dateValue=new Date(0);
 				 dateValue.setUTCSeconds(task.due_date['$date']/1000);
 				 console.log(task);
