@@ -35,12 +35,16 @@ def all_todos():
         data.append(todo);
     return jsonify(json.loads(dumps(data)));
 
+
+def get_todo_object(todo_id):
+    return mongo.db.todos.find_one({'todo_id':todo_id})
+    
+
 @app.route('/todos/<int:todo_id>' , methods=['GET'])
 def get_todo(todo_id):
-    todo=mongo.db.todos.find({'todo_id':todo_id})
+    todo=get_todo_object(todo_id);
     data=[];
-    for t in todo:
-        data.append(t)
+    data.append(todo);
     return jsonify(json.loads(dumps(data)))
 
 
@@ -66,19 +70,35 @@ def create_todos():
 
 @app.route('/todos/<int:todo_id>' , methods=['POST'])
 def update_or_create_todo(todo_id): #id is not auto generated
+
+    #Getting current state
+    todo_object = get_todo_object(todo_id);
     data=request.get_json();
     if 'due_date' in data:
         data['due_date']=datetime.utcfromtimestamp(data['due_date'])
-    else:
-        data['due_date']=datetime.today()
+
     data['todo_id']=todo_id
     mongo.db.todos.update_one({'todo_id':todo_id},{'$set': data},upsert=True);
+
+    #if obtained via an action log it
+    if ('trackHabit' in todo_object) and todo_object['trackHabit']==True :
+        todo_log={};
+        todo_log['action']=data['todo_action'];
+        todo_log['creation_timestamp']=datetime.utcnow();
+        todo_log['todo_id']=todo_id;
+
+        if 'due_date' in todo_object:
+            todo_log['due_date']=todo_object['due_date'];
+            #insert into todo_logs collection
+            mongo.db.todo_logs.insert(todo_log);
+    
     return jsonify(json.loads(dumps(data)))
 
 
 @app.route('/todos/<int:todo_id>' , methods=['DELETE'])
 def delete_todo(todo_id):
-    data=mongo.db.todos.find_one_and_delete({'todo_id':todo_id})
+    mongo.db.todos.find_one_and_delete({'todo_id':todo_id})
+    mongo.db.todo_logs.delete_many({'todo_id':todo_id});
     return jsonify({})
 
 if __name__ == "__main__":

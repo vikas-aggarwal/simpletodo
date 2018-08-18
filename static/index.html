@@ -1,33 +1,39 @@
 <!DOCTYPE html>
 <html>
   <head>
+    
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css"/>
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min.css">
+    <link rel = "stylesheet" href = "https://rawgithub.com/arschmitz/jquery-mobile-datepicker-wrapper/master/jquery.mobile.datepicker.css" />
+    
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min.js"></script>
+    <script src="https://rawgithub.com/jquery/jquery-ui/1.10.4/ui/jquery.ui.datepicker.js"></script>
+    <script src="https://rawgithub.com/arschmitz/jquery-mobile-datepicker-wrapper/master/jquery.mobile.datepicker.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
+    <script src="utils.js"></script>    
+    <script src="app.js"></script>
 
-
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css"/>
-<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min.css">
-<link rel = "stylesheet" href = "https://rawgithub.com/arschmitz/jquery-mobile-datepicker-wrapper/master/jquery.mobile.datepicker.css" />
-
-<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-<script src="https://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min.js"></script>
-<script src = "https://rawgithub.com/jquery/jquery-ui/1.10.4/ui/jquery.ui.datepicker.js"></script>
-<script src = "https://rawgithub.com/arschmitz/jquery-mobile-datepicker-wrapper/master/jquery.mobile.datepicker.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>   
-   </head>
-
+    <style>
+      #ui-datepicker-div { z-index:10 !important;}
+    </style>
+  </head>
+  
   <body>
     <div data-role="page" id="mainpage">
       <div data-role="header">
 	<h1>Tasks</h1>
-	<a href="#create" data-icon="plus" class="ui-btn-right">New</a>
+	<a href="#createPage" data-icon="plus" class="ui-btn-right">New</a>
       </div>
       <div data-role="main" class="ui-content" id="tasklist">
 	
       </div>
-</div>
-
-    <div data-role="page" id="create">
+    </div>
+    
+    <div data-role="page" id="createPage">
       <div data-role="header">
 	<h1>New Task</h1>
 	<a href="#mainpage" data-icon="back">Back</a>
@@ -41,7 +47,7 @@
     </div>
     
     
-    <div data-role="page" id="edit">
+    <div data-role="page" id="editPage">
       <div data-role="header">
 	<h1>Edit Task</h1>
 	<a href="#mainpage" data-icon="back">Back</a>
@@ -53,396 +59,82 @@
     </div>
 
 
-<script type="text/html" id="task_form_template">
-    <label for="taskTitle">Title:</label>
-    <input type="text" name="taskTitle" id="{{action}}_taskTitle">
-    <label for="freq">Frequency:</label>
-    <input type="text" name="freq" id="{{action}}_freq">
-    <label for="dueDate">Due Date:</label>
-    <span><input type="text" name="dueDate" id="{{action}}_dueDate" /></span>
-    <fieldset data-role="controlgroup" data-type="horizontal">
-    <legend>Choose Slot:</legend>
-    <input type="radio" name="{{action}}_slot" id="{{action}}_slotNone" value="{{action}}_slotNone" checked="checked"/><label for="{{action}}_slotNone">None</label>
-    <input type="radio" name="{{action}}_slot" id="{{action}}_slot1" value="{{action}}_slot1" /><label for="{{action}}_slot1">1</label>
-    <input type="radio" name="{{action}}_slot" id="{{action}}_slot2" value="{{action}}_slot2" /><label for="{{action}}_slot2">2</label>
-    <input type="radio" name="{{action}}_slot" id="{{action}}_slot3" value="{{action}}_slot3" /><label for="{{action}}_slot3">3</label>
-    <input type="radio" name="{{action}}_slot" id="{{action}}_slot4" value="{{action}}_slot4" /><label for="{{action}}_slot4">4</label>
-    <input type="radio" name="{{action}}_slot" id="{{action}}_slot5" value="{{action}}_slot5" /><label for="{{action}}_slot5">5</label>
-    <input type="radio" name="{{action}}_slot" id="{{action}}_slot6" value="{{action}}_slot6" /><label for="{{action}}_slot6">6</label>
-    </fieldset>
-    <label for="remindBefore">Remind Before (Days):</label>
-    <input type="text" name="remindBeforeDays" id="{{action}}_remindBeforeDays">
-</script>
+    <script type="text/html" id="task_form_template">
+      <label for="taskTitle">Title:</label>
+      <input type="text" name="taskTitle" id="{{action}}_taskTitle">
+      <label for="freq">Frequency:</label>
+      <input type="text" name="freq" id="{{action}}_freq">
+      <label for="dueDate">Due Date:</label>
+      <span><input type="text" name="dueDate" id="{{action}}_dueDate" /></span>
+      <fieldset data-role="controlgroup" data-type="horizontal">
+	<legend>Choose Slot:</legend>
+	<input type="radio" name="{{action}}_slot" id="{{action}}_slotNone" value="{{action}}_slotNone" checked="checked"/><label for="{{action}}_slotNone">None</label>
+	<input type="radio" name="{{action}}_slot" id="{{action}}_slot1" value="{{action}}_slot1" /><label for="{{action}}_slot1">1</label>
+	<input type="radio" name="{{action}}_slot" id="{{action}}_slot2" value="{{action}}_slot2" /><label for="{{action}}_slot2">2</label>
+	<input type="radio" name="{{action}}_slot" id="{{action}}_slot3" value="{{action}}_slot3" /><label for="{{action}}_slot3">3</label>
+	<input type="radio" name="{{action}}_slot" id="{{action}}_slot4" value="{{action}}_slot4" /><label for="{{action}}_slot4">4</label>
+	<input type="radio" name="{{action}}_slot" id="{{action}}_slot5" value="{{action}}_slot5" /><label for="{{action}}_slot5">5</label>
+	<input type="radio" name="{{action}}_slot" id="{{action}}_slot6" value="{{action}}_slot6" /><label for="{{action}}_slot6">6</label>
+      </fieldset>
+      <label for="remindBefore">Remind Before (Days):</label>
+      <input type="text" name="remindBeforeDays" id="{{action}}_remindBeforeDays">
+      <label>
+        <input name="checkbox" type="checkbox" id="{{action}}_trackHabit">Track Habit
+    </label>
+    </script>
+    
 
 
-
-<script type="text/html" id="listview-template">
-  <li data-region-id="{{todo_id}}_region">
-    <div class="ui-grid-a">
-    <div class="ui-block-a">
-      <a id="{{todo_id}}_edit_link"><h3 class="ui-li-header" style="display:inline" >{{taskName}}</h3></a>
-      <p>{{taskFrequency}}</p>
-    </div>
-    <div class="ui-block-b">
-      <p style="float:right;width: 16px;margin-left: 10px;">
-	    <img id="{{todo_id}}_loading" src="loading.gif" style="float:right;display:none"/>
-	    <img id="{{todo_id}}_success" src="check.png" style="float:right;display:none"/>
-	    <img id="{{todo_id}}_failed" src="alert.png" style="float:right;display:none"/>
-      </p>
-	  
-      <p style="float:right">
-	    <span id="{{todo_id}}_label">{{dateString}}&nbsp;</span>
-	    <input type="text" hidden="hidden" id="{{todo_id}}_date" data-role="date" readonly="readonly" value="{{dateString}}">
-	  </p>
-	  
-    </div>
-    <div class="ui-block-b">
-    <p style="margin-right: 26px;text-align: right;color:green">{{dueIn}}</p>
-    </div>
-    </div>
-   
-
-  </li>
-</script>
-
-
-<script type="text/javascript">
-
-  $("#create").page({
-	beforecreate : function(){$("#create_content").prepend(Mustache.render($("#task_form_template").text(),{"action":"create"}))}
-  })
-
-    $("#edit").page({
-	beforecreate : function(){$("#edit_content").prepend(Mustache.render($("#task_form_template").text(),{"action":"edit"}))}
-  })
-
-  
-  dateFormat='dd-M-yy';
-  template=document.getElementById("listview-template").innerHTML;
-  $.datepicker.setDefaults({dateFormat: dateFormat,showOn: "button",
-  buttonImage: "https://cdnjs.cloudflare.com/ajax/libs/Zebra_datepicker/1.9.4/images/calendar.png",
-  buttonImageOnly: true,
-  buttonText: "Select date"});
-
-
-  $("#create_dueDate").datepicker();
-  $("#edit_dueDate").datepicker();
-  $("#createSubmitBtn").bind("click",function(e)
-  {
-      var subData={};
-      subData.task=$("#create_taskTitle").val();
-      subData.frequency=$("#create_freq").val();
-      subData.due_date=$("#create_dueDate").datepicker("getDate").getTime()/1000
-      subData.timeSlot=$("input[name='create_slot']:checked").val();
-      subData.timeSlot=subData.timeSlot.substring(subData.timeSlot.indexOf("slot")+4)
-      subData.remindBeforeDays=$("#create_remindBeforeDays").val();
-      $.ajax({type:'POST',url:'../todos',data:JSON.stringify(subData),contentType:"application/json"}).done(
-	  function(data)
-	  {
-	      console.log(data);
-	      $( ":mobile-pagecontainer" ).pagecontainer( "change", "#mainpage" );
-	  }
-      )
-      
-      
-  });
-  
-
-
-
-  $("#editSubmitBtn").bind("click",function(e)
-  {
-      var subData={};
-      subData.task=$("#edit_taskTitle").val();
-      subData.frequency=$("#edit_freq").val();
-      subData.due_date=$("#edit_dueDate").datepicker("getDate").getTime()/1000
-      subData.timeSlot=$("input[name='edit_slot']:checked").val();
-      subData.timeSlot=subData.timeSlot.substring(subData.timeSlot.indexOf("slot")+4)
-      subData.remindBeforeDays=$("#edit_remindBeforeDays").val();
-      todo_id=$("#edit_todo_id").val();
-  
-      $.ajax({type:'POST',url:'../todos/'+todo_id,data:JSON.stringify(subData),contentType:"application/json"}).done(
-	  function(data)
-	  {
-	      console.log(data);
-	      $( ":mobile-pagecontainer" ).pagecontainer( "change", "#mainpage" );
-	  }
-  )
-      
-      
-  });
-
-
-
-  function calculateRemainingDays(task)
-  {
-      if("remindBeforeDays" in task && !isNaN(task.remindBeforeDays))
-      {
-	  //remindBeforeDays should be positive
-	  if(parseInt(task.remindBeforeDays,10) <= 0)
-	  {
-	      return 0;
-	  }
-	  
-	  var dateValue=new Date(0);
-	  dateValue.setUTCSeconds(task.due_date['$date']/1000);
-	  if(dateValue.getTime() > sysDate.getTime())
-	  {
-	      //+1 beacuse task due date is considered at 00:00 hrs, but we want at 23:59 hrs while calculating days
-	      return Math.round((dateValue.getTime()-sysDate.getTime())/(24*60*60*1000))+1;
-	      
-      	      
-	  }
-      }
-
-      return 0;
-  }
-
-    function taskComparedToToday(task)
-  {
-      var dateValue=new Date(0);
-      dateValue.setUTCSeconds(task.due_date['$date']/1000);
-      if(dateValue.getTime() < sysDate.getTime() && dateValue.toDateString() != sysDate.toDateString())
-      {
-	  return -1;
-      }
-      else   if(dateValue.toDateString() == sysDate.toDateString())
-      {
-	  return 0;
-      }
-      else
-      {
-	  return 1;
-      }
-  
-  }
-
-
-function taskToBeRemindedToday(task)
-{
-    if(taskComparedToToday(task) > 0 && "remindBeforeDays" in task && !isNaN(task.remindBeforeDays))
-    {
-	//remindBeforeDays should be positive
-	if(parseInt(task.remindBeforeDays,10) <= 0)
-	{
-	    return false;
-	}
+    <script type="text/html" id="listview-template">
+      <li data-region-id="{{todo_id}}_region">
+	<div class="ui-grid-a">
+	  <div class="ui-block-a">
+	    <a id="{{todo_id}}_edit_link"><h3 class="ui-li-header" style="display:inline" >{{taskName}}</h3></a>
+	    <p>{{taskFrequency}}</p>
+	    <p>
+	      <span>Due:</span>
+	      <span id="{{todo_id}}_label_due">{{dateString}}</span>
+	    </p>
+	    <p>
+	      <span>Next:</span>
+	      <span id="{{todo_id}}_label_next">{{dateString}}</span>
+	      <input type="text" hidden="hidden" id="{{todo_id}}_date" data-role="date" readonly="readonly" value="{{dateString}}">
+	    </p>
+	    
+	  </div>
+	  <div class="ui-block-b">
+	    
+	    
+	    <p style="float:right">
+	      {{^trackHabit}}
+	      <button class="ui-btn ui-icon-check ui-btn-icon-left ui-mini {{todo_id}}_action" onclick="markAsDone({{todo_id}})">Done</button>
+	      {{/trackHabit}}
+	      {{#trackHabit}}
+	      <button class="ui-btn ui-icon-check ui-btn-icon-left ui-mini {{todo_id}}_action ui-state-disabled" onclick="markAsDone({{todo_id}})">Done</button>
+	      <button class="ui-btn ui-icon-delete ui-btn-icon-left ui-mini {{todo_id}}_action ui-state-disabled" onclick="markAsSkip({{todo_id}})">Skip</button>
+	      {{/trackHabit}}
+	      <img id="{{todo_id}}_loading" src="loading.gif" style="float:right;display:none"/>
+	      <img id="{{todo_id}}_success" src="check.png" style="float:right;display:none"/>
+	      <img id="{{todo_id}}_failed" src="alert.png" style="float:right;display:none"/>
+	     
+	    </p>
+	    
+	  </div>
+	  {{#dueIn}}
+	  <div class="ui-block-a">
+	  </div>
+	  <div class="ui-block-b">
+	    <p style="text-align: right;color:green">{{dueIn}}</p>
+	  </div>
+	  {{/dueIn}}
+	</div>
 	
-	var dateValue=new Date(0);
-	dateValue.setUTCSeconds(task.due_date['$date']/1000);
-	dateValue.setUTCDate(dateValue.getUTCDate()-parseInt(task.remindBeforeDays,10));
-	if(dateValue.getTime() <= sysDate.getTime())
-	{
-	    return true;
-      	    
-	}
-    }
-    return false;
-}
-
-  
-
-  function renderTasks(tasks)
-  {
-      for(t in tasks)
-      {
-	  task = tasks[t];
-	  var view={};
-	  view.taskName=task.task;
-	  view.taskFrequency=task.frequency;
-	  dateValue=new Date(0);
-	  dateValue.setUTCSeconds(task.due_date['$date']/1000);
-	  view.dateString=$.datepicker.formatDate(dateFormat,dateValue)
-	  view.todo_id=task.todo_id
-	  view.timeSlot=task.timeSlot || 'None'
-	  if(taskToBeRemindedToday(task))
-	  {
-	      var remainingDays = calculateRemainingDays(task);
-	      if(remainingDays>0)
-	      {
-		  view.dueIn="Due in "+remainingDays+" days";
-	      }
-	  }
-	  $('#tasklistdata').append(Mustache.render(template, view));
-      }
-      
-  }
-  
-
-  
-  tasks={};
-  $.ajax('../todos').done(
-  function(data){
-  $('#tasklist').append('<ul data-role="listview" id="tasklistdata"></ul>')
-  $('#tasklist').trigger("create")
-  tasks=data
-  sysDate=new Date();
-
-
-
-
-  /* Pending tasks */
-
-  
-  $('#tasklistdata').append('<li data-role="list-divider">Pending</li>')
-  pendingTasks=[];
-  for(t in data) //Pending
-  {
-  task = data[t];
-     
-  if(taskComparedToToday(task)<0)
-   {
-    pendingTasks.push(task);
-   }
-			   
-   }
-
-  renderTasks(pendingTasks);
-			   
-
-
-  /* Today's Tasks */
-      todaysTasks=[];
-      $('#tasklistdata').append('<li data-role="list-divider">Today</li>')
-      for(t in data) //Today
-      {
-	  task = data[t];
-	  
-	  if(taskComparedToToday(task)==0 || taskToBeRemindedToday(task))
-	  {
-	      todaysTasks.push(task);
-	  }
-	  
-	  
-      }
-      todaysTasks.sort(function(a,b)
-		       {
-			   if(a.timeSlot==undefined)
-			   {
-			       return 1;
-			   }
-			   if(b.timeSlot==undefined)
-			   {
-			       return -1;
-			   }
-			   if(a.timeSlot < b.timeSlot)
-			   {
-			       return -1;
-			   }
-			   else if(a.timeSlot==b.timeSlot)
-			   {
-			       return 0;
-			   }
-			   return 1;
-		       });
-      renderTasks(todaysTasks);
-      
-  /* Upcoming Tasks */
-  upcomingTasks=[];
-  $('#tasklistdata').append('<li data-role="list-divider">Upcoming</li>')
-  for(t in data) //Upcoming
-  {
-  task = data[t];
-
-      if(taskComparedToToday(task)>0 && !taskToBeRemindedToday(task)) //reminded tasks already in Todays list
-  {
-	upcomingTasks.push(task);
-  }
-  
-
-   }
-   renderTasks(upcomingTasks);
-
-			   
-
-
-			   
-    $('#tasklistdata').listview("refresh");
-
+	
+      </li>
+    </script>
     
-    $('#tasklistdata').ready(function(){$("input[id$='_date']").datepicker({onSelect :
-
-    function(dateStr,datePickerObject)
-    {
-
-    todo_id=datePickerObject.id.substring(0,datePickerObject.id.indexOf("_"))
-    $("#"+todo_id+"_loading").css("display","");
-    $("#"+todo_id+"_label").html(dateStr)
-    newDate=$.datepicker.parseDate(dateFormat,dateStr)
-    data={'due_date':Math.floor(newDate.getTime()/1000)}
-    $.ajax({url:'../todos/'+todo_id,type:"POST",data:JSON.stringify(data),contentType:"application/json"}).done(
-    function(data)
-    {
-    $("#"+todo_id+"_loading").css("display","none");
-    $("#"+todo_id+"_success").css("display","");
-      console.log(data)
-    }
-    ).fail(
-    function()
-    {
-    $("#"+todo_id+"_loading").css("display","none");
-    $("#"+todo_id+"_failed").css("display","");
     
-    }
-    )
-    }
 
-
-    })})
-    $('#tasklistdata').ready(function(){
-    $("#tasklistdata li").on("taphold",function(event){
-
-    
-    objectId=event.currentTarget.attributes['data-region-id'].value;
-    objectId=objectId.substr(0,objectId.indexOf('_'))
-    taskToDelete = tasks.find(function(f){if(f.todo_id==objectId){return true}});
-    var d = confirm("Delete : "+taskToDelete.task+"?")
-    if(d==true)
-    {
-        $.ajax({url:"../todos/"+objectId,method:"DELETE"})
-        $("[data-region-id='"+objectId+"_region'] div.ui-grid-a").get(0).style.background="brown"
-    }
-
-    })
-    })
-
-
-    
-				 })
-				 $('#tasklistdata').ready(function(){
-				 
-				 $("#tasklist").on("click","[id$='edit_link']",function(event)
-				 {
-
-				 todo_id=event.currentTarget.id;
-				 todo_id=todo_id.substring(0,todo_id.indexOf("_"));
-				 $("#edit_todo_id").val(todo_id);
-				 $.ajax('../todos/'+todo_id).done(
-				 function(data){
-				 task=data[0];
-				 $("#edit_taskTitle").val(task.task);
-				 $("#edit_freq").val(task.frequency);
-				 $("#edit_remindBeforeDays").val(task.remindBeforeDays);
-				 dateValue=new Date(0);
-				 dateValue.setUTCSeconds(task.due_date['$date']/1000);
-				 console.log(task);
-				 console.log(dateValue);
-				 $("#edit_dueDate").datepicker("setDate",dateValue)
-				 $("#edit_slot"+(task.timeSlot||'None')).prop("checked",true);
-				 $("input[name='edit_slot']").checkboxradio("refresh")
-				 $( ":mobile-pagecontainer" ).pagecontainer( "change", "#edit" );
-				 })
-				 
-				 }
-
-				 )
-				 })
-
-
-				 
-
-var temp;    
-</script>
 
 
   </body>
