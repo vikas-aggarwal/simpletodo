@@ -360,7 +360,15 @@ document
 						  $("#edit_dueDate").datepicker("setDate",dateValue)
 					      }
 					      $("#edit_slot"+(task.timeSlot||'None')).prop("checked",true);
-					      $("#edit_trackHabit").prop("checked",task.trackHabit).checkboxradio("refresh");
+					      if('trackHabit' in task)
+					      {
+						  $("#edit_trackHabit").prop("checked",task.trackHabit).checkboxradio("refresh");
+					      }
+					      else
+					      {
+						  $("#edit_trackHabit").prop("checked",false).checkboxradio("refresh");
+					      }
+					      
 					      $("input[name='edit_slot']").checkboxradio("refresh")
 					      $( ":mobile-pagecontainer" ).pagecontainer( "change", "#editPage" );
 					  })
