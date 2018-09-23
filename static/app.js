@@ -30,9 +30,10 @@ function initDatePicker()
 
 
 
-
+var allTasks;
 function processTasks(tasks)
 {
+    allTasks = tasks;
     for(var t in tasks)
     {
 	var task = tasks[t];
@@ -108,6 +109,34 @@ function updateDoneOrSkip(payload)
 	    }
 	);
     
+}
+
+
+
+
+function updateUIForNextDate(todo_id,dateStr)
+{
+    $("#"+todo_id+"_label_next").html(dateStr);
+    $("."+todo_id+"_action").removeClass("ui-state-disabled");
+}
+
+
+
+function calculateNextDayForTodos()
+{
+    for(var t in allTasks)
+    {
+	var task = allTasks[t];
+	var freq = parseFrequency(task.frequency);
+	var dateValue=new Date(0);
+	dateValue.setUTCSeconds(task.due_date['$date']/1000);
+	var nextDate = getNextOccurrence(freq,dateValue);
+	if(nextDate!=null)
+	{
+	    $("#"+task.todo_id+"_date").datepicker("setDate",$.datepicker.formatDate(dateFormat,nextDate));
+	    updateUIForNextDate(task.todo_id,$.datepicker.formatDate(dateFormat,nextDate));
+	}
+    }
 }
 
 
@@ -298,8 +327,7 @@ document
 
 		    
 		    $('#tasklistdata').listview("refresh");
-
-		    
+		    					     
 		    $('#tasklistdata').ready(function()
 					     {
 						 $("input[id$='_date']")
@@ -308,13 +336,12 @@ document
 							             {
 									 
 									 todo_id=datePickerObject.id.substring(0,datePickerObject.id.indexOf("_"))
-									 $("#"+todo_id+"_label_next").html(dateStr);
-									 $("."+todo_id+"_action").removeClass("ui-state-disabled");
-									 									
+									 updateUIForNextDate(todo_id,dateStr);									 									
 								     }
 							 
 							 
 						     })
+						 calculateNextDayForTodos();
 					     })
 		    $('#tasklistdata').ready(function(){
 			$("#tasklistdata li").on("taphold",function(event){
