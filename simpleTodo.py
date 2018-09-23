@@ -81,7 +81,7 @@ def update_or_create_todo(todo_id): #id is not auto generated
     mongo.db.todos.update_one({'todo_id':todo_id},{'$set': data},upsert=True);
 
     #if obtained via an action log it
-    if ('trackHabit' in todo_object) and todo_object['trackHabit']==True :
+    if ('trackHabit' in todo_object) and todo_object['trackHabit']==True and ('todo_action' in data) :
         todo_log={};
         todo_log['action']=data['todo_action'];
         todo_log['creation_timestamp']=datetime.utcnow();
