@@ -1,3 +1,34 @@
+require.config({
+    shim : {
+	'jquerymobile' : {
+	    deps : ['jquery']
+	},
+	'jquery-ui/datepicker' : {
+	    deps : ['jquerymobile']
+	},
+	'jquerymobile/datepicker' : {
+	    deps : ['jquery-ui/datepicker']
+	}
+    },
+    paths: {
+	"jquery" : "https://code.jquery.com/jquery-1.11.3.min",
+	"jquerymobile" : "https://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min",
+	"jquery-ui/datepicker" : "https://rawgithub.com/jquery/jquery-ui/1.10.4/ui/jquery.ui.datepicker",
+	"jquerymobile/datepicker" : "https://rawgithub.com/arschmitz/jquery-mobile-datepicker-wrapper/master/jquery.mobile.datepicker",
+	"mustache" : "https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min"
+    }
+});
+
+
+
+
+
+
+requirejs(['mustache','jquery','recur','utils','jquerymobile','jquery-ui/datepicker','jquerymobile/datepicker'],
+	  function(Mustache){
+
+    
+
 //TODO should not be global
 var dateFormat='dd-M-yy';
 
@@ -141,17 +172,33 @@ function calculateNextDayForTodos()
 
 
 
-
-document
-    .addEventListener(
-	"DOMContentLoaded",
-	//"load",
-	function(event)
-	{
 	    initDatePicker();
 	    initCreatePage();
 	    initEditPage();
-	    
+
+	    //tasklist listener on all done and skip objects
+	      $("#tasklist").on("click",".todo-button",function(event){
+		  var classes = $(event.target).attr("class").split(/\s+/);
+		  var todo_id = -1;
+		  classes.forEach(function(c){
+		      if(c.endsWith("action"))
+		      {
+			  todo_id = c.substring(0,c.indexOf("_"));
+		      }
+		  })
+
+		  
+		  if($(event.target).hasClass("done-button") && todo_id!=-1)
+		  {
+		      markAsDone(todo_id);
+		  }
+		  else if(todo_id != -1)
+		  {
+		      markAsSkip(todo_id);
+		  }
+		      
+	     }); 
+	      
 	    //TODO move these 2 lines
 	    $("#create_dueDate").datepicker();
 	    $("#edit_dueDate").datepicker();
@@ -412,4 +459,4 @@ document
 
 	    
 
-	});
+});

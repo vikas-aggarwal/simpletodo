@@ -8,15 +8,8 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css"/>
     <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min.css">
     <link rel = "stylesheet" href = "https://rawgithub.com/arschmitz/jquery-mobile-datepicker-wrapper/master/jquery.mobile.datepicker.css" />
-    
-    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-    <script src="https://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min.js"></script>
-    <script src="https://rawgithub.com/jquery/jquery-ui/1.10.4/ui/jquery.ui.datepicker.js"></script>
-    <script src="https://rawgithub.com/arschmitz/jquery-mobile-datepicker-wrapper/master/jquery.mobile.datepicker.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
-    <script src="utils.js"></script>
-    <script src="recur.js"></script>
-    <script src="app.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="app"></script>
 
     <style>
       #ui-datepicker-div { z-index:10 !important;}
@@ -108,11 +101,11 @@
 	    
 	    <p style="float:right">
 	      {{^trackHabit}}
-	      <button class="ui-btn ui-icon-check ui-btn-icon-left ui-mini {{todo_id}}_action" onclick="markAsDone({{todo_id}})">Done</button>
+	      <button class="ui-btn ui-icon-check ui-btn-icon-left ui-mini {{todo_id}}_action done-button todo-button">Done</button>
 	      {{/trackHabit}}
 	      {{#trackHabit}}
-	      <button class="ui-btn ui-icon-check ui-btn-icon-left ui-mini {{todo_id}}_action ui-state-disabled" onclick="markAsDone({{todo_id}})">Done</button>
-	      <button class="ui-btn ui-icon-delete ui-btn-icon-left ui-mini {{todo_id}}_action ui-state-disabled" onclick="markAsSkip({{todo_id}})">Skip</button>
+	      <button class="ui-btn ui-icon-check ui-btn-icon-left ui-mini {{todo_id}}_action ui-state-disabled done-button todo-button">Done</button>
+	      <button class="ui-btn ui-icon-delete ui-btn-icon-left ui-mini {{todo_id}}_action ui-state-disabled skip-button todo-button">Skip</button>
 	      {{/trackHabit}}
 	      <img id="{{todo_id}}_loading" src="loading.gif" style="float:right;display:none"/>
 	      <img id="{{todo_id}}_success" src="check.png" style="float:right;display:none"/>
