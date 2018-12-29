@@ -266,6 +266,9 @@ function calculateNextDayForTodos()
 		    task = tasks[t];
 		    var view={};
 		    view.taskName=task.task;
+		    if(view.taskName+"" == ""){
+			view.taskName = "<No Title>";
+		    }
 		    view.taskFrequency=task.frequency;
 		    dateValue=new Date(0);
 		    dateValue.setUTCSeconds(task.due_date['$date']/1000);

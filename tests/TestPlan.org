@@ -1,0 +1,37 @@
+* Automated Tests
+  Command : python -m unittest tests/test_simpleTodoTest.py
+** Unit
+*** DONE Check if GET is sorted by date asc
+*** DONE Check if GET return correct number of items after loop
+*** Create Todo [1/3]
+**** DONE Create with no data
+**** TODO Create with name only
+**** TODO Create with due date
+*** Update Todo [0/5]
+**** TODO Update next due date
+**** TODO Update next due date with habit enabled and no action
+**** TODO Update next due date with habit enabled and done action
+**** TODO Update next due date with habit enabled and skip action
+**** TODO Update next due date with habit enabled and random action
+*** Delete Todo [0/2]
+**** TODO Delete data with habit
+**** TODO Delete data without habit
+** Integration
+
+
+* Manual Tests
+*** Create a new todo without any data
+    Should appear in today, with <No Title>
+*** Edit the above task
+    Enter name, save
+    Add frequency as Daily, save, check next date is calculated
+    Mark as Done
+    Choose slot as 1, set date to today
+    Set remind before 5 days and set date to today+3 days, should get due in 3 days
+    Set Date in the past, should shift to upper slot
+    Check "Track Habit", Done and Skip should appear
+    Click Done
+    Click Skip
+    Uncheck Track Habit
+    Click on Done
+*** Long press above and delete
