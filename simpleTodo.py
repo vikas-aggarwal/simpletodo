@@ -47,5 +47,17 @@ def delete_todo(todo_id):
     todoData.delete_todo(todo_id);
     return jsonify({})
 
+
+
+@app.route('/todos/logs/stats' , methods=['GET'])
+def get_todo_logs_counts_by_action():
+    stats=todoData.get_todo_logs_count();
+    data=[];
+    data.append(stats);
+    return jsonify(json.loads(dumps(data)))
+
+
+
+
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0')

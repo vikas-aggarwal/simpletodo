@@ -13,6 +13,24 @@
 
     <style>
       #ui-datepicker-div { z-index:10 !important;}
+
+      .progressBar {
+	font-size: 0em;
+	border: 1px;
+      }
+
+      .progressBar-success {
+      display : inline-block;
+      background : lightgreen;
+      height:5px;
+      }
+
+      .progressBar-failure{
+      display:inline-block;
+      background: lightsalmon;
+      height:5px;
+      }
+      
     </style>
   </head>
   
@@ -94,7 +112,12 @@
 	      <span id="{{todo_id}}_label_next">{{dateString}}</span>
 	      <input type="text" hidden="hidden" id="{{todo_id}}_date" data-role="date" readonly="readonly" value="{{dateString}}">
 	    </p>
-	    
+	    {{#doneCount}}
+            <div class="progressBar">
+	      <div class="progressBar-success" style="width:{{donePercent}}%;"></div>
+	      <div class="progressBar-failure" style="width:{{skipPercent}}%;"></div>
+	    </div>
+	    {{/doneCount}}
 	  </div>
 	  <div class="ui-block-b">
 	    
@@ -104,8 +127,8 @@
 	      <button class="ui-btn ui-icon-check ui-btn-icon-left ui-mini {{todo_id}}_action done-button todo-button">Done</button>
 	      {{/trackHabit}}
 	      {{#trackHabit}}
-	      <button class="ui-btn ui-icon-check ui-btn-icon-left ui-mini {{todo_id}}_action ui-state-disabled done-button todo-button">Done</button>
-	      <button class="ui-btn ui-icon-delete ui-btn-icon-left ui-mini {{todo_id}}_action ui-state-disabled skip-button todo-button">Skip</button>
+	      <button class="ui-btn ui-icon-check ui-btn-icon-left ui-mini {{todo_id}}_action ui-state-disabled done-button todo-button">Done ({{doneCount}})</button>
+	      <button class="ui-btn ui-icon-delete ui-btn-icon-left ui-mini {{todo_id}}_action ui-state-disabled skip-button todo-button">Skip ({{skipCount}})</button>
 	      {{/trackHabit}}
 	      <img id="{{todo_id}}_loading" src="loading.gif" style="float:right;display:none"/>
 	      <img id="{{todo_id}}_success" src="check.png" style="float:right;display:none"/>

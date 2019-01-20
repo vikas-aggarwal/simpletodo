@@ -185,7 +185,7 @@ function calculateNextDayForTodos()
 		      {
 			  todo_id = c.substring(0,c.indexOf("_"));
 		      }
-		  })
+		  });
 
 		  
 		  if($(event.target).hasClass("done-button") && todo_id!=-1)
@@ -223,7 +223,7 @@ function calculateNextDayForTodos()
 							   console.log(data);
 							   $( ":mobile-pagecontainer" ).pagecontainer( "change", "#mainpage" );
 						       }
-						   )
+						   );
 						   
 						   
 					       });
@@ -252,14 +252,14 @@ function calculateNextDayForTodos()
 							 console.log(data);
 							 $( ":mobile-pagecontainer" ).pagecontainer( "change", "#mainpage" );
 						     }
-						 )
+						 );
 						 
 						 
 					     });
 	    
 
 
-	    function renderTasks(tasks)
+	      function renderTasks(tasks,taskIdWiseStats)
 	    {
 		for(t in tasks)
 		{
@@ -272,29 +272,71 @@ function calculateNextDayForTodos()
 		    view.taskFrequency=task.frequency;
 		    dateValue=new Date(0);
 		    dateValue.setUTCSeconds(task.due_date['$date']/1000);
-		    view.dateString=$.datepicker.formatDate(dateFormat,dateValue)
-		    view.todo_id=task.todo_id
-		    view.timeSlot=task.timeSlot || 'None'
+		    view.dateString=$.datepicker.formatDate(dateFormat,dateValue);
+		    view.todo_id=task.todo_id;
+		    view.timeSlot=task.timeSlot || 'None';
 		    view.trackHabit=task.trackHabit;
+	
 		    if('due_in_days' in task)
 		    {
 			view.dueIn=(task.due_in_days != 1)?"Due in "+task.due_in_days+" days":"Due Tomorrow";	
 		    }
+
+		    if(task.todo_id in taskIdWiseStats && task.trackHabit) {
+			view.doneCount = taskIdWiseStats[task.todo_id].done;
+			view.skipCount = taskIdWiseStats[task.todo_id].skip;
+			view.donePercent = Math.floor(view.doneCount*100/(view.doneCount+view.skipCount));
+			view.skipPercent = Math.floor(view.skipCount*100/(view.doneCount+view.skipCount));
+		    }
+		    else if(task.trackHabit){
+			view.doneCount = 0;
+			view.skipCount = 0;
+			view.donePercent = 0;
+			view.skipPercent = 0;
+		    }
+
+		    
 		    $('#tasklistdata').append(Mustache.render(document.getElementById("listview-template").innerHTML, view));
 		}
 		
 	    }
+
+
+	      function processStats(statsResponse){
+		  var taskWiseStats = {};
+		  (statsResponse[0][0]).forEach(function(stat) {
+		      if("todo_id" in stat["_id"] && "action" in stat["_id"]){
+			  var todoId = stat["_id"].todo_id;
+			  var action = stat["_id"].action;
+
+			  if(!(todoId in taskWiseStats)){
+			      taskWiseStats[todoId] = {done:0,skip:0};
+			  }
+
+			  if(action === "Done"){
+			      taskWiseStats[todoId].done=stat.count;
+			  }
+			  else if(action === "Skip"){
+			      taskWiseStats[todoId].skip=stat.count;
+			  }
+		      }
+		  });
+		  return taskWiseStats;
+	      }
 	    
 
 	    
 	    tasks={};
-	    $.ajax('../todos').done(
-		function(data){
-		    
-		    $('#tasklist').append('<ul data-role="listview" id="tasklistdata"></ul>')
-		    $('#tasklist').trigger("create")
-		    tasks=data
-		    processTasks(tasks);
+	      $.when($.ajax('../todos'),$.ajax('../todos/logs/stats')).done(
+		  function(responseTaskdata,stats){
+
+
+		      var taskIdWiseStats = processStats(stats);
+		      $('#tasklist').append('<ul data-role="listview" id="tasklistdata"></ul>');
+		      $('#tasklist').trigger("create");
+		      tasks=responseTaskdata[0];
+		      data=tasks;
+		      processTasks(tasks);
 
 
 
@@ -303,7 +345,7 @@ function calculateNextDayForTodos()
 		    /* Pending tasks */
 
 		    
-		    $('#tasklistdata').append('<li data-role="list-divider">Pending</li>')
+		    $('#tasklistdata').append('<li data-role="list-divider">Pending</li>');
 		    pendingTasks=[];
 		    for(t in data) //Pending
 		    {
@@ -316,13 +358,13 @@ function calculateNextDayForTodos()
 			
 		    }
 
-		    renderTasks(pendingTasks);
+		    renderTasks(pendingTasks,taskIdWiseStats);
 		    
 
 
 		    /* Today's Tasks */
 		    todaysTasks=[];
-		    $('#tasklistdata').append('<li data-role="list-divider">Today</li>')
+		    $('#tasklistdata').append('<li data-role="list-divider">Today</li>');
 		    for(t in data) //Today
 		    {
 			task = data[t];
@@ -354,11 +396,11 @@ function calculateNextDayForTodos()
 					 }
 					 return 1;
 				     });
-		    renderTasks(todaysTasks);
+		    renderTasks(todaysTasks,taskIdWiseStats);
 		    
 		    /* Upcoming Tasks */
 		    upcomingTasks=[];
-		    $('#tasklistdata').append('<li data-role="list-divider">Upcoming</li>')
+		    $('#tasklistdata').append('<li data-role="list-divider">Upcoming</li>');
 		    for(t in data) //Upcoming
 		    {
 			task = data[t];
@@ -370,7 +412,7 @@ function calculateNextDayForTodos()
 			
 
 		    }
-		    renderTasks(upcomingTasks);
+		    renderTasks(upcomingTasks,taskIdWiseStats);
 
 		    
 
@@ -385,35 +427,35 @@ function calculateNextDayForTodos()
 							 onSelect :   function(dateStr,datePickerObject)
 							             {
 									 
-									 todo_id=datePickerObject.id.substring(0,datePickerObject.id.indexOf("_"))
+									 todo_id=datePickerObject.id.substring(0,datePickerObject.id.indexOf("_"));
 									 updateUIForNextDate(todo_id,dateStr);									 									
 								     }
 							 
 							 
-						     })
+						     });
 						 calculateNextDayForTodos();
-					     })
+					     });
 		    $('#tasklistdata').ready(function(){
 			$("#tasklistdata li").on("taphold",function(event){
 			    
 			    
 			    objectId=event.currentTarget.attributes['data-region-id'].value;
-			    objectId=objectId.substr(0,objectId.indexOf('_'))
-			    taskToDelete = tasks.find(function(f){if(f.todo_id==objectId){return true}});
-			    var d = confirm("Delete : "+taskToDelete.task+"?")
+			    objectId=objectId.substr(0,objectId.indexOf('_'));
+			    taskToDelete = tasks.find(function(f){if(f.todo_id==objectId){return true;}else{return false;}});
+			    var d = confirm("Delete : "+taskToDelete.task+"?");
 			    if(d==true)
 			    {
 				$("."+objectId+"_action").addClass("ui-state-disabled");
-				$.ajax({url:"../todos/"+objectId,method:"DELETE"})
-				$("[data-region-id='"+objectId+"_region'] div.ui-grid-a").get(0).style.background="brown"
+				$.ajax({url:"../todos/"+objectId,method:"DELETE"});
+				$("[data-region-id='"+objectId+"_region'] div.ui-grid-a").get(0).style.background="brown";
 			    }
 			    
-			})
-		    })
+			});
+		    });
 
 
 		    
-		})
+		});
 	    $('#tasklistdata').ready(function(){
 		
 		$("#tasklist").on("click","[id$='edit_link']",function(event)
@@ -434,7 +476,7 @@ function calculateNextDayForTodos()
 						  dateValue.setUTCSeconds(task.due_date['$date']/1000);
 						  console.log(task);
 						  console.log(dateValue);
-						  $("#edit_dueDate").datepicker("setDate",dateValue)
+						  $("#edit_dueDate").datepicker("setDate",dateValue);
 					      }
 					      $("#edit_slot"+(task.timeSlot||'None')).prop("checked",true);
 					      if('trackHabit' in task)
@@ -446,14 +488,14 @@ function calculateNextDayForTodos()
 						  $("#edit_trackHabit").prop("checked",false).checkboxradio("refresh");
 					      }
 					      
-					      $("input[name='edit_slot']").checkboxradio("refresh")
+					      $("input[name='edit_slot']").checkboxradio("refresh");
 					      $( ":mobile-pagecontainer" ).pagecontainer( "change", "#editPage" );
-					  })
+					  });
 				      
 				  }
 
-				 )
-	    })
+				 );
+	    });
 
 
 	    

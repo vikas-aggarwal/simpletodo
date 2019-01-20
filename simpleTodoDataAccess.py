@@ -5,6 +5,12 @@ class SimpleTodoDataAccess:
     def __init__(self,mongo):
         self.mongo = mongo;
 
+
+    def get_todo_logs_count(self):
+        todo_count = self.mongo.db.todo_logs.aggregate([
+            {"$group":{"_id": {"action":"$action","todo_id":"$todo_id"},"count": { "$sum": 1 }}}])
+        return todo_count;
+
         
     def get_all_todos_by_due_date(self):
         all_todos = self.mongo.db.todos.find({}).sort('due_date',pymongo.ASCENDING)
@@ -34,7 +40,7 @@ class SimpleTodoDataAccess:
 
     def delete_todo(self,todo_id):
         self.mongo.db.todos.find_one_and_delete({'todo_id':todo_id})
-        mongo.db.todo_logs.delete_many({'todo_id':todo_id});
+        self.mongo.db.todo_logs.delete_many({'todo_id':todo_id});
 
     def upsert_todo(self,todo_id,data):
         #Getting current state
@@ -46,6 +52,11 @@ class SimpleTodoDataAccess:
         data['todo_id']=todo_id
         self.mongo.db.todos.update_one({'todo_id':todo_id},{'$set': data},upsert=True);
 
+        #Delete todo logs if no longer tracked as Habit
+        if ('trackHabit' in todo_object) and todo_object['trackHabit']==True and ('trackHabit' in data) and data['trackHabit'] == False:
+            self.mongo.db.todo_logs.delete_many({'todo_id':todo_id});
+            return;
+        
         #if obtained via an action log it
         if ('trackHabit' in todo_object) and todo_object['trackHabit']==True and ('todo_action' in data) :
             todo_log={};
