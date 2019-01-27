@@ -112,12 +112,12 @@
 	      <span id="{{todo_id}}_label_next">{{dateString}}</span>
 	      <input type="text" hidden="hidden" id="{{todo_id}}_date" data-role="date" readonly="readonly" value="{{dateString}}">
 	    </p>
-	    {{#doneCount}}
+	    {{#trackHabit}}
             <div class="progressBar">
 	      <div class="progressBar-success" style="width:{{donePercent}}%;"></div>
 	      <div class="progressBar-failure" style="width:{{skipPercent}}%;"></div>
 	    </div>
-	    {{/doneCount}}
+	    {{/trackHabit}}
 	  </div>
 	  <div class="ui-block-b">
 	    

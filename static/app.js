@@ -338,7 +338,22 @@ function calculateNextDayForTodos()
 		      data=tasks;
 		      processTasks(tasks);
 
+		      /*Alerts*/
+		    $('#tasklistdata').append('<li data-role="list-divider">Alerts</li>');
+		    alertTasks=[];
+		    for(t in data) //Pending
+		    {
+			task = data[t];
+			
+			if(taskToBeRemindedToday(task))
+			{
+			    alertTasks.push(task);
+			}
+			
+		    }
 
+		    renderTasks(alertTasks,taskIdWiseStats);
+		    
 
 
 
@@ -369,7 +384,7 @@ function calculateNextDayForTodos()
 		    {
 			task = data[t];
 			
-			if(taskComparedToToday(task)==0 || taskToBeRemindedToday(task))
+			if(taskComparedToToday(task)==0)
 			{
 			    todaysTasks.push(task);
 			}
