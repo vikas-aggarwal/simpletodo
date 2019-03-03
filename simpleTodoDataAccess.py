@@ -1,9 +1,14 @@
 import pymongo
 from datetime import datetime
+import sys;
 
 class SimpleTodoDataAccess:
-    def __init__(self,mongo):
+    def __init__(self,mongo,wipeDatabase,environmentMode):
         self.mongo = mongo;
+        if wipeDatabase and not environmentMode == "production":
+            print("WIPING DATABASE",file=sys.stderr); 
+            self.mongo.db.todo_logs.drop();
+            self.mongo.db.todos.drop();
 
 
     def get_todo_logs_count(self):

@@ -9,10 +9,18 @@ import simpleTodoDataAccess
 from datetime import datetime
 
 app=Flask(__name__)
-app.config['MONGO_URI']="mongodb://localhost:27017/simpleTodo";
+
+if app.config['ENV'] == "automatedTesting":
+    app.config['MONGO_URI']="mongodb://localhost:27017/automatedTesting";
+    app.config['WIPE_DATABASE']=True;
+else:
+    app.config['MONGO_URI']="mongodb://localhost:27017/simpleTodo";
+    app.config['WIPE_DATABASE']=False;
+
+
 
 mongo=PyMongo(app)
-todoData = simpleTodoDataAccess.SimpleTodoDataAccess(mongo);
+todoData = simpleTodoDataAccess.SimpleTodoDataAccess(mongo,app.config['WIPE_DATABASE'],app.config['ENV']);
 
 @app.route('/todos', methods=['GET'])
 def all_todos():
