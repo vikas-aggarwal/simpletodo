@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os
-from simpleTodo import app as application
+from simpleTodo import APP as application
 
 if __name__ == '__main__':
     from wsgiref.simple_server import make_server
