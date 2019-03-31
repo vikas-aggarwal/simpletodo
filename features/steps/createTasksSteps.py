@@ -1,19 +1,17 @@
+import datetime;
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from behave import *;
-import time;
-from unittest import TestCase
 from assertpy import *;
-import datetime;
+
 
 
 
 @then(u'the user is on task list page')
-def step_impl(context):
-    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")));
-    mainPageElem  = context.browser.find_element_by_id("mainpage");
-    assert mainPageElem.get_attribute("class").index("ui-page-active")!=-1;
+def user_is_on_tasklist_page(context):
+    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
+    main_page_elem = context.browser.find_element_by_id("mainpage")
+    assert main_page_elem.get_attribute("class").index("ui-page-active") != -1
 
 
 
@@ -40,7 +38,7 @@ def step_impl(context):
 
 
 @then(u'a new task should be created')
-def step_impl(context):
+def newTaskStep(context,expectedTasksCount="1"):
     #first get all tasks in today
     context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")));
     oldTasks = context.browser.find_elements(By.CSS_SELECTOR,"a[id$='_edit_link']");
@@ -55,18 +53,20 @@ def step_impl(context):
     #get the new task and verify
     currentTasks = context.browser.find_elements(By.CSS_SELECTOR,"a[id$='_edit_link']");
 
-    foundNewTask = None;
+    foundTasksCount = 0;
+    foundNewTask = [];
     for task in currentTasks:
         if task.get_attribute("id") not in oldTaskIDs:
-            foundNewTask = task;
-            context.foundNewTask = task;
-    assert_that(foundNewTask).is_not_none();
+            foundNewTask.append(task);
+            foundTasksCount = foundTasksCount+1;        
+    context.foundNewTask = foundNewTask;
+    assert_that(foundTasksCount).is_equal_to(int(expectedTasksCount));
 
 
             
 @then(u'Task title is "{title}"')
 def step_impl(context,title):
-    assert_that(context.foundNewTask.text).is_equal_to(title);
+    assert_that(context.foundNewTask[0].text).is_equal_to(title);
 
 
 @when(u'user enters "{title}" on title field')
@@ -80,7 +80,7 @@ def step_impl(context,dueDate):
         dueDateString = datetime.datetime.now().strftime("%d-%b-%Y");
     else:
         dueDateString = dueDate;
-    taskId = context.foundNewTask.get_attribute("id");
+    taskId = context.foundNewTask[0].get_attribute("id");
     dueDateSpan = context.browser.find_element_by_id(taskId[0:taskId.index('_')]+"_label_due");
     assert_that(dueDateSpan.text).is_equal_to(dueDateString);
 
@@ -93,7 +93,7 @@ def step_impl(context,freq):
 
 @then(u'Task Frequency is "{freq}"')
 def step_impl(context,freq):
-    taskId = context.foundNewTask.get_attribute("id");
+    taskId = context.foundNewTask[0].get_attribute("id");
     frequencyLabel = context.browser.find_element_by_id(taskId[0:taskId.index('_')]+"_frequency_label");
     assert_that(frequencyLabel.text).is_equal_to(freq);
     
@@ -108,14 +108,77 @@ def step_impl(context,noOfDays,dueDate):
         
     nextDate = datetime.datetime.strptime(dueDateString,"%d-%b-%Y") + datetime.timedelta(days=int(noOfDays));
     nextDateString = nextDate.strftime("%d-%b-%Y");
-    taskId = context.foundNewTask.get_attribute("id");
+    taskId = context.foundNewTask[0].get_attribute("id");
     nextDateSpan = context.browser.find_element_by_id(taskId[0:taskId.index('_')]+"_label_next");
     
     assert_that(nextDateSpan.text).is_equal_to(nextDateString);
 
 
 @when(u'user enters due date as "{dueDate}"')
-def step_impl(context,dueDate):
+def enter_task_due_date(context,dueDate):
     dueDateElement = context.browser.find_element_by_id("create_dueDate");
     dueDateElement.send_keys(dueDate);
 
+
+@when(u'user selects slot "{slotNumber}"')
+def step_impl(context, slotNumber):
+    slot = context.browser.find_element_by_css_selector("label[for=create_slot"+slotNumber+"]")
+    slot.click()
+
+
+@then(u'"{noOfTasks}" new tasks should be created')
+def step_impl(context, noOfTasks):
+    newTaskStep(context, noOfTasks)
+
+@then(u'"{beforeTask}" should appear before "{afterTask}" in today')
+def step_impl(context, beforeTask, afterTask):
+    #TODO check for today
+    assert_that(context.foundNewTask[0].text).is_equal_to(beforeTask)
+    assert_that(context.foundNewTask[1].text).is_equal_to(afterTask)
+
+@when(u'user enters "{noOfDays}" in remind before field')
+def step_impl(context,noOfDays):
+    remindBefore = context.browser.find_element_by_id("create_remindBeforeDays")
+    remindBefore.send_keys(noOfDays)
+
+@then(u'"{taskName}" should appear in the alerts section')
+def step_impl(context,taskName):
+    taskListWebElement = context.browser.find_element_by_id("tasklistdata")
+    taskListElements = taskListWebElement.find_elements_by_tag_name("li")
+    inAlert = False;
+    foundInAlert = False;
+    for taskElem in taskListElements:
+        if taskElem.get_attribute("data-role") == "list-divider":
+            if taskElem.text == "Alerts":
+                inAlert = True;
+            else:
+                inAlert = False;
+        elif inAlert and  context.foundNewTask[0].text == taskElem.find_element_by_class_name("ui-li-header").text :
+            foundInAlert = True;
+
+    assert_that(foundInAlert).is_true();    
+
+    
+
+@when(u'user enters due date "{noOfDays}" days in future')
+def step_impl(context,noOfDays):
+    dueDateString = (datetime.datetime.now() + datetime.timedelta(days=int(noOfDays))).strftime("%d-%b-%Y");
+    enter_task_due_date(context, dueDateString)
+
+
+@when(u'user selects Track Habit')
+def step_impl(context):
+    trackHabit = context.browser.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/label");
+    trackHabit.click();
+    
+
+@then(u'"{taskName}" should have Done and Skip button with 0 count')
+def step_impl(context,taskName):
+    taskEditLinkID = context.foundNewTask[0].get_attribute("id");
+    taskID = taskEditLinkID[0:taskEditLinkID.index('_')];
+    taskRegion = context.browser.find_elements(By.CSS_SELECTOR,"li[data-region-id='"+taskID+"_region']")[0];
+    buttons = taskRegion.find_elements_by_tag_name("button")
+    assert_that(len(buttons)).is_equal_to(2);
+    assert_that(buttons[0].text).is_equal_to("Done (0)");
+    assert_that(buttons[1].text).is_equal_to("Skip (0)");
+    

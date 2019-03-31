@@ -1,71 +1,66 @@
-from flask import Flask,jsonify, request
+import json
+from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 from bson.json_util import dumps
-import json
-import pymongo
-import os
 import simpleTodoDataAccess
 
-from datetime import datetime
 
-app=Flask(__name__)
+APP = Flask(__name__)
 
-if app.config['ENV'] == "automatedTesting":
-    app.config['MONGO_URI']="mongodb://localhost:27017/automatedTesting";
-    app.config['WIPE_DATABASE']=True;
+if APP.config['ENV'] == "automatedTesting":
+    APP.config['MONGO_URI'] = "mongodb://localhost:27017/automatedTesting"
 else:
-    app.config['MONGO_URI']="mongodb://localhost:27017/simpleTodo";
-    app.config['WIPE_DATABASE']=False;
+    APP.config['MONGO_URI'] = "mongodb://localhost:27017/simpleTodo"
 
+MONGO = PyMongo(APP)
+TODO_DATA = simpleTodoDataAccess.SimpleTodoDataAccess(MONGO);
 
-
-mongo=PyMongo(app)
-todoData = simpleTodoDataAccess.SimpleTodoDataAccess(mongo,app.config['WIPE_DATABASE'],app.config['ENV']);
-
-@app.route('/todos', methods=['GET'])
+@APP.route('/todos', methods=['GET'])
 def all_todos():
-    data = todoData.get_all_todos_by_due_date();
-    return jsonify(json.loads(dumps(data)));
+    """Gets all todos from data source, sorted by due date in ascending order"""
+    data = TODO_DATA.get_all_todos_by_due_date()
+    return jsonify(json.loads(dumps(data)))
 
 
 
-@app.route('/todos/<int:todo_id>' , methods=['GET'])
+@APP.route('/todos/<int:todo_id>', methods=['GET'])
 def get_todo(todo_id):
-    todo=todoData.get_todo(todo_id);
-    data=[];
-    data.append(todo);
+    """Get a specific todo"""
+    todo = TODO_DATA.get_todo(todo_id)
+    data = []
+    data.append(todo)
     return jsonify(json.loads(dumps(data)))
 
 
-@app.route('/todos', methods=['POST'])
+@APP.route('/todos', methods=['POST'])
 def create_todos():
-    data=request.get_json();
-    todoData.create_todo(data);
-    return jsonify(json.loads(dumps(data)));
+    data = request.get_json()
+    TODO_DATA.create_todo(data)
+    return jsonify(json.loads(dumps(data)))
 
-@app.route('/todos/<int:todo_id>' , methods=['POST'])
+@APP.route('/todos/<int:todo_id>', methods=['POST'])
 def update_or_create_todo(todo_id): #id is not auto generated
-    data=request.get_json();
-    todoData.upsert_todo(todo_id,data);
+    data = request.get_json()
+    TODO_DATA.upsert_todo(todo_id, data)
     return jsonify(json.loads(dumps(data)))
 
 
-@app.route('/todos/<int:todo_id>' , methods=['DELETE'])
+@APP.route('/todos/<int:todo_id>', methods=['DELETE'])
 def delete_todo(todo_id):
-    todoData.delete_todo(todo_id);
+    TODO_DATA.delete_todo(todo_id)
     return jsonify({})
 
 
 
-@app.route('/todos/logs/stats' , methods=['GET'])
+@APP.route('/todos/logs/stats', methods=['GET'])
 def get_todo_logs_counts_by_action():
-    stats=todoData.get_todo_logs_count();
-    data=[];
-    data.append(stats);
+    stats = TODO_DATA.get_todo_logs_count()
+    data = []
+    data.append(stats)
     return jsonify(json.loads(dumps(data)))
 
 
 
 
 if __name__ == "__main__":
-    app.run(debug=True,host='0.0.0.0')
+    APP.run(debug=True, host='0.0.0.0')
