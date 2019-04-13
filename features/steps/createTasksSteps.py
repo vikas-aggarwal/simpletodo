@@ -1,8 +1,8 @@
-import datetime;
+import datetime
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from behave import *;
-from assertpy import *;
+from behave import *
+from assertpy import *
 
 
 
@@ -18,61 +18,61 @@ def user_is_on_tasklist_page(context):
 
 @given(u'the user is on task list page')
 def step_impl(context):
-    context.browser.get("http://localhost:5000/static/index.html");
-    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")));
-    mainPageElem  = context.browser.find_element_by_id("mainpage");
-    assert mainPageElem.get_attribute("class").index("ui-page-active")!=-1;
+    context.browser.get(context.protocol+"://"+context.host+":"+context.port+"/static/index.html")
+    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
+    main_page_elem = context.browser.find_element_by_id("mainpage")
+    assert main_page_elem.get_attribute("class").index("ui-page-active") != -1
 
 
 @when(u'user clicks on New')
 def step_impl(context):
-    newButtonLink = context.browser.find_element_by_xpath("/html/body/div[1]/div[1]/a");
-    newButtonLink.click();
-    context.wait.until(EC.element_to_be_clickable((By.ID, "createSubmitBtn")));
+    new_button_link = context.browser.find_element_by_xpath("/html/body/div[1]/div[1]/a")
+    new_button_link.click()
+    context.wait.until(EC.element_to_be_clickable((By.ID, "createSubmitBtn")))
 
 
 @when(u'clicks on submit')
 def step_impl(context):
-    createSubmitBtn = context.browser.find_element_by_id("createSubmitBtn");
-    createSubmitBtn.click();
+    createSubmitBtn = context.browser.find_element_by_id("createSubmitBtn")
+    createSubmitBtn.click()
 
 
 @then(u'a new task should be created')
 def newTaskStep(context,expectedTasksCount="1"):
     #first get all tasks in today
-    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")));
-    oldTasks = context.browser.find_elements(By.CSS_SELECTOR,"a[id$='_edit_link']");
-    oldTaskIDs = [];
+    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
+    oldTasks = context.browser.find_elements(By.CSS_SELECTOR,"a[id$='_edit_link']")
+    oldTaskIDs = []
     for task in oldTasks:
-        oldTaskIDs.append(task.get_attribute("id"));
+        oldTaskIDs.append(task.get_attribute("id"))
 
     #refresh the page
-    context.browser.refresh();
-    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")));
+    context.browser.refresh()
+    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
     
     #get the new task and verify
-    currentTasks = context.browser.find_elements(By.CSS_SELECTOR,"a[id$='_edit_link']");
+    currentTasks = context.browser.find_elements(By.CSS_SELECTOR,"a[id$='_edit_link']")
 
-    foundTasksCount = 0;
-    foundNewTask = [];
+    foundTasksCount = 0
+    foundNewTask = []
     for task in currentTasks:
         if task.get_attribute("id") not in oldTaskIDs:
-            foundNewTask.append(task);
-            foundTasksCount = foundTasksCount+1;        
-    context.foundNewTask = foundNewTask;
-    assert_that(foundTasksCount).is_equal_to(int(expectedTasksCount));
+            foundNewTask.append(task)
+            foundTasksCount = foundTasksCount+1
+    context.foundNewTask = foundNewTask
+    assert_that(foundTasksCount).is_equal_to(int(expectedTasksCount))
 
 
             
 @then(u'Task title is "{title}"')
 def step_impl(context,title):
-    assert_that(context.foundNewTask[0].text).is_equal_to(title);
+    assert_that(context.foundNewTask[0].text).is_equal_to(title)
 
 
 @when(u'user enters "{title}" on title field')
 def step_impl(context,title):
-    taskTitle = context.browser.find_element_by_id("create_taskTitle");
-    taskTitle.send_keys(title);
+    taskTitle = context.browser.find_element_by_id("create_taskTitle")
+    taskTitle.send_keys(title)
 
 @then(u'Task Due Date is "{dueDate}"')
 def step_impl(context,dueDate):
@@ -168,17 +168,18 @@ def step_impl(context,noOfDays):
 
 @when(u'user selects Track Habit')
 def step_impl(context):
-    trackHabit = context.browser.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/label");
-    trackHabit.click();
-    
+    track_habit = context.browser.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/label")
+    track_habit.click()
+
 
 @then(u'"{taskName}" should have Done and Skip button with 0 count')
 def step_impl(context,taskName):
-    taskEditLinkID = context.foundNewTask[0].get_attribute("id");
-    taskID = taskEditLinkID[0:taskEditLinkID.index('_')];
-    taskRegion = context.browser.find_elements(By.CSS_SELECTOR,"li[data-region-id='"+taskID+"_region']")[0];
+    taskEditLinkID = context.foundNewTask[0].get_attribute("id")
+    taskID = taskEditLinkID[0:taskEditLinkID.index('_')]
+    taskRegion = context.browser.find_elements(By.CSS_SELECTOR,"li[data-region-id='"+taskID+"_region']")[0]
     buttons = taskRegion.find_elements_by_tag_name("button")
-    assert_that(len(buttons)).is_equal_to(2);
-    assert_that(buttons[0].text).is_equal_to("Done (0)");
-    assert_that(buttons[1].text).is_equal_to("Skip (0)");
+    assert_that(len(buttons)).is_equal_to(2)
+    assert_that(buttons[0].text).is_equal_to("Done (0)")
+    assert_that(buttons[1].text).is_equal_to("Skip (0)")
+    
     

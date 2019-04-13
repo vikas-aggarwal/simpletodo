@@ -13,7 +13,7 @@ else:
     APP.config['MONGO_URI'] = "mongodb://localhost:27017/simpleTodo"
 
 MONGO = PyMongo(APP)
-TODO_DATA = simpleTodoDataAccess.SimpleTodoDataAccess(MONGO);
+TODO_DATA = simpleTodoDataAccess.SimpleTodoDataAccess(MONGO)
 
 @APP.route('/todos', methods=['GET'])
 def all_todos():
@@ -37,6 +37,7 @@ def create_todos():
     data = request.get_json()
     TODO_DATA.create_todo(data)
     return jsonify(json.loads(dumps(data)))
+
 
 @APP.route('/todos/<int:todo_id>', methods=['POST'])
 def update_or_create_todo(todo_id): #id is not auto generated

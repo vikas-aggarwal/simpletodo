@@ -220,7 +220,14 @@ function calculateNextDayForTodos()
 						   $.ajax({type:'POST',url:'../todos',data:JSON.stringify(subData),contentType:"application/json"}).done(
 						       function(data)
 						       {
-							   console.log(data);
+							   //clear all values
+							   $("#create_taskTitle").val("");
+							   $("#create_freq").val("");
+							   $("#create_dueDate").datepicker("setDate","")
+							   $("#create_remindBeforeDays").val("");
+							   $("#create_slotNone").prop("checked",true);
+							   $("input[name='create_slot']").checkboxradio("refresh");
+							   $("#create_trackHabit").prop("checked",false).checkboxradio("refresh");
 							   $( ":mobile-pagecontainer" ).pagecontainer( "change", "#mainpage" );
 						       }
 						   );
