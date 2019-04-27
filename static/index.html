@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html>
   <head>
-    
-    
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+   
+    <link rel="stylesheet" href="css/jquery-ui.css"/>
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.1.min.css">
+    <link rel = "stylesheet" href = "css/jquery.mobile.datepicker.css" />
+    <script src="libs/require.min.js" data-main="app"></script>
     
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css"/>
-    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min.css">
-    <link rel = "stylesheet" href = "https://rawgithub.com/arschmitz/jquery-mobile-datepicker-wrapper/master/jquery.mobile.datepicker.css" />
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="app"></script>
-
     <style>
       #ui-datepicker-div { z-index:10 !important;}
 
@@ -30,18 +28,35 @@
       background: lightsalmon;
       height:5px;
       }
+
+      #loadingPane {
+	  position : absolute;
+	  height : 100%;
+	  width : 100%;
+	  background : white;
+      }
+
+
+      #loadingPane > img {
+	display: block;
+	margin: 0 auto;
+      }
+
       
     </style>
   </head>
   
   <body>
+    <div id="loadingPane">
+      <img src="img/ajax-loader.gif">
+    </div>
+    
     <div data-role="page" id="mainpage">
       <div data-role="header">
 	<h1>Tasks</h1>
 	<a href="#createPage" data-icon="plus" class="ui-btn-right">New</a>
       </div>
-      <div data-role="main" class="ui-content" id="tasklist">
-	
+      <div data-role="main" class="ui-content" id="tasklist">	
       </div>
     </div>
     
@@ -51,10 +66,7 @@
 	<a href="#mainpage" data-icon="back">Back</a>
       </div>
       <div data-role="main" class="ui-content" id="create_content">
-	
-	
 	<button class="ui-btn" id="createSubmitBtn">Submit</button>
-	
       </div>
     </div>
     

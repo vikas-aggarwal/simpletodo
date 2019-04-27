@@ -11,11 +11,11 @@ require.config({
 	}
     },
     paths: {
-	"jquery" : "https://code.jquery.com/jquery-1.11.3.min",
-	"jquerymobile" : "https://code.jquery.com/mobile/1.4.1/jquery.mobile-1.4.1.min",
-	"jquery-ui/datepicker" : "https://rawgithub.com/jquery/jquery-ui/1.10.4/ui/jquery.ui.datepicker",
-	"jquerymobile/datepicker" : "https://rawgithub.com/arschmitz/jquery-mobile-datepicker-wrapper/master/jquery.mobile.datepicker",
-	"mustache" : "https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min"
+	"jquery" : "libs/jquery-1.11.3.min",
+	"jquerymobile" : "libs/jquery.mobile-1.4.1.min",
+	"jquery-ui/datepicker" : "libs/jquery.ui.datepicker",
+	"jquerymobile/datepicker" : "libs/jquery.mobile.datepicker",
+	"mustache" : "libs/mustache.min"
     }
 });
 
@@ -27,7 +27,7 @@ require.config({
 requirejs(['mustache','jquery','recur','utils','jquerymobile','jquery-ui/datepicker','jquerymobile/datepicker'],
 	  function(Mustache){
 
-    
+$("#loadingPane").css("display","none");    
 
 //TODO should not be global
 var dateFormat='dd-M-yy';
@@ -54,7 +54,7 @@ function initDatePicker()
 {
     
     $.datepicker.setDefaults({dateFormat: dateFormat,showOn: "button",
-			      buttonImage: "https://cdnjs.cloudflare.com/ajax/libs/Zebra_datepicker/1.9.4/images/calendar.png",
+			      buttonImage: "img/calendar.png",
 			      buttonImageOnly: true,
 			      buttonText: "Select date"});
 }
