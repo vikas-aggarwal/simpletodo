@@ -8,6 +8,9 @@ def before_all(context):
         context.host    = "localhost"
         context.port    = "8080"
         context.protocol= "http"
+        context.dateFormatForFeature = "%d-%b-%Y"
+        context.dateFormatForInput = "%Y-%m-%d"
+        context.dateFormatFromInputText = "%m/%d/%Y" #For US locale
 
 def after_all(context):
 	context.browser.quit()

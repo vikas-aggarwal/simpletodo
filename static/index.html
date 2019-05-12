@@ -2,11 +2,7 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-   
-    <link rel="stylesheet" href="css/jquery-ui.css"/>
     <link rel="stylesheet" href="css/jquery.mobile-1.4.1.min.css">
-    <link rel = "stylesheet" href = "css/jquery.mobile.datepicker.css" />
     <script src="libs/require.min.js" data-main="app"></script>
     
     <style>
@@ -89,7 +85,7 @@
       <label for="freq">Frequency:</label>
       <input type="text" name="freq" id="{{action}}_freq">
       <label for="dueDate">Due Date:</label>
-      <span><input type="text" name="dueDate" id="{{action}}_dueDate" /></span>
+      <span><input type="date" name="dueDate" id="{{action}}_dueDate" /></span>
       <fieldset data-role="controlgroup" data-type="horizontal">
 	<legend>Choose Slot:</legend>
 	<input type="radio" name="{{action}}_slot" id="{{action}}_slotNone" value="{{action}}_slotNone" checked="checked"/><label for="{{action}}_slotNone">None</label>
@@ -121,8 +117,7 @@
 	    </p>
 	    <p>
 	      <span>Next:</span>
-	      <span id="{{todo_id}}_label_next">{{dateString}}</span>
-	      <input type="text" hidden="hidden" id="{{todo_id}}_date" data-role="date" readonly="readonly" value="{{dateString}}">
+	      <input type="date" id="{{todo_id}}_date" value="{{dateString}}">
 	    </p>
 	    {{#trackHabit}}
             <div class="progressBar">
@@ -136,7 +131,7 @@
 	    
 	    <p style="float:right">
 	      {{^trackHabit}}
-	      <button class="ui-btn ui-icon-check ui-btn-icon-left ui-mini {{todo_id}}_action done-button todo-button">Done</button>
+	      <button class="ui-btn ui-icon-check ui-btn-icon-left ui-mini ui-state-disabled {{todo_id}}_action done-button todo-button">Done</button>
 	      {{/trackHabit}}
 	      {{#trackHabit}}
 	      <button class="ui-btn ui-icon-check ui-btn-icon-left ui-mini {{todo_id}}_action ui-state-disabled done-button todo-button">Done ({{doneCount}})</button>

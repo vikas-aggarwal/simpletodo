@@ -29,7 +29,7 @@ def step_impl(context, taskName, frequency, dueDate):
     payload = {}
     payload['frequency'] = frequency
     payload['task'] = taskName
-    payload['due_date'] = datetime.datetime.strptime(dueDate, "%d-%b-%Y").timestamp()
+    payload['due_date'] = datetime.datetime.strptime(dueDate, context.dateFormatForFeature).timestamp()
     todo_id = create_task(payload, context.host, context.port)
     context.current_todo_id = todo_id
     context.browser.refresh()
@@ -42,7 +42,7 @@ def step_impl(context, taskName, frequency, dueDate, count):
     payload['frequency'] = frequency
     payload['task'] = taskName
     payload['trackHabit'] = "true"
-    payload['due_date'] =  datetime.datetime.strptime(dueDate, "%d-%b-%Y").timestamp()
+    payload['due_date'] = datetime.datetime.strptime(dueDate, context.dateFormatForFeature).timestamp()
     todo_id = create_task(payload, context.host, context.port)
     last_due_date = payload['due_date']
     context.current_todo_id = todo_id
@@ -76,8 +76,9 @@ def step_impl(context, taskName, action):
 @then(u'the due date of the task "{taskName}" should change to "{newDueDate}"')
 def step_impl(context, taskName, newDueDate):
     task_node = context.browser.find_element(By.XPATH, "//li[//h3[text()='"+taskName+"']]")  # type: selenium.webdriver.remote.webelement.WebElement
-    due_date  = task_node.find_element(By.XPATH, "//*[contains(@id,'label_due')]").text
-    assert_that(due_date).is_equal_to(newDueDate)
+    due_date = task_node.find_element(By.XPATH, "//*[contains(@id,'label_due')]").text
+    due_date_to_verify = datetime.datetime.strptime(due_date, context.dateFormatFromInputText).strftime(context.dateFormatForFeature)
+    assert_that(due_date_to_verify).is_equal_to(newDueDate)
 
 
 
@@ -91,10 +92,12 @@ def step_impl(context):
 
 @when(u'user selects a next due date as "{newDueDate}" as the done button is disabled')
 def step_impl(context, newDueDate):
-    #TODO check for disabled button
     driver = context.browser # type: selenium.webdriver.Firefox
     current_todo_id = context.current_todo_id
-    driver.execute_script('var p = $("#'+str(current_todo_id)+'_date");p.datepicker("setDate","'+newDueDate+'");p.datepicker("option","onSelect")("'+newDueDate+'",p.datepicker().get(0))')
+    button = driver.find_element(By.XPATH, '//li[@data-region-id="'+str(current_todo_id)+'_region"]//button[contains(text(),"Done")]')
+    assert_that("ui-state-disabled" in button.get_attribute("class")).is_true()
+    newDueDateInISOFormat = datetime.datetime.strptime(newDueDate, context.dateFormatForFeature).strftime(context.dateFormatForInput)
+    driver.find_element(By.ID, str(current_todo_id)+"_date").send_keys(newDueDateInISOFormat)
     context.wait.until(EC.element_to_be_clickable((By.XPATH ,'//li[@data-region-id="'+str(current_todo_id)+'_region"]//button[contains(text(),"Done")]')))
 
 

@@ -80,3 +80,23 @@ function taskToBeRemindedToday(task)
     }
     return false;
 }
+
+/**
+* @param dateObject {Date}
+*/
+function getDateInLocalISO(dateObject) {
+    var date = dateObject.getDate()+'';
+    if((date+'').length == 1){
+	date = "0"+date;
+    }
+    
+    var month = (dateObject.getMonth()+1)+'';
+    if((month+'').length == 1){
+	month = "0"+month;
+    }
+    
+    
+    var year = dateObject.getFullYear();
+
+    return year+"-"+month+"-"+date;
+}

@@ -1,20 +1,18 @@
+/// <reference path="./libs/jquery-1.11.3.min.js" />
+/// <reference path="./utils.js" />
+/// <reference path="./recur.js" />
+/// <reference path="./libs/require.min.js" />
+
+
 require.config({
     shim : {
 	'jquerymobile' : {
 	    deps : ['jquery']
-	},
-	'jquery-ui/datepicker' : {
-	    deps : ['jquerymobile']
-	},
-	'jquerymobile/datepicker' : {
-	    deps : ['jquery-ui/datepicker']
 	}
     },
     paths: {
 	"jquery" : "libs/jquery-1.11.3.min",
 	"jquerymobile" : "libs/jquery.mobile-1.4.1.min",
-	"jquery-ui/datepicker" : "libs/jquery.ui.datepicker",
-	"jquerymobile/datepicker" : "libs/jquery.mobile.datepicker",
 	"mustache" : "libs/mustache.min"
     }
 });
@@ -24,13 +22,11 @@ require.config({
 
 
 
-requirejs(['mustache','jquery','recur','utils','jquerymobile','jquery-ui/datepicker','jquerymobile/datepicker'],
-	  function(Mustache){
-
+requirejs(['mustache','jquery','recur','utils','jquerymobile'],
+	  function(Mustache,$){
+	      
 $("#loadingPane").css("display","none");    
 
-//TODO should not be global
-var dateFormat='dd-M-yy';
 
 function initCreatePage()
 {
@@ -47,16 +43,6 @@ function initEditPage()
 	beforecreate : function(){$("#edit_content").prepend(Mustache.render($("#task_form_template").text(),{"action":"edit"}))}
     });
     
-}
-
-
-function initDatePicker()
-{
-    
-    $.datepicker.setDefaults({dateFormat: dateFormat,showOn: "button",
-			      buttonImage: "img/calendar.png",
-			      buttonImageOnly: true,
-			      buttonText: "Select date"});
 }
 
 
@@ -116,9 +102,9 @@ function markAsSkip(todo_id)
 function updateDoneOrSkip(payload)
 {
     var todo_id=payload.todo_id;
-    var newDate = $("#"+payload.todo_id+"_date").datepicker("getDate");
+    var newDate = new Date($("#"+payload.todo_id+"_date").val());
     payload['due_date']= Math.floor(newDate.getTime()/1000);
-    var dateStr=$.datepicker.formatDate(dateFormat,newDate)
+    var dateStr=newDate.toLocaleDateString();
     $("#"+todo_id+"_loading").css("display","");
     $("#"+todo_id+"_label_due").html(dateStr);
     $("."+todo_id+"_action").addClass("ui-state-disabled");
@@ -147,7 +133,6 @@ function updateDoneOrSkip(payload)
 
 function updateUIForNextDate(todo_id,dateStr)
 {
-    $("#"+todo_id+"_label_next").html(dateStr);
     $("."+todo_id+"_action").removeClass("ui-state-disabled");
 }
 
@@ -164,15 +149,13 @@ function calculateNextDayForTodos()
 	var nextDate = getNextOccurrence(freq,dateValue);
 	if(nextDate!=null)
 	{
-	    $("#"+task.todo_id+"_date").datepicker("setDate",$.datepicker.formatDate(dateFormat,nextDate));
-	    updateUIForNextDate(task.todo_id,$.datepicker.formatDate(dateFormat,nextDate));
+	    $("#"+task.todo_id+"_date").val(getDateInLocalISO(nextDate));
+	    updateUIForNextDate(task.todo_id,nextDate);
 	}
     }
 }
 
 
-
-	    initDatePicker();
 	    initCreatePage();
 	    initEditPage();
 
@@ -199,19 +182,22 @@ function calculateNextDayForTodos()
 		      
 	     }); 
 	      
-	    //TODO move these 2 lines
-	    $("#create_dueDate").datepicker();
-	    $("#edit_dueDate").datepicker();
-
+	    
 
 	    $("#createSubmitBtn").bind("click",function(e)
 				               {
 						   var subData={};
 						   subData.task=$("#create_taskTitle").val();
 						   subData.frequency=$("#create_freq").val();
-						   if($("#create_dueDate").datepicker("getDate")!=null)
+						   if($("#create_dueDate").val())
 						   {
-						       subData.due_date=$("#create_dueDate").datepicker("getDate").getTime()/1000
+						       var dueDate = new Date($("#create_dueDate").val());
+						       dueDate.setHours(0)
+						       dueDate.setMinutes(0);
+						       dueDate.setSeconds(0);
+						       dueDate.setMilliseconds(0);
+
+						       subData.due_date=dueDate.getTime()/1000
 						   }
 						   subData.timeSlot=$("input[name='create_slot']:checked").val();
 						   subData.timeSlot=subData.timeSlot.substring(subData.timeSlot.indexOf("slot")+4)
@@ -223,7 +209,7 @@ function calculateNextDayForTodos()
 							   //clear all values
 							   $("#create_taskTitle").val("");
 							   $("#create_freq").val("");
-							   $("#create_dueDate").datepicker("setDate","")
+							   $("#create_dueDate").val("")
 							   $("#create_remindBeforeDays").val("");
 							   $("#create_slotNone").prop("checked",true);
 							   $("input[name='create_slot']").checkboxradio("refresh");
@@ -243,15 +229,21 @@ function calculateNextDayForTodos()
 						 var subData={};
 						 subData.task=$("#edit_taskTitle").val();
 						 subData.frequency=$("#edit_freq").val();
-						 if($("#edit_dueDate").datepicker("getDate")!=null)
+						 if($("#edit_dueDate").val())
 						 {
-						     subData.due_date=$("#edit_dueDate").datepicker("getDate").getTime()/1000
+						     var dueDate = new Date($("#edit_dueDate").val());
+						     dueDate.setHours(0)
+						     dueDate.setMinutes(0);
+						     dueDate.setSeconds(0);
+						     dueDate.setMilliseconds(0);
+
+						     subData.due_date=dueDate.getTime()/1000
 						 }
 						 subData.timeSlot=$("input[name='edit_slot']:checked").val();
 						 subData.timeSlot=subData.timeSlot.substring(subData.timeSlot.indexOf("slot")+4)
 						 subData.remindBeforeDays=$("#edit_remindBeforeDays").val();
 						 subData.trackHabit=$("#edit_trackHabit").prop("checked");
-						 todo_id=$("#edit_todo_id").val();
+						 var todo_id=$("#edit_todo_id").val();
 						 
 						 $.ajax({type:'POST',url:'../todos/'+todo_id,data:JSON.stringify(subData),contentType:"application/json"}).done(
 						     function(data)
@@ -268,18 +260,18 @@ function calculateNextDayForTodos()
 
 	      function renderTasks(tasks,taskIdWiseStats)
 	    {
-		for(t in tasks)
+		for(var t in tasks)
 		{
-		    task = tasks[t];
+		    var task = tasks[t];
 		    var view={};
 		    view.taskName=task.task;
 		    if(view.taskName+"" == ""){
 			view.taskName = "<No Title>";
 		    }
 		    view.taskFrequency=task.frequency;
-		    dateValue=new Date(0);
+		    var dateValue=new Date(0);
 		    dateValue.setUTCSeconds(task.due_date['$date']/1000);
-		    view.dateString=$.datepicker.formatDate(dateFormat,dateValue);
+		    view.dateString=dateValue.toLocaleDateString();
 		    view.todo_id=task.todo_id;
 		    view.timeSlot=task.timeSlot || 'None';
 		    view.trackHabit=task.trackHabit;
@@ -333,7 +325,7 @@ function calculateNextDayForTodos()
 	    
 
 	    
-	    tasks={};
+	    var tasks={};
 	      $.when($.ajax('../todos'),$.ajax('../todos/logs/stats')).done(
 		  function(responseTaskdata,stats){
 
@@ -342,15 +334,15 @@ function calculateNextDayForTodos()
 		      $('#tasklist').append('<ul data-role="listview" id="tasklistdata"></ul>');
 		      $('#tasklist').trigger("create");
 		      tasks=responseTaskdata[0];
-		      data=tasks;
+		      var data=tasks;
 		      processTasks(tasks);
 
 		      /*Alerts*/
 		    $('#tasklistdata').append('<li data-role="list-divider">Alerts</li>');
-		    alertTasks=[];
-		    for(t in data) //Pending
+		    var alertTasks=[];
+		    for(var t in data) //Pending
 		    {
-			task = data[t];
+			var task = data[t];
 			
 			if(taskToBeRemindedToday(task))
 			{
@@ -368,7 +360,7 @@ function calculateNextDayForTodos()
 
 		    
 		    $('#tasklistdata').append('<li data-role="list-divider">Pending</li>');
-		    pendingTasks=[];
+		    var pendingTasks=[];
 		    for(t in data) //Pending
 		    {
 			task = data[t];
@@ -385,7 +377,7 @@ function calculateNextDayForTodos()
 
 
 		    /* Today's Tasks */
-		    todaysTasks=[];
+		    var todaysTasks=[];
 		    $('#tasklistdata').append('<li data-role="list-divider">Today</li>');
 		    for(t in data) //Today
 		    {
@@ -421,7 +413,7 @@ function calculateNextDayForTodos()
 		    renderTasks(todaysTasks,taskIdWiseStats);
 		    
 		    /* Upcoming Tasks */
-		    upcomingTasks=[];
+		    var upcomingTasks=[];
 		    $('#tasklistdata').append('<li data-role="list-divider">Upcoming</li>');
 		    for(t in data) //Upcoming
 		    {
@@ -445,25 +437,24 @@ function calculateNextDayForTodos()
 		    $('#tasklistdata').ready(function()
 					     {
 						 $("input[id$='_date']")
-						     .datepicker({
-							 onSelect :   function(dateStr,datePickerObject)
+						     .change(function()
 							             {
 									 
-									 todo_id=datePickerObject.id.substring(0,datePickerObject.id.indexOf("_"));
-									 updateUIForNextDate(todo_id,dateStr);									 									
+									 var todo_id=this.id.substring(0,this.id.indexOf("_"));
+									 updateUIForNextDate(todo_id,this.value);									 									
 								     }
 							 
 							 
-						     });
+						     );
 						 calculateNextDayForTodos();
 					     });
 		    $('#tasklistdata').ready(function(){
 			$("#tasklistdata li").on("taphold",function(event){
 			    
 			    
-			    objectId=event.currentTarget.attributes['data-region-id'].value;
+			    var objectId=event.currentTarget.attributes['data-region-id'].value;
 			    objectId=objectId.substr(0,objectId.indexOf('_'));
-			    taskToDelete = tasks.find(function(f){if(f.todo_id==objectId){return true;}else{return false;}});
+			    var taskToDelete = tasks.find(function(f){if(f.todo_id==objectId){return true;}else{return false;}});
 			    var d = confirm("Delete : "+taskToDelete.task+"?");
 			    if(d==true)
 			    {
@@ -483,22 +474,20 @@ function calculateNextDayForTodos()
 		$("#tasklist").on("click","[id$='edit_link']",function(event)
 				  {
 
-				      todo_id=event.currentTarget.id;
+				      var todo_id=event.currentTarget.id;
 				      todo_id=todo_id.substring(0,todo_id.indexOf("_"));
 				      $("#edit_todo_id").val(todo_id);
 				      $.ajax('../todos/'+todo_id).done(
 					  function(data){
-					      task=data[0];
+					      var task=data[0];
 					      $("#edit_taskTitle").val(task.task);
 					      $("#edit_freq").val(task.frequency);
 					      $("#edit_remindBeforeDays").val(task.remindBeforeDays);
 					      if('due_date' in task)
 					      {
-						  dateValue=new Date(0);
+						  var dateValue=new Date(0);
 						  dateValue.setUTCSeconds(task.due_date['$date']/1000);
-						  console.log(task);
-						  console.log(dateValue);
-						  $("#edit_dueDate").datepicker("setDate",dateValue);
+						  $("#edit_dueDate").val(dateValue.toISOString().substring(0,10));
 					      }
 					      $("#edit_slot"+(task.timeSlot||'None')).prop("checked",true);
 					      if('trackHabit' in task)

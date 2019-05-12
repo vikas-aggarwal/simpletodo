@@ -26,7 +26,7 @@ def step_impl(context):
 
 @when(u'user clicks on New')
 def step_impl(context):
-    new_button_link = context.browser.find_element_by_xpath("/html/body/div[1]/div[1]/a")
+    new_button_link = context.browser.find_element_by_xpath("/html/body/div[2]/div[1]/a")
     new_button_link.click()
     context.wait.until(EC.element_to_be_clickable((By.ID, "createSubmitBtn")))
 
@@ -75,14 +75,15 @@ def step_impl(context,title):
     taskTitle.send_keys(title)
 
 @then(u'Task Due Date is "{dueDate}"')
-def step_impl(context,dueDate):
+def step_impl(context, dueDate):
     if dueDate == "today":
-        dueDateString = datetime.datetime.now().strftime("%d-%b-%Y");
+        dueDateString = datetime.datetime.now().strftime(context.dateFormatForFeature);
     else:
         dueDateString = dueDate;
     taskId = context.foundNewTask[0].get_attribute("id");
-    dueDateSpan = context.browser.find_element_by_id(taskId[0:taskId.index('_')]+"_label_due");
-    assert_that(dueDateSpan.text).is_equal_to(dueDateString);
+    dueDateSpan = context.browser.find_element_by_id(taskId[0:taskId.index('_')]+"_label_due").text
+    due_date_to_verify = datetime.datetime.strptime(dueDateSpan, context.dateFormatFromInputText).strftime(context.dateFormatForFeature)
+    assert_that(due_date_to_verify).is_equal_to(dueDateString);
 
 
 @when(u'user enters "{freq}" on the frequency field')
@@ -102,22 +103,22 @@ def step_impl(context,freq):
 @then(u'Task Next is "{noOfDays}" day after "{dueDate}"')
 def step_impl(context,noOfDays,dueDate):
     if dueDate == "today":
-        dueDateString = datetime.datetime.now().strftime("%d-%b-%Y");
+        dueDateString = datetime.datetime.now().strftime(context.dateFormatForFeature);
     else:
         dueDateString = dueDate;
         
-    nextDate = datetime.datetime.strptime(dueDateString,"%d-%b-%Y") + datetime.timedelta(days=int(noOfDays));
-    nextDateString = nextDate.strftime("%d-%b-%Y");
-    taskId = context.foundNewTask[0].get_attribute("id");
-    nextDateSpan = context.browser.find_element_by_id(taskId[0:taskId.index('_')]+"_label_next");
-    
-    assert_that(nextDateSpan.text).is_equal_to(nextDateString);
+    nextDate = datetime.datetime.strptime(dueDateString, context.dateFormatForFeature) + datetime.timedelta(days=int(noOfDays))
+    nextDateString = nextDate.strftime(context.dateFormatForFeature)
+    taskId = context.foundNewTask[0].get_attribute("id")
+    nextDateSpan = context.browser.find_element_by_id(taskId[0:taskId.index('_')]+"_date")
+    next_date_to_verify = datetime.datetime.strptime(nextDateSpan.get_attribute("value"), context.dateFormatForInput).strftime(context.dateFormatForFeature)
+    assert_that(next_date_to_verify).is_equal_to(nextDateString);
 
 
 @when(u'user enters due date as "{dueDate}"')
-def enter_task_due_date(context,dueDate):
-    dueDateElement = context.browser.find_element_by_id("create_dueDate");
-    dueDateElement.send_keys(dueDate);
+def enter_task_due_date(context, dueDate):
+    dueDateElement = context.browser.find_element_by_id("create_dueDate")
+    dueDateElement.send_keys(datetime.datetime.strptime(dueDate, context.dateFormatForFeature).strftime(context.dateFormatForInput))
 
 
 @when(u'user selects slot "{slotNumber}"')
@@ -162,13 +163,13 @@ def step_impl(context,taskName):
 
 @when(u'user enters due date "{noOfDays}" days in future')
 def step_impl(context,noOfDays):
-    dueDateString = (datetime.datetime.now() + datetime.timedelta(days=int(noOfDays))).strftime("%d-%b-%Y");
+    dueDateString = (datetime.datetime.now() + datetime.timedelta(days=int(noOfDays))).strftime(context.dateFormatForFeature)
     enter_task_due_date(context, dueDateString)
 
 
 @when(u'user selects Track Habit')
 def step_impl(context):
-    track_habit = context.browser.find_element_by_xpath("/html/body/div[2]/div[2]/div[4]/label")
+    track_habit = context.browser.find_element_by_xpath("/html/body/div[3]/div[2]/div[4]/label")
     track_habit.click()
 
 
