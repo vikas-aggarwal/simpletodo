@@ -13,7 +13,8 @@ require.config({
     paths: {
 	"jquery" : "libs/jquery-1.11.3.min",
 	"jquerymobile" : "libs/jquery.mobile-1.4.1.min",
-	"mustache" : "libs/mustache.min"
+	"mustache" : "libs/mustache.min",
+	"jstz" : "libs/jstz"
     }
 });
 
@@ -22,10 +23,13 @@ require.config({
 
 
 
-requirejs(['mustache','jquery','recur','utils','jquerymobile'],
-	  function(Mustache,$){
-	      
-$("#loadingPane").css("display","none");    
+requirejs(['mustache','jquery','jstz','recur','utils','jquerymobile'],
+	  function(Mustache,$,jstz){
+
+	      var locale = document.documentElement.lang;
+	      var timeZoneString = jstz.determine().name();
+	
+	      $("#loadingPane").css("display","none");    
 
 
 function initCreatePage()
@@ -103,8 +107,12 @@ function updateDoneOrSkip(payload)
 {
     var todo_id=payload.todo_id;
     var newDate = new Date($("#"+payload.todo_id+"_date").val());
+    newDate.setHours(0);
+    newDate.setMinutes(0);
+    newDate.setSeconds(0);
+    newDate.setMilliseconds(0);
     payload['due_date']= Math.floor(newDate.getTime()/1000);
-    var dateStr=newDate.toLocaleDateString();
+    var dateStr=newDate.toLocaleDateString(locale, {timeZone : timeZoneString});
     $("#"+todo_id+"_loading").css("display","");
     $("#"+todo_id+"_label_due").html(dateStr);
     $("."+todo_id+"_action").addClass("ui-state-disabled");
@@ -271,7 +279,7 @@ function calculateNextDayForTodos()
 		    view.taskFrequency=task.frequency;
 		    var dateValue=new Date(0);
 		    dateValue.setUTCSeconds(task.due_date['$date']/1000);
-		    view.dateString=dateValue.toLocaleDateString();
+		    view.dateString=dateValue.toLocaleDateString(locale, {timeZone : timeZoneString});
 		    view.todo_id=task.todo_id;
 		    view.timeSlot=task.timeSlot || 'None';
 		    view.trackHabit=task.trackHabit;
@@ -487,7 +495,7 @@ function calculateNextDayForTodos()
 					      {
 						  var dateValue=new Date(0);
 						  dateValue.setUTCSeconds(task.due_date['$date']/1000);
-						  $("#edit_dueDate").val(dateValue.toISOString().substring(0,10));
+						  $("#edit_dueDate").val(getDateInLocalISO(dateValue));
 					      }
 					      $("#edit_slot"+(task.timeSlot||'None')).prop("checked",true);
 					      if('trackHabit' in task)
