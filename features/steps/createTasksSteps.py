@@ -26,7 +26,7 @@ def step_impl(context):
 
 @when(u'user clicks on New')
 def step_impl(context):
-    new_button_link = context.browser.find_element_by_xpath("/html/body/div[2]/div[1]/a")
+    new_button_link = context.browser.find_element_by_xpath("/html/body/div[2]/div[1]/a[2]")
     new_button_link.click()
     context.wait.until(EC.element_to_be_clickable((By.ID, "createSubmitBtn")))
 
@@ -47,7 +47,7 @@ def newTaskStep(context,expectedTasksCount="1"):
         oldTaskIDs.append(task.get_attribute("id"))
 
     #refresh the page
-    context.browser.refresh()
+    context.browser.find_element(By.ID, "refreshData").click();
     context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
     
     #get the new task and verify

@@ -190,7 +190,9 @@ function calculateNextDayForTodos()
 		      
 	     }); 
 	      
-	    
+	      $("#refreshData").bind("click", function(e) {
+		  loadTasks();
+	      });
 
 	    $("#createSubmitBtn").bind("click",function(e)
 				               {
@@ -333,194 +335,190 @@ function calculateNextDayForTodos()
 	    
 
 	    
-	    var tasks={};
-	      $.when($.ajax('../todos'),$.ajax('../todos/logs/stats')).done(
-		  function(responseTaskdata,stats){
+	      var tasks={};
+	      function loadTasks() {
+		  $.when($.ajax('../todos'),$.ajax('../todos/logs/stats')).done(
+		      function(responseTaskdata,stats){
+			  
+			  var taskIdWiseStats = processStats(stats);
+			  $('#tasklist').html('');
+			  $('#tasklist').append('<ul data-role="listview" id="tasklistdata"></ul>');
+			  $('#tasklist').trigger("create");
+			  tasks=responseTaskdata[0];
+			  var data=tasks;
+			  processTasks(tasks);
 
-
-		      var taskIdWiseStats = processStats(stats);
-		      $('#tasklist').append('<ul data-role="listview" id="tasklistdata"></ul>');
-		      $('#tasklist').trigger("create");
-		      tasks=responseTaskdata[0];
-		      var data=tasks;
-		      processTasks(tasks);
-
-		      /*Alerts*/
-		    $('#tasklistdata').append('<li data-role="list-divider">Alerts</li>');
-		    var alertTasks=[];
-		    for(var t in data) //Pending
-		    {
-			var task = data[t];
+			  /*Alerts*/
+			  $('#tasklistdata').append('<li data-role="list-divider">Alerts</li>');
+			  var alertTasks=[];
+			  for(var t in data) //Pending
+			  {
+			      var task = data[t];
+			      
+			      if(taskToBeRemindedToday(task))
+			      {
+				  alertTasks.push(task);
+			      }
 			
-			if(taskToBeRemindedToday(task))
-			{
-			    alertTasks.push(task);
-			}
-			
-		    }
-
-		    renderTasks(alertTasks,taskIdWiseStats);
+			  }
+			  
+			  renderTasks(alertTasks,taskIdWiseStats);
+			  
+			  
+			  
+			  
+			  /* Pending tasks */
+			  
+			  
+			  $('#tasklistdata').append('<li data-role="list-divider">Pending</li>');
+			  var pendingTasks=[];
+			  for(t in data) //Pending
+			  {
+			      task = data[t];
+			      
+			      if(taskComparedToToday(task)<0)
+			      {
+				  pendingTasks.push(task);
+			      }
+			      
+			  }
+			  
+			  renderTasks(pendingTasks,taskIdWiseStats);
+			  
+			  
+			  
+			  /* Today's Tasks */
+			  var todaysTasks=[];
+			  $('#tasklistdata').append('<li data-role="list-divider">Today</li>');
+			  for(t in data) //Today
+			  {
+			      task = data[t];
+			      
+			      if(taskComparedToToday(task)==0)
+			      {
+				  todaysTasks.push(task);
+			      }
+			      
+			      
+			  }
+			  todaysTasks.sort(function(a,b)
+					   {
+					       if(a.timeSlot==undefined)
+					       {
+						   return 1;
+					       }
+					       if(b.timeSlot==undefined)
+					       {
+						   return -1;
+					       }
+					       if(a.timeSlot < b.timeSlot)
+					       {
+						   return -1;
+					       }
+					       else if(a.timeSlot==b.timeSlot)
+					       {
+						   return 0;
+					       }
+					       return 1;
+					   });
+			  renderTasks(todaysTasks,taskIdWiseStats);
+			  
+			  /* Upcoming Tasks */
+			  var upcomingTasks=[];
+			  $('#tasklistdata').append('<li data-role="list-divider">Upcoming</li>');
+			  for(t in data) //Upcoming
+			  {
+			      task = data[t];
+			      
+			      if(taskComparedToToday(task)>0 && !taskToBeRemindedToday(task)) //reminded tasks already in Todays list
+			      {
+				  upcomingTasks.push(task);
+			      }
+			      
+			      
+			  }
+			  renderTasks(upcomingTasks,taskIdWiseStats);
+			  
+			  
+			  
+			  
 		    
-
-
-
-		    /* Pending tasks */
-
-		    
-		    $('#tasklistdata').append('<li data-role="list-divider">Pending</li>');
-		    var pendingTasks=[];
-		    for(t in data) //Pending
-		    {
-			task = data[t];
-			
-			if(taskComparedToToday(task)<0)
-			{
-			    pendingTasks.push(task);
-			}
-			
-		    }
-
-		    renderTasks(pendingTasks,taskIdWiseStats);
-		    
-
-
-		    /* Today's Tasks */
-		    var todaysTasks=[];
-		    $('#tasklistdata').append('<li data-role="list-divider">Today</li>');
-		    for(t in data) //Today
-		    {
-			task = data[t];
-			
-			if(taskComparedToToday(task)==0)
-			{
-			    todaysTasks.push(task);
-			}
-			
-			
-		    }
-		    todaysTasks.sort(function(a,b)
-				     {
-					 if(a.timeSlot==undefined)
-					 {
-					     return 1;
-					 }
-					 if(b.timeSlot==undefined)
-					 {
-					     return -1;
-					 }
-					 if(a.timeSlot < b.timeSlot)
-					 {
-					     return -1;
-					 }
-					 else if(a.timeSlot==b.timeSlot)
-					 {
-					     return 0;
-					 }
-					 return 1;
-				     });
-		    renderTasks(todaysTasks,taskIdWiseStats);
-		    
-		    /* Upcoming Tasks */
-		    var upcomingTasks=[];
-		    $('#tasklistdata').append('<li data-role="list-divider">Upcoming</li>');
-		    for(t in data) //Upcoming
-		    {
-			task = data[t];
-
-			if(taskComparedToToday(task)>0 && !taskToBeRemindedToday(task)) //reminded tasks already in Todays list
-			{
-			    upcomingTasks.push(task);
-			}
-			
-
-		    }
-		    renderTasks(upcomingTasks,taskIdWiseStats);
-
-		    
-
-
-		    
-		    $('#tasklistdata').listview("refresh");
-		    					     
-		    $('#tasklistdata').ready(function()
+			  $('#tasklistdata').listview("refresh");
+		    	  
+			  $('#tasklistdata').ready(function()
 					     {
 						 $("input[id$='_date']")
 						     .change(function()
-							             {
-									 
-									 var todo_id=this.id.substring(0,this.id.indexOf("_"));
-									 updateUIForNextDate(todo_id,this.value);									 									
-								     }
-							 
-							 
-						     );
+							     {
+								 
+								 var todo_id=this.id.substring(0,this.id.indexOf("_"));
+								 updateUIForNextDate(todo_id,this.value);									 									
+							     } );
 						 calculateNextDayForTodos();
 					     });
-		    $('#tasklistdata').ready(function(){
-			$("#tasklistdata li").on("taphold",function(event){
-			    
-			    
-			    var objectId=event.currentTarget.attributes['data-region-id'].value;
-			    objectId=objectId.substr(0,objectId.indexOf('_'));
-			    var taskToDelete = tasks.find(function(f){if(f.todo_id==objectId){return true;}else{return false;}});
-			    var d = confirm("Delete : "+taskToDelete.task+"?");
-			    if(d==true)
-			    {
-				$("."+objectId+"_action").addClass("ui-state-disabled");
-				$.ajax({url:"../todos/"+objectId,method:"DELETE"});
-				$("[data-region-id='"+objectId+"_region'] div.ui-grid-a").get(0).style.background="brown";
-			    }
-			    
-			});
-		    });
-
-
-		    
-		});
-	    $('#tasklistdata').ready(function(){
-		
-		$("#tasklist").on("click","[id$='edit_link']",function(event)
+			  
+			  $('#tasklistdata').ready(function(){
+			      $("#tasklistdata li").on("taphold",function(event){
+				 
+				  var objectId=event.currentTarget.attributes['data-region-id'].value;
+				  objectId=objectId.substr(0,objectId.indexOf('_'));
+				  var taskToDelete = tasks.find(function(f){if(f.todo_id==objectId){return true;}else{return false;}});
+				  var d = confirm("Delete : "+taskToDelete.task+"?");
+				  if(d==true)
 				  {
-
-				      var todo_id=event.currentTarget.id;
-				      todo_id=todo_id.substring(0,todo_id.indexOf("_"));
-				      $("#edit_todo_id").val(todo_id);
-				      $.ajax('../todos/'+todo_id).done(
-					  function(data){
-					      var task=data[0];
-					      $("#edit_taskTitle").val(task.task);
-					      $("#edit_freq").val(task.frequency);
-					      $("#edit_remindBeforeDays").val(task.remindBeforeDays);
-					      if('due_date' in task)
-					      {
-						  var dateValue=new Date(0);
-						  dateValue.setUTCSeconds(task.due_date['$date']/1000);
-						  $("#edit_dueDate").val(getDateInLocalISO(dateValue));
-					      }
-					      $("#edit_slot"+(task.timeSlot||'None')).prop("checked",true);
-					      if('trackHabit' in task)
-					      {
-						  $("#edit_trackHabit").prop("checked",task.trackHabit).checkboxradio("refresh");
-					      }
-					      else
-					      {
-						  $("#edit_trackHabit").prop("checked",false).checkboxradio("refresh");
-					      }
-					      
-					      $("input[name='edit_slot']").checkboxradio("refresh");
-					      $( ":mobile-pagecontainer" ).pagecontainer( "change", "#editPage" );
-					  });
-				      
+				      $("."+objectId+"_action").addClass("ui-state-disabled");
+				      $.ajax({url:"../todos/"+objectId,method:"DELETE"});
+				      $("[data-region-id='"+objectId+"_region'] div.ui-grid-a").get(0).style.background="brown";
 				  }
+				  
+			      });
+			  });
+		      });
+		  
+		  $('#tasklistdata').ready(function(){
+		      
+		      $("#tasklist").on("click","[id$='edit_link']",function(event)
+					{
+					    
+					    var todo_id=event.currentTarget.id;
+					    todo_id=todo_id.substring(0,todo_id.indexOf("_"));
+					    $("#edit_todo_id").val(todo_id);
+					    $.ajax('../todos/'+todo_id).done(
+						function(data){
+						    var task=data[0];
+						    $("#edit_taskTitle").val(task.task);
+						    $("#edit_freq").val(task.frequency);
+						    $("#edit_remindBeforeDays").val(task.remindBeforeDays);
+						    if('due_date' in task)
+						    {
+							var dateValue=new Date(0);
+							dateValue.setUTCSeconds(task.due_date['$date']/1000);
+							$("#edit_dueDate").val(getDateInLocalISO(dateValue));
+						    }
+						    $("#edit_slot"+(task.timeSlot||'None')).prop("checked",true);
+						    if('trackHabit' in task)
+						    {
+							$("#edit_trackHabit").prop("checked",task.trackHabit).checkboxradio("refresh");
+						    }
+						    else
+						    {
+							$("#edit_trackHabit").prop("checked",false).checkboxradio("refresh");
+						    }
+						    
+						    $("input[name='edit_slot']").checkboxradio("refresh");
+						    $( ":mobile-pagecontainer" ).pagecontainer( "change", "#editPage" );
+						});
+					    
+					}
+					
+				       );
+		  });
+		  
+	      }
+	      
 
-				 );
-	    });
-
-
-	    
-
-	    var temp;    
-
+	      var temp;    
+	      loadTasks();
 	    
 
 });

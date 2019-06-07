@@ -32,7 +32,7 @@ def step_impl(context, taskName, frequency, dueDate):
     payload['due_date'] = datetime.datetime.strptime(dueDate, context.dateFormatForFeature).timestamp()
     todo_id = create_task(payload, context.host, context.port)
     context.current_todo_id = todo_id
-    context.browser.refresh()
+    context.browser.find_element(By.ID, "refreshData").click();
     context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
 
 
@@ -60,8 +60,8 @@ def step_impl(context, taskName, frequency, dueDate, count):
         payload['todo_action'] = 'Skip'
         payload['todo_id'] = todo_id
         create_task_log(payload, todo_id, context.host, context.port)
-        
-    context.browser.refresh()
+
+    context.browser.find_element(By.ID, "refreshData").click();
     context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
 
 
@@ -113,7 +113,7 @@ def step_impl(context):
 
 @then(u'log of "{buttonName}" should be created and the count of should be "{new_count}"')
 def step_impl(context, buttonName, new_count):
-    context.browser.refresh()
+    context.browser.find_element(By.ID, "refreshData").click();
     context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
     current_todo_id = context.current_todo_id
     done_button = context.browser.find_element(By.XPATH, '//li[@data-region-id="'+str(current_todo_id)+'_region"]//button[contains(text(),"'+buttonName+' ('+new_count+')")]')
