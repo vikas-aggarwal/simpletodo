@@ -73,3 +73,23 @@ Feature: Interact with Tasks
     And Done and Skip button should be disabled
     And log of "Skip" should be created and the count of should be "1"
     And the progress bar should show increase in "red" bar to "100%"
+
+  Scenario: Filter Daily tasks
+    Given the user is on task list page
+    When user already has a non-habit task "NonHabitDailyTask" with frequency "Daily" and due date as "01-Apr-2018"
+    And user already has a habit task "HabitIrregular" with frequency "Irregular" and due date as "01-Apr-2018" with count "0"
+    And user clicks on filter
+    And user selects "Daily"
+    Then "NonHabitDailyTask" should be visible
+    And "HabitIrregular" should be hidden
+
+  Scenario: Removing filter shows all tasks
+    Given the user is on task list page
+    When user already has a non-habit task "NonHabitDailyTask" with frequency "Daily" and due date as "01-Apr-2018"
+    And user already has a habit task "HabitIrregular" with frequency "Irregular" and due date as "01-Apr-2018" with count "0"
+    And user clicks on filter
+    And user selects "Daily"
+    And user clicks on filter
+    And user clears the filters
+    Then "NonHabitDailyTask" should be visible
+    And "HabitIrregular" should be visible

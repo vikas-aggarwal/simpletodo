@@ -1,7 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 import pymongo
-
+import datetime
+import os
 
 def before_all(context):
     context.browser = webdriver.Firefox()
@@ -14,10 +15,6 @@ def before_all(context):
     context.dateFormatFromInputText = "%d/%m/%Y"  # For GB locale
 
 def after_all(context):
-    coverage_data = context.browser.execute_script('return JSON.stringify(window.__coverage__ || {})')
-    coverage_file = open("jsCoverage.json","w")
-    coverage_file.write(coverage_data)
-    coverage_file.close()
     context.browser.quit()
     
 def before_scenario(context, scenario):
@@ -27,3 +24,15 @@ def before_scenario(context, scenario):
     db.todos.drop()
     db.todo_logs.drop()
     client.close()
+
+def after_scenario(context, scenario):
+    coverage_data = context.browser.execute_script('return JSON.stringify(window.__coverage__ || {})')
+    file_numbers = [int(x[x.index('_')+1:x.index('.json')]) for x  in  os.listdir('.') if x.startswith("jsCoverage_")]
+    file_numbers.sort(reverse=True)
+    if len(file_numbers) == 0 :
+        file_number = 1
+    else:
+        file_number = file_numbers[0]+1
+    coverage_file = open("jsCoverage_"+str(file_number)+".json","w")
+    coverage_file.write(coverage_data)
+    coverage_file.close()

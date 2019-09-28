@@ -26,7 +26,7 @@ def step_impl(context):
 
 @when(u'user clicks on New')
 def step_impl(context):
-    new_button_link = context.browser.find_element_by_xpath("/html/body/div[2]/div[1]/a[2]")
+    new_button_link = context.browser.find_element_by_xpath("/html/body/div[2]/div[1]/div/a[1]")
     new_button_link.click()
     context.wait.until(EC.element_to_be_clickable((By.ID, "createSubmitBtn")))
 

@@ -269,46 +269,62 @@ function calculateNextDayForTodos()
 
 
 	      function renderTasks(tasks,taskIdWiseStats)
-	    {
-		for(var t in tasks)
-		{
-		    var task = tasks[t];
-		    var view={};
-		    view.taskName=task.task;
-		    if(view.taskName+"" == ""){
-			view.taskName = "<No Title>";
+	      {
+		  for(var t in tasks)
+		  {
+		      var task = tasks[t];
+		      var view={};
+		      view.taskName=task.task;
+		      if(view.taskName+"" == ""){
+			  view.taskName = "<No Title>";
+		      }
+		      view.taskFrequency=task.frequency;
+		      var dateValue=new Date(0);
+		      dateValue.setUTCSeconds(task.due_date['$date']/1000);
+		      view.dateString=dateValue.toLocaleDateString(locale, {timeZone : timeZoneString});
+		      view.todo_id=task.todo_id;
+		      view.timeSlot=task.timeSlot || 'None';
+		      view.trackHabit=task.trackHabit;
+		      
+		      if('due_in_days' in task)
+		      {
+			  view.dueIn=(task.due_in_days != 1)?"Due in "+task.due_in_days+" days":"Due Tomorrow";	
+		      }
+		      
+		      if(task.todo_id in taskIdWiseStats && task.trackHabit) {
+			  view.doneCount = taskIdWiseStats[task.todo_id].done;
+			  view.skipCount = taskIdWiseStats[task.todo_id].skip;
+			  view.donePercent = Math.floor(view.doneCount*100/(view.doneCount+view.skipCount));
+			  view.skipPercent = Math.floor(view.skipCount*100/(view.doneCount+view.skipCount));
 		    }
-		    view.taskFrequency=task.frequency;
-		    var dateValue=new Date(0);
-		    dateValue.setUTCSeconds(task.due_date['$date']/1000);
-		    view.dateString=dateValue.toLocaleDateString(locale, {timeZone : timeZoneString});
-		    view.todo_id=task.todo_id;
-		    view.timeSlot=task.timeSlot || 'None';
-		    view.trackHabit=task.trackHabit;
-	
-		    if('due_in_days' in task)
-		    {
-			view.dueIn=(task.due_in_days != 1)?"Due in "+task.due_in_days+" days":"Due Tomorrow";	
-		    }
-
-		    if(task.todo_id in taskIdWiseStats && task.trackHabit) {
-			view.doneCount = taskIdWiseStats[task.todo_id].done;
-			view.skipCount = taskIdWiseStats[task.todo_id].skip;
-			view.donePercent = Math.floor(view.doneCount*100/(view.doneCount+view.skipCount));
-			view.skipPercent = Math.floor(view.skipCount*100/(view.doneCount+view.skipCount));
-		    }
-		    else if(task.trackHabit){
-			view.doneCount = 0;
-			view.skipCount = 0;
-			view.donePercent = 0;
-			view.skipPercent = 0;
-		    }
-
-		    
-		    $('#tasklistdata').append(Mustache.render(document.getElementById("listview-template").innerHTML, view));
+		      else if(task.trackHabit){
+			  view.doneCount = 0;
+			  view.skipCount = 0;
+			  view.donePercent = 0;
+			  view.skipPercent = 0;
+		      }
+		      
+		      if(shouldRenderTask(view))
+			  $('#tasklistdata').append(Mustache.render(document.getElementById("listview-template").innerHTML, view));
 		}
 		
-	    }
+	      }
+
+
+	      function shouldRenderTask(taskData) {
+		  if(filters.length > 0){
+		      for(var index in filters){
+			  var filterFreq = filters[index];
+			  if(taskData.taskFrequency === filterFreq){
+			      return true;
+			  }
+		      }
+
+		      return false;
+		  }
+		  
+		  return true;
+	      }
 
 
 	      function processStats(statsResponse){
@@ -515,8 +531,37 @@ function calculateNextDayForTodos()
 		  });
 		  
 	      }
-	      
 
+
+	      var filters = [];
+	      $("#filterDoneButton").on("click", function(){
+		  filters = [];
+		  if($("#dailyFilterCheckbox").get(0).checked){
+		      filters.push($("#dailyFilterCheckbox").get(0).value);
+		  }
+		  loadTasks();
+		  $("#filterPopup").popup("close");
+		  if(filters.length > 0){
+		      $("#filterData").addClass("filter-active");
+		  }
+	      });
+	      
+	      $("#filterClearButton").on("click", function(){
+		  $("#dailyFilterCheckbox").get(0).checked = false;
+		  $("#dailyFilterCheckbox").checkboxradio("refresh");
+		  filters = [];
+		  loadTasks();
+		  $("#filterPopup").popup("close");
+		  $("#filterData").removeClass("filter-active");
+	      });
+
+	      $( "#filterPopup" ).on( "popupafteropen", function( event, ui ) {
+		  if(filters.length == 0) {
+		      $("#dailyFilterCheckbox").get(0).checked = false;
+		      $("#dailyFilterCheckbox").checkboxradio("refresh");
+		  }
+	      } );
+	      
 	      var temp;    
 	      loadTasks();
 	    

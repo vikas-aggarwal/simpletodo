@@ -133,5 +133,48 @@ def step_impl(context, color, percent):
 
 
 
+@when(u'user clicks on filter')
+def step_impl(context):
+    driver = context.browser # type: selenium.webdriver.Firefox
+    driver.find_element(By.ID, "filterData").click()
+    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#filterPopup")))
 
 
+@when(u'user selects "{filterValue}"')
+def step_impl(context, filterValue):
+    #Only one option is available as of now, ignoring paramaters
+    driver = context.browser # type: selenium.webdriver.Firefox
+    driver.find_element(By.CSS_SELECTOR, "#filterPopup label").click()
+    driver.find_element(By.ID, "filterDoneButton").click()
+    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
+    filter_icon = driver.find_element(By.ID, "filterData")
+    assert_that("filter-active" in filter_icon.get_attribute("class")).is_true()
+
+@then(u'"{taskName}" should be visible')
+def step_impl(context, taskName):
+    tasks_region = context.browser.find_elements(By.CSS_SELECTOR,"li[data-region-id]")
+    for task_region in tasks_region:
+        taskNameFromBrowser = task_region.find_elements(By.CSS_SELECTOR,".ui-li-header")[0].text
+        if taskName == taskNameFromBrowser:
+            assert_that(True).is_true()
+            return
+    assert_that(False).is_true()
+    
+@then(u'"{taskName}" should be hidden')
+def step_impl(context, taskName):
+    tasks_region = context.browser.find_elements(By.CSS_SELECTOR,"li[data-region-id]")
+    for task_region in tasks_region:
+        taskNameFromBrowser = task_region.find_elements(By.CSS_SELECTOR,".ui-li-header")[0].text
+        if taskName == taskNameFromBrowser:
+            assert_that(False).is_true()
+            return
+    assert_that(True).is_true()
+
+
+@when(u'user clears the filters')
+def step_impl(context):
+    driver = context.browser # type: selenium.webdriver.Firefox
+    driver.find_element(By.ID, "filterClearButton").click()
+    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
+    filter_icon = driver.find_element(By.ID, "filterData")
+    assert_that("filter-active" in filter_icon.get_attribute("class")).is_false()
