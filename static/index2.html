@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <style>
+      .taskSeperator {
+	  color: white;
+	  background-color: green;
+      }
+    </style>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://gitcdn.link/cdn/Chalarangelo/mini.css/e849238d198c032c9d3fa84ccadf59ea7f0ad06c/dist/mini-default.css">
+    <script src="libs/require.min.js" data-main="app2"></script>
+  </head>
+  <body>
+    <div class="container" id="taskList">
+      <div class="row">
+	<div class="col-sm-12">
+	</div>
+      </div>
+      <div class="row">
+	<div class="col-md-3">
+	  <h2 class="col-sm-12 taskSeperator">Alerts</h2>
+	  <div class="taskData row" id="alertTasks"></div>
+	</div>
+	<div class="col-md-3">
+	  <h2 class="col-sm-12 taskSeperator">Pending</h2>
+	  <div class="taskData row" id="pendingTasks"></div>
+	</div>
+	<div class="col-md-3">
+	  <h2 class="col-sm-12 taskSeperator">Today</h2>
+	  <div class="taskData row" id="todaysTasks"></div>
+	</div>
+	<div class="col-md-3">
+	  <h2 class="col-sm-12 taskSeperator">Upcoming</h2>
+	  <div class="taskData row" id="upcomingTasks"></div>
+	</div>
+      </div>
+    </div>
+    <template id="taskCardTemplate">
+      <div class="card small">
+	<h3 class="section">{{Title}}</h3>
+	<div class="section">
+	  <p>{{#Frequency}}<mark>{{Frequency}}</mark>{{/Frequency}}</p>
+	  <p>Due: {{DueDate}}</p>
+	</div>
+      </div>
+    </template>
+  </body>
+</html>
+
