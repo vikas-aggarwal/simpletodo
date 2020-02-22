@@ -13,8 +13,8 @@ conn = sqlite3.connect("simpleTodo.db")
 c = conn.cursor()
 c.executescript(
 """
-drop table todos;
-drop table todo_logs;
+--drop table todos;
+--drop table todo_logs;
 create table if not exists todos(
 todo_id integer,
 due_date text,
