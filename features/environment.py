@@ -1,6 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
-import pymongo
+import testing
 import datetime
 import os
 
@@ -19,11 +19,22 @@ def after_all(context):
     
 def before_scenario(context, scenario):
     # Wipe database
-    client = pymongo.MongoClient('mongodb://localhost:27017/')
-    db = client["automatedTesting"]
-    db.todos.drop()
-    db.todo_logs.drop()
-    client.close()
+    if testing.DB_TYPE == "mongo":
+        import pymongo
+        client = pymongo.MongoClient('mongodb://localhost:27017/')
+        db = client["automatedTesting"]
+        db.todos.drop()
+        db.todo_logs.drop()
+        client.close()
+    else:
+        import sqlite3
+        conn = sqlite3.connect(testing.SQLITE3_DB_PATH)
+        db = conn.cursor();
+        db.execute("delete from todos")
+        db.execute("delete from todo_logs")
+        conn.commit()
+        conn.close()
+        
 
 def after_scenario(context, scenario):
     coverage_data = context.browser.execute_script('return JSON.stringify(window.__coverage__ || {})')

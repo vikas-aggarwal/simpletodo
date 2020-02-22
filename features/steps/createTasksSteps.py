@@ -10,6 +10,7 @@ from assertpy import *
 @then(u'the user is on task list page')
 def user_is_on_tasklist_page(context):
     context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
+    context.wait.until(EC.presence_of_element_located((By.ID, "mainpage")))
     main_page_elem = context.browser.find_element_by_id("mainpage")
     assert main_page_elem.get_attribute("class").index("ui-page-active") != -1
 
@@ -26,6 +27,7 @@ def step_impl(context):
 
 @when(u'user clicks on New')
 def step_impl(context):
+    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
     new_button_link = context.browser.find_element_by_xpath("/html/body/div[2]/div[1]/div/a[1]")
     new_button_link.click()
     context.wait.until(EC.element_to_be_clickable((By.ID, "createSubmitBtn")))
@@ -47,8 +49,10 @@ def newTaskStep(context,expectedTasksCount="1"):
         oldTaskIDs.append(task.get_attribute("id"))
 
     #refresh the page
+    context.wait.until(EC.element_to_be_clickable((By.ID, "refreshData")))
     context.browser.find_element(By.ID, "refreshData").click();
     context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
+    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[id$='_edit_link']")))
     
     #get the new task and verify
     currentTasks = context.browser.find_elements(By.CSS_SELECTOR,"a[id$='_edit_link']")

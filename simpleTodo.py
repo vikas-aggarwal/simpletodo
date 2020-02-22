@@ -1,19 +1,11 @@
 import json
 from flask import Flask, jsonify, request
-from flask_pymongo import PyMongo
 from bson.json_util import dumps
-import simpleTodoDataAccess
-
+import dbManager
 
 APP = Flask(__name__)
 
-if APP.config['ENV'] == "automatedTesting":
-    APP.config['MONGO_URI'] = "mongodb://localhost:27017/automatedTesting"
-else:
-    APP.config['MONGO_URI'] = "mongodb://localhost:27017/simpleTodo"
-
-MONGO = PyMongo(APP)
-TODO_DATA = simpleTodoDataAccess.SimpleTodoDataAccess(MONGO)
+TODO_DATA = dbManager.getDataAccessObject(APP)
 
 @APP.route('/todos', methods=['GET'])
 def all_todos():

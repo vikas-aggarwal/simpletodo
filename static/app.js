@@ -59,7 +59,7 @@ function processTasks(tasks)
     {
 	var task = tasks[t];
 	//if due_date not present in task , make current time as due date
-	if(!('due_date' in task))
+	if(!('due_date' in task) || !task.due_date)
 	{
 	    task.due_date = {};
 	    task.due_date['$date'] = (new Date()).getTime();
@@ -330,9 +330,9 @@ function calculateNextDayForTodos()
 	      function processStats(statsResponse){
 		  var taskWiseStats = {};
 		  (statsResponse[0][0]).forEach(function(stat) {
-		      if("todo_id" in stat["_id"] && "action" in stat["_id"]){
-			  var todoId = stat["_id"].todo_id;
-			  var action = stat["_id"].action;
+		      if("todo_id" in stat && "action" in stat){
+			  var todoId = stat.todo_id;
+			  var action = stat.action;
 
 			  if(!(todoId in taskWiseStats)){
 			      taskWiseStats[todoId] = {done:0,skip:0};
