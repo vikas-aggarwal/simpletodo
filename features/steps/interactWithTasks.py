@@ -178,3 +178,32 @@ def step_impl(context):
     context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
     filter_icon = driver.find_element(By.ID, "filterData")
     assert_that("filter-active" in filter_icon.get_attribute("class")).is_false()
+
+@when(u'user clicks on the task "{taskName}" to edit it')
+def step_impl(context, taskName):
+    driver = context.browser # type: selenium.webdriver.Firefox
+    tasks = context.browser.find_elements(By.CSS_SELECTOR,"a[id$='_edit_link']")
+    for task in tasks:
+        if task.text == taskName:
+            task.click()
+            context.wait.until(EC.element_to_be_clickable((By.ID, "editSubmitBtn")))
+            return
+
+@when(u'user edits due date as "{dueDate}"')
+def enter_task_due_date(context, dueDate):
+    dueDateElement = context.browser.find_element_by_id("edit_dueDate")
+    dueDateElement.send_keys(datetime.datetime.strptime(dueDate, context.dateFormatForFeature).strftime(context.dateFormatForInput))
+
+
+@when(u'clicks on submit to edit')
+def step_impl(context):
+    editSubmitBtn = context.browser.find_element_by_id("editSubmitBtn")
+    editSubmitBtn.click()
+    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
+    #refresh the page
+    context.wait.until(EC.element_to_be_clickable((By.ID, "refreshData")))
+    context.browser.find_element(By.ID, "refreshData").click();
+    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[id$='_edit_link']")))
+    
+
+    

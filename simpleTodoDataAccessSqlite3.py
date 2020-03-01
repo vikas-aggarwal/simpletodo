@@ -136,6 +136,7 @@ class SimpleTodoDataAccessSqlite3:
             data['due_date'] = datetime.utcfromtimestamp(data['due_date'])
 
         data['todo_id'] = todo_id
+        data['todo_action'] = data.get("todo_action")
         db.execute("update todos set due_date=:due_date, todo_action=:todo_action where todo_id = :todo_id", data)
         conn.commit()
 

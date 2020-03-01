@@ -93,3 +93,11 @@ Feature: Interact with Tasks
     And user clears the filters
     Then "NonHabitDailyTask" should be visible
     And "HabitIrregular" should be visible
+
+  Scenario: Edit a Task with Irregular frequency
+    Given the user is on task list page
+    When user already has a non-habit task "EditIrregular" with frequency "Irregular" and due date as "01-Apr-2018"
+    And user clicks on the task "EditIrregular" to edit it
+    And user edits due date as "05-Nov-2018"
+    And clicks on submit to edit
+    Then the due date of the task "EditIrregular" should change to "05-Nov-2018"
