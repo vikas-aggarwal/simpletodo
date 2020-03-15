@@ -14,3 +14,27 @@
     #Running a scenario
     behave -n <name of scenario>
   #+END_SRC
+
+
+* Code Coverage
+  - Javascript
+    #+BEGIN_SRC sh
+      #Assuming in virtual env
+      pip install nodeenv
+      nodeenv -p #install default
+      npm install -g nyc
+      #run following from static folder
+      bash instrumentJS.sh
+      #run the python tests, there will be coverage json files in the project root directory
+      bash removeInstrumentation.sh
+      nyc report -t <project_root> --reporter=html #js coverage report
+    #+END_SRC
+  - Python
+    #+BEGIN_SRC bash
+      pip install coverage
+      #start the server with following
+      coverage run app.py
+      #start behave
+      coverage html --omit='*site-packages*' #report for python generated in htmlcov folder
+    #+END_SRC
+
