@@ -2,6 +2,8 @@ import sys
 from datetime import datetime
 import sqlite3
 from TodoTypes import Todo
+from TodoTypes import TodoUpdatePayload
+from TodoTypes import TodoLogDB
 
 class SimpleTodoDataAccessSqlite3:
     TODO_SELECT_COLUMN_STRING = "todo_id, due_date as 'due_date [timestamp]', frequency, remind_before_days, task_name, time_slot, todo_action, track_habit"
@@ -49,7 +51,7 @@ class SimpleTodoDataAccessSqlite3:
                     "frequency": row['frequency'],
                     "task": row['task_name'],
                     "timeSlot": row['time_slot'],
-                    "trackHabit": row['track_habit'],
+                    "trackHabit": (row['track_habit'] == 1),
                     "remindBeforeDays": row['remind_before_days']
             } #type: Todo
         return todo
@@ -121,9 +123,10 @@ class SimpleTodoDataAccessSqlite3:
         conn.commit()
         conn.close()
 
-    def upsert_todo(self, todo_id, data):
+    def upsert_todo(self, todo_id, data #type: TodoUpdatePayload
+    ):
         #Getting current state
-        todo_object = self.get_todo(todo_id)
+        todo_object = self.get_todo(todo_id) #type: Todo
 
         if todo_object == None: #insert
             self.create_todo(data, todo_id)
@@ -131,13 +134,25 @@ class SimpleTodoDataAccessSqlite3:
 
         conn = self._getConnection()
         db = conn.cursor()
-        
-        if 'due_date' in data:
-            data['due_date'] = datetime.utcfromtimestamp(data['due_date'])
 
+        if 'due_date' in data:
+            data['due_date_utc'] = datetime.utcfromtimestamp(data['due_date'])
+        else:
+            data['due_date_utc'] = todo_object['due_date']
+
+
+        if "trackHabit" not in data:
+            data['trackHabit'] =  todo_object['trackHabit']
+            
         data['todo_id'] = todo_id
         data['todo_action'] = data.get("todo_action")
-        db.execute("update todos set due_date=:due_date, todo_action=:todo_action where todo_id = :todo_id", data)
+
+        #get remaining data from payload or existing object
+        data['frequency'] = data.get('frequency') or todo_object['frequency']
+        data['task'] = data.get('task') or todo_object['task']
+        data['timeSlot'] = data.get('timeSlot') or todo_object['timeSlot']
+        data['remindBeforeDays'] = data.get('remindBeforeDays') or todo_object['remindBeforeDays']
+        db.execute("update todos set due_date=:due_date_utc, frequency=:frequency, remind_before_days=:remindBeforeDays, task_name=:task, time_slot=:timeSlot, track_habit=:trackHabit, todo_action=:todo_action where todo_id = :todo_id", data)
         conn.commit()
 
         #Delete todo logs if no longer tracked as Habit
@@ -151,11 +166,12 @@ class SimpleTodoDataAccessSqlite3:
 
         #if obtained via an action log it
         if ('trackHabit' in todo_object) and todo_object['trackHabit'] and ('todo_action' in data):
-            todo_log = {}
-            todo_log['action'] = data['todo_action']
-            todo_log['creation_timestamp'] = datetime.utcnow()
-            todo_log['todo_id'] = todo_id
-
+            todo_log = {
+                'action' : data['todo_action'],
+                'creation_timestamp': datetime.utcnow(),
+                'todo_id': todo_id,
+                'due_date': None
+            } #type: TodoLogDB
             if 'due_date' in todo_object:
                 todo_log['due_date'] = todo_object['due_date']
             else:

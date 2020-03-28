@@ -10,7 +10,7 @@ from assertpy import *
 @then(u'the user is on task list page')
 def user_is_on_tasklist_page(context):
     context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
-    context.wait.until(EC.presence_of_element_located((By.ID, "mainpage")))
+    context.wait.until(EC.visibility_of_element_located((By.ID, "mainpage")))
     main_page_elem = context.browser.find_element_by_id("mainpage")
     assert main_page_elem.get_attribute("class").index("ui-page-active") != -1
 

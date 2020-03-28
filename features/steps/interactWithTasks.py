@@ -21,7 +21,12 @@ def create_task_log(payload,todo_id,host,port):
     response = http_client.getresponse()
     assert_that(response.status).is_equal_to(200)
 
-
+def get_task(todo_id, host, port):
+    http_client = http.client.HTTPConnection(host, port)
+    http_client.request("GET", "/todos/"+str(todo_id))
+    response = http_client.getresponse()
+    assert_that(response.status).is_equal_to(200)
+    return json.load(response)
 
 
 @when(u'user already has a non-habit task "{taskName}" with frequency "{frequency}" and due date as "{dueDate}"')
@@ -41,7 +46,7 @@ def step_impl(context, taskName, frequency, dueDate, count):
     payload = {}
     payload['frequency'] = frequency
     payload['task'] = taskName
-    payload['trackHabit'] = "true"
+    payload['trackHabit'] = True
     payload['due_date'] = datetime.datetime.strptime(dueDate, context.dateFormatForFeature).timestamp()
     todo_id = create_task(payload, context.host, context.port)
     last_due_date = payload['due_date']
@@ -205,5 +210,42 @@ def step_impl(context):
     context.browser.find_element(By.ID, "refreshData").click();
     context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[id$='_edit_link']")))
     
-
     
+
+@when(u'user edits task name as "{title}"')
+def step_impl(context,title):
+    taskTitle = context.browser.find_element_by_id("edit_taskTitle")
+    taskTitle.clear()
+    taskTitle.send_keys(title)
+
+@when(u'user edits frequency as "{freq}"')
+def step_impl(context,freq):
+    browser = context.browser # type: selenium.webdriver.Firefox
+    frequency = browser.find_element_by_id("edit_freq")
+    frequency.clear()
+    frequency.send_keys(freq)
+
+@when(u'user edits slot to "{slotNumber}"')
+def step_impl(context, slotNumber):
+    slot = context.browser.find_element_by_css_selector("label[for=edit_slot"+slotNumber+"]")
+    slot.click()
+
+@when(u'user edits remind before to "{noOfDays}"')
+def step_impl(context,noOfDays):
+    remindBefore = context.browser.find_element_by_id("edit_remindBeforeDays")
+    remindBefore.send_keys(noOfDays)
+
+@when(u'user edits Track Habit')
+def step_impl(context):
+    track_habit = context.browser.find_element_by_xpath("/html/body/div[4]/div[2]/div[4]/label")
+    track_habit.click()
+
+@then(u'validate task with name "{task_name}", frequency "{frequency}", due date "{due_date}", time slot "{timeSlot}", remind before "{remindBefore}" and track habit as "{trackHabit}"')
+def step_impl(context, task_name, frequency, due_date, timeSlot, remindBefore, trackHabit):
+    taskData = get_task(1, context.host, context.port)[0]
+    assert_that(frequency).is_equal_to(taskData['frequency'])
+    assert_that(task_name).is_equal_to(taskData['task'])
+    assert_that(due_date).is_equal_to(datetime.datetime.fromtimestamp(taskData['due_date']['$date']/1000).strftime(context.dateFormatForFeature))
+    assert_that(timeSlot).is_equal_to(str(taskData['timeSlot']))
+    assert_that(remindBefore).is_equal_to(str(taskData['remindBeforeDays']))
+    assert_that(trackHabit).is_equal_to(str(taskData['trackHabit']))

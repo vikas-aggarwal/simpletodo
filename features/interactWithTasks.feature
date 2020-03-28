@@ -101,3 +101,31 @@ Feature: Interact with Tasks
     And user edits due date as "05-Nov-2018"
     And clicks on submit to edit
     Then the due date of the task "EditIrregular" should change to "05-Nov-2018"
+
+  Scenario: User edits all the fields of a task
+    Given the user is on task list page
+    When user already has a non-habit task "EditIrregular" with frequency "Irregular" and due date as "01-Apr-2018"
+    And user clicks on the task "EditIrregular" to edit it
+    And user edits task name as "EditIrregular-1"
+    And user edits frequency as "Monthly"
+    And user edits due date as "05-Nov-2018"
+    And user edits slot to "2"
+    And user edits remind before to "5"
+    And user edits Track Habit
+    And clicks on submit to edit
+    Then validate task with name "EditIrregular-1", frequency "Monthly", due date "05-Nov-2018", time slot "2", remind before "5" and track habit as "True"
+    
+
+  Scenario: User edits all the fields of a habit task marking Track habit as False
+    Given the user is on task list page
+    When user already has a habit task "EditIrregular" with frequency "Irregular" and due date as "01-Apr-2018" with count "0"
+    And user clicks on the task "EditIrregular" to edit it
+    And user edits task name as "EditIrregular-1"
+    And user edits frequency as "Monthly"
+    And user edits due date as "05-Nov-2018"
+    And user edits slot to "4"
+    And user edits remind before to "5"
+    And user edits Track Habit
+    And clicks on submit to edit
+    Then validate task with name "EditIrregular-1", frequency "Monthly", due date "05-Nov-2018", time slot "4", remind before "5" and track habit as "False"
+
