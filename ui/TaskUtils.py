@@ -42,7 +42,7 @@ def get_task_bucket(todo: Todo) -> TaskBuckets:
 
 
 def get_task_view_model(todo: Todo, todo_logs_map, accept_languages) -> TodoListViewModel:
-    todoModel: TodoListViewModel = {"todo_id": todo['todo_id'],
+    todoModel = {"todo_id": todo['todo_id'],
                                     "due_date_str": "",
                                     "due_date": datetime.now(),  # To satisfy type system
                                     "frequency": todo['frequency'],
@@ -53,7 +53,7 @@ def get_task_view_model(todo: Todo, todo_logs_map, accept_languages) -> TodoList
                                     "next_due_date": None,  # TODO
                                     "due_in_days": None,
                                     "done_count": None,
-                                    "skip_count": None}
+                                    "skip_count": None}  # type: TodoListViewModel
     if todo['task'] is None or todo['task'] == "":
         todoModel['task'] = "<No Title>"
 
