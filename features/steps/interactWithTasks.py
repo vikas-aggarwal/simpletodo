@@ -1,23 +1,26 @@
 import json
 import http
 import datetime
-import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from behave import *
-from assertpy import *
+from behave import then, when
+from assertpy import assert_that
 import selenium
 
-def create_task(payload,host,port):
+def submit_form(context):
+    context.browser.find_element(By.CSS_SELECTOR, ".form_submit_button input").click()
+
+
+def create_task(payload, host, port):
     http_client = http.client.HTTPConnection(host, port)
-    http_client.request("POST", "/todos", json.dumps(payload), {'Content-Type':'application/json'})
+    http_client.request("POST", "/todos", json.dumps(payload), {'Content-Type': 'application/json'})
     response = http_client.getresponse()
     assert_that(response.status).is_equal_to(200)
     return json.load(response)['todo_id']
 
-def create_task_log(payload,todo_id,host,port):
+def create_task_log(payload, todo_id, host, port):
     http_client = http.client.HTTPConnection(host, port)
-    http_client.request("POST", "/todos/"+str(todo_id), json.dumps(payload), {'Content-Type':'application/json'})
+    http_client.request("POST", "/todos/action/"+str(todo_id), json.dumps(payload), {'Content-Type': 'application/json'})
     response = http_client.getresponse()
     assert_that(response.status).is_equal_to(200)
 
@@ -30,19 +33,19 @@ def get_task(todo_id, host, port):
 
 
 @when(u'user already has a non-habit task "{taskName}" with frequency "{frequency}" and due date as "{dueDate}"')
-def step_impl(context, taskName, frequency, dueDate):
+def create_non_habit_task(context, taskName, frequency, dueDate):
     payload = {}
     payload['frequency'] = frequency
     payload['task'] = taskName
     payload['due_date'] = datetime.datetime.strptime(dueDate, context.dateFormatForFeature).timestamp()
     todo_id = create_task(payload, context.host, context.port)
     context.current_todo_id = todo_id
-    context.browser.find_element(By.ID, "refreshData").click();
-    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
+    driver = context.browser  # type: selenium.webdriver.Firefox
+    driver.refresh()
 
 
 @when(u'user already has a habit task "{taskName}" with frequency "{frequency}" and due date as "{dueDate}" with count "{count}"')
-def step_impl(context, taskName, frequency, dueDate, count):
+def create_habit_task(context, taskName, frequency, dueDate, count):
     payload = {}
     payload['frequency'] = frequency
     payload['task'] = taskName
@@ -65,66 +68,38 @@ def step_impl(context, taskName, frequency, dueDate, count):
         payload['todo_action'] = 'Skip'
         payload['todo_id'] = todo_id
         create_task_log(payload, todo_id, context.host, context.port)
-
-    context.browser.find_element(By.ID, "refreshData").click();
-    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
-
+    driver = context.browser  # type: selenium.webdriver.Firefox
+    driver.refresh()
 
 
 @when(u'user marks the task "{taskName}" as "{action}"')
-def step_impl(context, taskName, action):
-    task_node = context.browser.find_element(By.XPATH, "//li[//h3[text()='"+taskName+"']]")
-    action_button = task_node.find_element(By.XPATH, "//button[contains(text(),'"+action+"')]")
+def mark_task_done_or_skip(context, taskName, action):
+    action_button = context.browser.find_element_by_css_selector("label[for=\""+str(context.current_todo_id)+"_"+action.lower()+"\"]")
     action_button.click()
     context.actionButton = action_button
+    submit_form(context)
 
 @then(u'the due date of the task "{taskName}" should change to "{newDueDate}"')
-def step_impl(context, taskName, newDueDate):
-    task_node = context.browser.find_element(By.XPATH, "//li[//h3[text()='"+taskName+"']]")  # type: selenium.webdriver.remote.webelement.WebElement
-    due_date = task_node.find_element(By.XPATH, "//*[contains(@id,'label_due')]").text
+def due_date_of_task_should_change_to(context, taskName, newDueDate):
+    due_date = context.browser.find_element_by_class_name("dueDateStr").text
     due_date_to_verify = datetime.datetime.strptime(due_date, context.dateFormatFromInputText).strftime(context.dateFormatForFeature)
     assert_that(due_date_to_verify).is_equal_to(newDueDate)
 
-
-
-@then(u'Done button should be disabled')
-def step_impl(context):
-    button = context.actionButton # type: selenium.webdriver.remote.webelement.WebElement
-    assert_that("ui-state-disabled" in button.get_attribute("class")).is_true()
-
-
-
-
-@when(u'user selects a next due date as "{newDueDate}" as the done button is disabled')
-def step_impl(context, newDueDate):
-    driver = context.browser # type: selenium.webdriver.Firefox
+@when(u'user selects a next due date as "{newDueDate}"')
+def user_selects_next_due(context, newDueDate):
+    driver = context.browser  # type: selenium.webdriver.Firefox
     current_todo_id = context.current_todo_id
-    button = driver.find_element(By.XPATH, '//li[@data-region-id="'+str(current_todo_id)+'_region"]//button[contains(text(),"Done")]')
-    assert_that("ui-state-disabled" in button.get_attribute("class")).is_true()
     newDueDateInISOFormat = datetime.datetime.strptime(newDueDate, context.dateFormatForFeature).strftime(context.dateFormatForInput)
-    driver.find_element(By.ID, str(current_todo_id)+"_date").send_keys(newDueDateInISOFormat)
-    context.wait.until(EC.element_to_be_clickable((By.XPATH ,'//li[@data-region-id="'+str(current_todo_id)+'_region"]//button[contains(text(),"Done")]')))
-
-
-@then(u'Done and Skip button should be disabled')
-def step_impl(context):
-    driver = context.browser # type: selenium.webdriver.Firefox
-    current_todo_id = context.current_todo_id
-    done_button = driver.find_element(By.XPATH, '//li[@data-region-id="'+str(current_todo_id)+'_region"]//button[contains(text(),"Done")]')
-    skip_button = driver.find_element(By.XPATH, '//li[@data-region-id="'+str(current_todo_id)+'_region"]//button[contains(text(),"Skip")]')
-    assert_that("ui-state-disabled" in done_button.get_attribute("class")).is_true()
-    assert_that("ui-state-disabled" in skip_button.get_attribute("class")).is_true()
-
+    driver.find_element(By.CSS_SELECTOR, "input[name=\""+str(current_todo_id)+"_next_due\"]").send_keys(newDueDateInISOFormat)
 
 @then(u'log of "{buttonName}" should be created and the count of should be "{new_count}"')
 def step_impl(context, buttonName, new_count):
-    context.browser.find_element(By.ID, "refreshData").click();
-    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
     current_todo_id = context.current_todo_id
-    done_button = context.browser.find_element(By.XPATH, '//li[@data-region-id="'+str(current_todo_id)+'_region"]//button[contains(text(),"'+buttonName+' ('+new_count+')")]')
-    
+    selector = 'label[for="'+str(current_todo_id)+"_"+buttonName.lower()+'"]'
+    done_label = context.browser.find_element(By.CSS_SELECTOR, selector)
+    assert_that(done_label.text).is_equal_to(buttonName+" ("+new_count+")")
 
-
+##NOT USED, RETAINED FOR FUTURE
 @then(u'the progress bar should show increase in "{color}" bar to "{percent}"')
 def step_impl(context, color, percent):
     current_todo_id = context.current_todo_id
@@ -141,57 +116,56 @@ def step_impl(context, color, percent):
 @when(u'user clicks on filter')
 def step_impl(context):
     driver = context.browser # type: selenium.webdriver.Firefox
-    driver.find_element(By.ID, "filterData").click()
-    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#filterPopup")))
+    driver.find_element(By.ID, "new_filter").click()
 
 
 @when(u'user selects "{filterValue}"')
 def step_impl(context, filterValue):
     #Only one option is available as of now, ignoring paramaters
     driver = context.browser # type: selenium.webdriver.Firefox
-    driver.find_element(By.CSS_SELECTOR, "#filterPopup label").click()
-    driver.find_element(By.ID, "filterDoneButton").click()
-    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
-    filter_icon = driver.find_element(By.ID, "filterData")
-    assert_that("filter-active" in filter_icon.get_attribute("class")).is_true()
+    context.browser.find_element_by_xpath('//a[text()="'+filterValue+'"]').click()
+    assert_that(driver.find_element_by_id("clear_filter").is_displayed()).is_true()
 
 @then(u'"{taskName}" should be visible')
 def step_impl(context, taskName):
-    tasks_region = context.browser.find_elements(By.CSS_SELECTOR,"li[data-region-id]")
+    tasks_region = context.browser.find_elements(By.CSS_SELECTOR, ".taskListWithHeader")
     for task_region in tasks_region:
-        taskNameFromBrowser = task_region.find_elements(By.CSS_SELECTOR,".ui-li-header")[0].text
-        if taskName == taskNameFromBrowser:
-            assert_that(True).is_true()
-            return
+        taskNameElement = task_region.find_elements(By.CSS_SELECTOR, ".taskTitle a")
+        if len(taskNameElement) > 0:
+            for taskEntry in taskNameElement:
+                taskNameFromBrowser = taskEntry.text
+                if taskName == taskNameFromBrowser:
+                    assert_that(True).is_true()
+                    return
     assert_that(False).is_true()
     
 @then(u'"{taskName}" should be hidden')
 def step_impl(context, taskName):
-    tasks_region = context.browser.find_elements(By.CSS_SELECTOR,"li[data-region-id]")
+    tasks_region = context.browser.find_elements(By.CSS_SELECTOR,".taskListWithHeader")
     for task_region in tasks_region:
-        taskNameFromBrowser = task_region.find_elements(By.CSS_SELECTOR,".ui-li-header")[0].text
-        if taskName == taskNameFromBrowser:
-            assert_that(False).is_true()
-            return
+        taskNameElement = task_region.find_elements(By.CSS_SELECTOR, ".taskTitle a")
+        if len(taskNameElement) > 0:
+            for taskEntry in taskNameElement:
+                taskNameFromBrowser = taskEntry.text
+                if taskName == taskNameFromBrowser:
+                    assert_that(False).is_true()
+                    return
     assert_that(True).is_true()
 
 
 @when(u'user clears the filters')
 def step_impl(context):
     driver = context.browser # type: selenium.webdriver.Firefox
-    driver.find_element(By.ID, "filterClearButton").click()
-    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
-    filter_icon = driver.find_element(By.ID, "filterData")
-    assert_that("filter-active" in filter_icon.get_attribute("class")).is_false()
+    driver.find_element(By.ID, "clear_filter").click()
+    assert_that(driver.find_element_by_id("new_filter").is_displayed()).is_true()
 
 @when(u'user clicks on the task "{taskName}" to edit it')
 def step_impl(context, taskName):
     driver = context.browser # type: selenium.webdriver.Firefox
-    tasks = context.browser.find_elements(By.CSS_SELECTOR,"a[id$='_edit_link']")
+    tasks = context.browser.find_elements(By.CSS_SELECTOR,".taskTitle>a")
     for task in tasks:
         if task.text == taskName:
             task.click()
-            context.wait.until(EC.element_to_be_clickable((By.ID, "editSubmitBtn")))
             return
 
 @when(u'user edits due date as "{dueDate}"')
@@ -202,15 +176,8 @@ def enter_task_due_date(context, dueDate):
 
 @when(u'clicks on submit to edit')
 def step_impl(context):
-    editSubmitBtn = context.browser.find_element_by_id("editSubmitBtn")
+    editSubmitBtn = context.browser.find_element_by_css_selector("input[type='submit']")
     editSubmitBtn.click()
-    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "li.ui-li-divider")))
-    #refresh the page
-    context.wait.until(EC.element_to_be_clickable((By.ID, "refreshData")))
-    context.browser.find_element(By.ID, "refreshData").click();
-    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[id$='_edit_link']")))
-    
-    
 
 @when(u'user edits task name as "{title}"')
 def step_impl(context,title):
@@ -237,7 +204,7 @@ def step_impl(context,noOfDays):
 
 @when(u'user edits Track Habit')
 def step_impl(context):
-    track_habit = context.browser.find_element_by_xpath("/html/body/div[4]/div[2]/div[4]/label")
+    track_habit = context.browser.find_element_by_xpath("/html/body/form/table/tbody/tr[6]/td/label")
     track_habit.click()
 
 @then(u'validate task with name "{task_name}", frequency "{frequency}", due date "{due_date}", time slot "{timeSlot}", remind before "{remindBefore}" and track habit as "{trackHabit}"')

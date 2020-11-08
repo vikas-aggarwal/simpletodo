@@ -12,7 +12,7 @@ def before_all(context):
     context.protocol = "http"
     context.dateFormatForFeature = "%d-%b-%Y"
     context.dateFormatForInput = "%Y-%m-%d"
-    context.dateFormatFromInputText = "%d/%m/%Y"  # For GB locale
+    context.dateFormatFromInputText = "%Y-%m-%d" #"%d/%m/%Y"  # TODO: Re-evaluate
 
 def after_all(context):
     context.browser.quit()
@@ -34,16 +34,3 @@ def before_scenario(context, scenario):
         db.execute("delete from todo_logs")
         conn.commit()
         conn.close()
-        
-
-def after_scenario(context, scenario):
-    coverage_data = context.browser.execute_script('return JSON.stringify(window.__coverage__ || {})')
-    file_numbers = [int(x[x.index('_')+1:x.index('.json')]) for x  in  os.listdir('.') if x.startswith("jsCoverage_")]
-    file_numbers.sort(reverse=True)
-    if len(file_numbers) == 0 :
-        file_number = 1
-    else:
-        file_number = file_numbers[0]+1
-    coverage_file = open("jsCoverage_"+str(file_number)+".json","w")
-    coverage_file.write(coverage_data)
-    coverage_file.close()

@@ -38,3 +38,20 @@
       coverage html --omit='*site-packages*' #report for python generated in htmlcov folder
     #+END_SRC
 
+
+* Typechecking
+  Assuming python venv with nodeenv and node installed locally to the venv
+** JS
+   #+BEGIN_SRC bash
+     npm install -g typescript
+   #+END_SRC
+
+** Python
+   #+BEGIN_SRC bash
+     pip install mypy
+     mypy .
+   #+END_SRC
+   
+
+* Pending Tests
+  - Non existing todo edit, get
