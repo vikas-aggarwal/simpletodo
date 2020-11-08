@@ -9,8 +9,8 @@ from datetime import datetime
 from dbManager import DBManager
 from typing import Union
 
-__database: DBManager
-__app: Any
+#__database: DBManager
+#__app: Any
 
 def init_ui(app, dbConnection: DBManager):
     global __database
