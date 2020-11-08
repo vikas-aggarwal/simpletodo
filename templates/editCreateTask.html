@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{data['action'] | capitalize}} Task</title>
+    <link rel="stylesheet" type="text/css" href="../../static/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body class="createEditPage">
+    <div class="page_header">
+      <h1 class="page_title">{{data['action'] | capitalize}} Task</h1>
+      <div class="action_bar">
+	<a href="../home" id="new_task">Home</a>
+      </div>
+    </div>
+    {% if data.errors %}
+    <div class="global_errors">
+      <ul>
+      {% for error in data.errors.globalErrors %}
+        <li>{{error}}</li>
+      {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    <form name="taskForm" class="taskForm" method="post" action="./{{data.taskData.todo_id if data['action'] == 'edit'}}{{"task" if data['action'] == 'create'}}">
+      <table>
+	<tr>
+	  <td>
+	    <label for="taskTitle">Title:</label>
+	  </td>
+	  <td>
+	    <input type="text" name="taskTitle" id="{{data['action']}}_taskTitle" value="{{data.taskData.task|default('')}}">
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <label for="freq">Frequency:</label>
+	  </td>
+	  <td>
+	    <input type="text" name="frequency" id="{{data['action']}}_freq" value="{{data.taskData.frequency| default('')}}">
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <label for="dueDate">Due Date:</label>
+	  </td>
+	  <td>
+	    <input type="date" name="dueDate" id="{{data['action']}}_dueDate" value="{{data.taskData.due_date_str | default('')}}"/>
+	  </td>
+	</tr>
+	<tr>
+	  <td colspan="2">
+	    <fieldset data-role="controlgroup" data-type="horizontal">
+	      <legend>Choose Slot:</legend>
+	      <input type="radio" name="slot" id="{{data['action']}}_slotNone" value="None" {% if data,taskData is not defined or data.taskData.timeSlot == None or data.taskData.timeSlot == 'None' %}checked="checked" {% endif %}/><label  class="button_labels" for="{{data['action']}}_slotNone">None</label>
+	      <input type="radio" name="slot" id="{{data['action']}}_slot1" value="1" {% if data.taskData.timeSlot == 1 %}checked="checked" {% endif %} /><label  class="button_labels" for="{{data['action']}}_slot1">1</label>
+	      <input type="radio" name="slot" id="{{data['action']}}_slot2" value="2" {% if data.taskData.timeSlot == 2 %}checked="checked" {% endif %} /><label  class="button_labels" for="{{data['action']}}_slot2">2</label>
+	      <input type="radio" name="slot" id="{{data['action']}}_slot3" value="3" {% if data.taskData.timeSlot == 3 %}checked="checked" {% endif %} /><label  class="button_labels" for="{{data['action']}}_slot3">3</label>
+	      <input type="radio" name="slot" id="{{data['action']}}_slot4" value="4" {% if data.taskData.timeSlot == 4 %}checked="checked" {% endif %} /><label  class="button_labels" for="{{data['action']}}_slot4">4</label>
+	      <input type="radio" name="slot" id="{{data['action']}}_slot5" value="5" {% if data.taskData.timeSlot == 5 %}checked="checked" {% endif %} /><label  class="button_labels" for="{{data['action']}}_slot5">5</label>
+	      <input type="radio" name="slot" id="{{data['action']}}_slot6" value="6" {% if data.taskData.timeSlot == 6 %}checked="checked" {% endif %} /><label  class="button_labels" for="{{data['action']}}_slot6">6</label>
+	    </fieldset>
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <label for="remindBefore">Remind Before (Days):</label>
+	  </td>
+	  <td>
+	    <input type="text" name="remindBeforeDays" id="{{data['action']}}_remindBeforeDays" value="{{data.taskData.remindBeforeDays | default('')}}">
+	  </td>
+	</tr>
+	<tr>
+	  <td colspan="2">
+	      {% if data.taskData.trackHabit %}
+              <input name="trackHabit" type="checkbox" id="{{data['action']}}_trackHabit" checked="checked">
+	      {% else %}
+	      <input name="trackHabit" type="checkbox" id="{{data['action']}}_trackHabit">
+	      {% endif %}
+	      <label for="{{data['action']}}_trackHabit" class="button_labels">Track Habit</label>
+	  </td>
+	</tr>
+	<tr>
+	  <td colspan="2" class="form_submit_center">
+	    <input type="submit" value="{{data['action'] | capitalize}} Task">
+	  </td>
+	</tr>
+      </table>
+    </form>
+  </body>
+</html>

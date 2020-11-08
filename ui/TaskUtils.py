@@ -1,0 +1,92 @@
+from TodoTypes import Todo
+from TodoTypes import TodoListViewModel
+from TodoTypes import TaskBuckets
+from typing import List
+from datetime import datetime
+from datetime import timedelta
+import pytz
+import recur
+
+date_format = '%Y-%m-%d'
+
+
+def get_local_datetime_object(date_str):
+    return __get_ui_time_zone().localize(datetime.strptime(date_str,
+                                                           date_format))
+
+
+def __get_ui_time_zone():
+    # Returning default for no, will have a user preference layer in future
+    return pytz.timezone("Asia/Kolkata")
+
+
+def get_task_bucket(todo: Todo) -> TaskBuckets:
+    if todo['due_date'] is None:
+        return TaskBuckets.TODAY
+    currentTime = pytz.utc.localize(datetime.utcnow()
+                                    ).astimezone(__get_ui_time_zone())
+    todo_due_date_local = pytz.utc.localize(todo['due_date']
+                                            ).astimezone(__get_ui_time_zone())
+    if currentTime.date() == todo_due_date_local.date():
+        return TaskBuckets.TODAY
+
+    if currentTime.date() > todo_due_date_local.date():
+        return TaskBuckets.PENDING
+
+    if todo['remindBeforeDays'] is not None:
+        if currentTime.date() >= (todo_due_date_local.date()
+                                  - timedelta(todo['remindBeforeDays'])):
+            return TaskBuckets.ALERTS
+
+    return TaskBuckets.UPCOMING
+
+
+def get_task_view_model(todo: Todo, todo_logs_map, accept_languages) -> TodoListViewModel:
+    todoModel: TodoListViewModel = {"todo_id": todo['todo_id'],
+                                    "due_date_str": "",
+                                    "due_date": datetime.now(),  # To satisfy type system
+                                    "frequency": todo['frequency'],
+                                    "task": todo['task'],
+                                    "trackHabit": todo['trackHabit'],
+                                    "timeSlot": todo['timeSlot'],
+                                    "remindBeforeDays": '',
+                                    "next_due_date": None,  # TODO
+                                    "due_in_days": None,
+                                    "done_count": None,
+                                    "skip_count": None}
+    if todo['task'] is None or todo['task'] == "":
+        todoModel['task'] = "<No Title>"
+
+    if(todo['due_date'] is None):
+        todoModel['due_date'] = datetime.utcnow()
+    else:
+        todoModel['due_date'] = todo['due_date']
+
+    currentTime = pytz.utc.localize(datetime.utcnow()).astimezone(__get_ui_time_zone())
+    todo_due_date_local = pytz.utc.localize(todoModel['due_date']).astimezone(__get_ui_time_zone())
+
+    todoModel["due_date_str"] = todo_due_date_local.strftime(date_format)
+
+    if (todo_due_date_local.date() - currentTime.date()).days > 0:
+        todoModel['due_in_days'] = (todo_due_date_local.date() - currentTime.date()).days
+
+    frequency_model = recur.parse_frequency(todo["frequency"])
+    if frequency_model:
+        next_due_date = recur.get_next_occurrence(frequency_model, todoModel["due_date"])
+        if next_due_date:
+            todoModel['next_due_date'] = pytz.utc.localize(next_due_date).astimezone(__get_ui_time_zone()).strftime(date_format)
+    if todo['remindBeforeDays']:
+        todoModel['remindBeforeDays'] = str(todo['remindBeforeDays'])
+          
+    if todo["todo_id"] in todo_logs_map:
+        todoModel["done_count"] = todo_logs_map[todo["todo_id"]].get("Done", 0)
+        todoModel["skip_count"] = todo_logs_map[todo["todo_id"]].get("Skip", 0)
+    elif todo["trackHabit"]:
+        todoModel["done_count"] = 0
+        todoModel["skip_count"] = 0
+
+    return todoModel
+
+
+def sort_task_by_slots(todos: List[TodoListViewModel]):
+    todos.sort(key=lambda todo: (todo["timeSlot"] and ((todo["timeSlot"] == "None" and 9) or todo["timeSlot"])) or 9)

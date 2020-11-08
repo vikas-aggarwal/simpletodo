@@ -1,0 +1,199 @@
+
+@media only screen and (min-width: 700px) {
+    .pageContent {
+	display: flex;
+	justify-content: space-between;
+    }
+    
+    .taskList {
+	display: flex;
+	flex-wrap: wrap;
+    }
+
+    .task {
+	flex: 1 1 auto;
+	width: 300px;
+    }
+
+    .taskListWithHeader {
+	margin: 5px;
+    }
+
+    .separator {
+	min-width: 300px;
+    }
+
+    .createEditPage {
+	width:500px;
+	margin: 0 auto;
+    }
+    
+    .createEditPage table {
+	width: 100%;
+    }
+}
+
+.filter_links {
+    margin-top: 15px;
+}
+
+.filter_links a {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.task {
+	border: 1px solid;
+	margin: 8px;
+	padding: 8px;
+}
+
+
+hr {
+    display:none;
+}
+
+
+.form_clear_filter_button, .form_filter_button, .form_new_button , .form_submit_button{
+    display:inline-block;
+    margin-right: 10px;
+    margin-bottom: 2px;
+}
+
+
+.page_title {
+    text-align: center;
+}
+
+.form_submit_center {
+    text-align: center;
+}
+
+
+.button {
+    display: inline-block;
+}
+
+.button_labels {
+    border: 1px solid;
+    padding: 5px;
+    display: inline-block;
+    margin: 5px;
+    margin-left: 0px;
+}
+
+
+.nextDate input, .taskForm input {
+    border: 1px solid;
+}
+
+.page_header {
+    position: sticky;
+    top: 0px;
+    background-color: white;
+    z-index: 1;
+    border-bottom: solid 1px green;
+}
+
+/* COLOR SCHEME*/
+body {
+    background-color: white;
+}
+
+.separator {
+    background-color: lightgrey;
+}
+
+a, a:link, a:visited  {
+    color: green;
+}
+
+a:hover, a:focus{
+    color: white;
+    background-color: green;
+}
+
+.form_submit_button > input, .form_submit_center > input{
+    color: green;
+    background-color: white;
+}
+
+.form_submit_button > input:hover,
+.form_submit_button > input:focus,
+.form_submit_center > input:hover,
+.form_submit_center > input:focus
+{
+    color: white;
+    background-color: green;
+}
+
+.task {
+    border-color: lightgrey;
+}
+
+.doneButton,
+.skipButton,
+#create_trackHabit,
+#edit_trackHabit,
+#create_slotNone,
+#create_slot1,
+#create_slot2,
+#create_slot3,
+#create_slot4,
+#create_slot5,
+#create_slot6,
+#edit_slotNone,
+#edit_slot1,
+#edit_slot2,
+#edit_slot3,
+#edit_slot4,
+#edit_slot5,
+#edit_slot6    
+{
+    display: none;
+}
+
+.doneButton:checked + label,
+.skipButton:checked + label,
+#create_trackHabit:checked + label,
+#edit_trackHabit:checked + label,
+#create_slotNone:checked + label,
+#create_slot1:checked + label,
+#create_slot2:checked + label,
+#create_slot3:checked + label,
+#create_slot4:checked + label,
+#create_slot5:checked + label,
+#create_slot6:checked + label,
+#edit_slotNone:checked + label,
+#edit_slot1:checked + label,
+#edit_slot2:checked + label,
+#edit_slot3:checked + label,
+#edit_slot4:checked + label,
+#edit_slot5:checked + label,
+#edit_slot6:checked + label
+{
+    background-color: green;
+    color: white;
+}
+
+
+.button_labels {
+    border-color: lightgray;
+}
+
+.doneButton:checked + .noneLabel {
+    background-color: lightgrey;
+    color: white;
+}
+
+.nextDate input, .taskForm input {
+    border-color: lightgray;
+}
+
+.task i {
+    color: grey;
+}
+
+.global_errors {
+    color: red;
+}

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Tasks</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body>
+     <form name="taskForm" class="listForm" method="post" action={% if filterString %}"./home?query={{filterString}}"{% else %}"./home"{% endif %}>
+       <div class="page_header">
+	 <h3 class="page_title">Tasks</h3>
+	 <div class="action_bar">
+	   <div class="form_new_button">
+	     <a href="new/task" id="new_task">New</a>
+	   </div>
+	   {% if filterString %}
+	   <div class="form_clear_filter_button">
+	     <a href="./home" id="clear_filter">Clear Filter</a>
+	   </div>
+	   {% else %}
+	   <div class="form_filter_button">
+	     <a href="./filter" id="new_filter">Filter</a>
+	   </div>
+	   {% endif %}
+	   <div class="form_submit_button">
+	     <input type="submit" value="Submit">
+	   </div>
+	 </div>
+	 {% if errors %}
+	 <div class="global_errors">
+	   <ul>
+	     {% for error in errors.globalErrors %}
+             <li>{{error}}</li>
+	     {% endfor %}
+	   </ul>
+	 </div>
+	 {% endif %}
+       </div>
+       
+       <div class="pageContent">
+	 {% for partition in ["ALERTS", "PENDING", "TODAY", "UPCOMING"] %}
+	 <div class="taskListWithHeader">
+	   <div class="separator">
+	     <a name="{{partition}}_area"></a>
+	     <hr />
+	     <h2>{{partition}} - {{todos[partition] | length}}</h2>
+	     <hr />
+	   </div>
+	   <div class="taskList">
+	     {% for todo in todos[partition] %}
+	     <div class="task">
+	       <div class="taskInfo">
+		 <h4 class="taskTitle"><a href="edit/{{todo['todo_id']}}">{{todo["task"]}}</a></h4>
+		 {% if todo['frequency'] %}
+		 <div class="frequency"><i>Frequency</i>:
+		   <span class="frequencyStr">{{todo["frequency"]}}</span>
+		 </div>
+		 {% endif %}
+		 <div class="dueDate"><i>Due:</i> <span class="dueDateStr">{{todo["due_date_str"]}}</span></div>
+		 
+		 {% if partition == "ALERTS" %}
+		 <div class="dueInDays"><i>Due in</i>: {{todo['due_in_days']}} days</div>
+		 {% endif %}
+	       </div>
+	       
+	       <div class="commandBar">
+		 <div class="nextDate">
+		   <i>Next:</i>
+		   <input type="date" name="{{todo['todo_id']}}_next_due" value="{{todo["next_due_date"] or ""}}">
+		 </div>
+		 {% if todo['trackHabit'] %}
+		 <div class="button">
+		   <input type="radio" class="doneButton" id="{{todo['todo_id']}}_none" name="{{todo['todo_id']}}_done_or_skip" value="None" checked="checked">
+		   <label class="button_labels noneLabel" for="{{todo['todo_id']}}_none">X</label>
+		 </div>
+		 <div class="button">
+		   <input type="radio" class="doneButton" id="{{todo['todo_id']}}_done" name="{{todo['todo_id']}}_done_or_skip" value="Done">
+		   <label class="button_labels" for="{{todo['todo_id']}}_done">Done ({{todo["done_count"]}})</label>
+		 </div>
+		 <div class="button">
+		   <input type="radio" class="skipButton" id="{{todo['todo_id']}}_skip" name="{{todo['todo_id']}}_done_or_skip" value="Skip">
+		   <label class="button_labels" for="{{todo['todo_id']}}_skip">Skip ({{todo["skip_count"]}})</label>
+		 </div>
+		 {% endif %}
+		 
+		 {% if todo['trackHabit'] == False %}
+		 <div class="button">
+		   <input type="radio" class="doneButton" id="{{todo['todo_id']}}_none" name="{{todo['todo_id']}}_done_or_skip" value="None" checked="checked">
+		   <label class="button_labels noneLabel" for="{{todo['todo_id']}}_none">X</label>
+		 </div>
+		 <div class="button">
+		   <input type="radio" class="doneButton" id="{{todo['todo_id']}}_done" name="{{todo['todo_id']}}_done_or_skip" value="Done">
+		   <label class="button_labels" for="{{todo['todo_id']}}_done">Done</label>
+		 </div>
+		 {% endif %}
+	       </div>
+	       
+	     </div>
+	     {% endfor  %}
+	   </div>
+	 </div>
+	 {% endfor %}
+       </div>
+     </form>
+  </body>
+</html>
