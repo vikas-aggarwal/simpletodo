@@ -13,7 +13,7 @@ ui.init_ui(APP, TODO_DATA)
 @APP.route('/todos', methods=['GET'])
 def all_todos():
     """Gets all todos from data source, sorted by due date in ascending order"""
-    data = TODO_DATA.get_all_todos_by_due_date()
+    data = TODO_DATA.get_all_todos_by_due_date(None)
     return jsonify(json.loads(dumps(data)))
 
 
