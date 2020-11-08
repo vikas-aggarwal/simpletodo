@@ -121,7 +121,7 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         conn = self._getConnection()
         db = conn.cursor()
         if data.get('due_date') is not None:
-            due_date_from_payload: int = data['due_date'] or 0
+            due_date_from_payload = data['due_date'] or 0
             dbObject['due_date'] = datetime.utcfromtimestamp(due_date_from_payload)
         else:
             dbObject['due_date'] = None
