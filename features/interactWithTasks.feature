@@ -118,3 +118,14 @@ Feature: Interact with Tasks
     And clicks on submit to edit
     Then validate task with name "EditIrregular-1", frequency "Monthly", due date "05-Nov-2018", time slot "4", remind before "5" and track habit as "False"
 
+  Scenario: Mark a non-habit task with Saturday as day of week frequency as done
+    Given the user is on task list page
+    When user already has a non-habit task "NonHabitDone" with frequency "Saturday" and due date as "24-Dec-2020"
+    And user marks the task "NonHabitDone" as "Done"
+    Then the due date of the task "NonHabitDone" should change to "02-Jan-2021"
+
+  Scenario: Mark a non-habit task with Monday as day of week frequency as done
+    Given the user is on task list page
+    When user already has a non-habit task "NonHabitDone" with frequency "Monday" and due date as "24-Dec-2020"
+    And user marks the task "NonHabitDone" as "Done"
+    Then the due date of the task "NonHabitDone" should change to "04-Jan-2021"

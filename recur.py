@@ -3,7 +3,7 @@ from datetime import timedelta
 
 
 def get_next_occurrence(recur, start_date):
-    
+    # start_date should be in the end users timezone for day of week to work correctly
     day_of_week_map = {"Sun":7, "Mon":1, "Tue":2, "Wed":3, "Thu":4, "Fri":5, "Sat":6}
     try:
         if recur["Frequency"] == "Day":
@@ -13,7 +13,9 @@ def get_next_occurrence(recur, start_date):
             if "Day_of_week" in recur and start_date.isoweekday() != day_of_week_map[recur["Day_of_week"]]:
                 expected_weekday = day_of_week_map[recur["Day_of_week"]] % 7
                 actual_weekday = start_date.isoweekday() % 7
-                diff_in_days = abs(expected_weekday - actual_weekday)
+                diff_in_days = expected_weekday - actual_weekday
+                if diff_in_days < 0:
+                    diff_in_days = 7 + diff_in_days
                 start_date = start_date + timedelta(days=diff_in_days)
             return start_date
         if recur["Frequency"] == "Month":

@@ -72,9 +72,9 @@ def get_task_view_model(todo: Todo, todo_logs_map, accept_languages) -> TodoList
 
     frequency_model = recur.parse_frequency(todo["frequency"])
     if frequency_model:
-        next_due_date = recur.get_next_occurrence(frequency_model, todoModel["due_date"])
+        next_due_date = recur.get_next_occurrence(frequency_model, todo_due_date_local)
         if next_due_date:
-            todoModel['next_due_date'] = pytz.utc.localize(next_due_date).astimezone(__get_ui_time_zone()).strftime(date_format)
+            todoModel['next_due_date'] = next_due_date.strftime(date_format)
     if todo['remindBeforeDays']:
         todoModel['remindBeforeDays'] = str(todo['remindBeforeDays'])
           
