@@ -1,7 +1,7 @@
 import json
 from flask import Flask, jsonify, request
 from bson.json_util import dumps
-import dbManager
+from db import dbManager
 from ui import UIHandler as ui
 from datetime import datetime
 

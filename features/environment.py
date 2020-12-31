@@ -1,6 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
-import testing
+from conf import testing
 import datetime
 import os
 

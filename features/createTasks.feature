@@ -7,6 +7,7 @@ Feature: Create Task
     Then a new task should be created 
     And Task title is "<No Title>"
     And Task Due Date is "today"
+    And Task banner should be "Uncategorized - Anytime"
     And the user is on task list page
 
 
@@ -18,6 +19,7 @@ Feature: Create Task
     Then a new task should be created 
     And Task title is "TitleOnlyTest"
     And Task Due Date is "today"
+    And Task banner should be "Uncategorized - Anytime"
     And the user is on task list page
 
   Scenario: Create Task with Title and Frequency
@@ -34,17 +36,19 @@ Feature: Create Task
     And the user is on task list page
 
 
-  Scenario: Create Task with Title and Frequency and Due Date
+  Scenario: Create Task with Title, Frequency, Category and Due Date
     Given the user is on task list page
     When user clicks on New
     And user enters "TitleWithFreqTest" on title field
     And user enters "Daily" on the frequency field
     And user enters due date as "05-Nov-2018"
+    And user selects category as "bills"
     And clicks on submit
     Then a new task should be created 
     And Task title is "TitleWithFreqTest"
     And Task Due Date is "05-Nov-2018"
     And Task Frequency is "Daily"
+    And Task banner should be "Bills - Anytime"
     And Task Next is "1" day after "05-Nov-2018"
     And the user is on task list page
   

@@ -135,20 +135,10 @@ a:hover, a:focus{
 .skipButton,
 #create_trackHabit,
 #edit_trackHabit,
-#create_slotNone,
-#create_slot1,
-#create_slot2,
-#create_slot3,
-#create_slot4,
-#create_slot5,
-#create_slot6,
-#edit_slotNone,
-#edit_slot1,
-#edit_slot2,
-#edit_slot3,
-#edit_slot4,
-#edit_slot5,
-#edit_slot6    
+input[id^="create_slot"],
+input[id^="edit_slot"],
+input[id^="edit_cat"],
+input[id^="create_cat"]
 {
     display: none;
 }
@@ -156,21 +146,7 @@ a:hover, a:focus{
 .doneButton:checked + label,
 .skipButton:checked + label,
 #create_trackHabit:checked + label,
-#edit_trackHabit:checked + label,
-#create_slotNone:checked + label,
-#create_slot1:checked + label,
-#create_slot2:checked + label,
-#create_slot3:checked + label,
-#create_slot4:checked + label,
-#create_slot5:checked + label,
-#create_slot6:checked + label,
-#edit_slotNone:checked + label,
-#edit_slot1:checked + label,
-#edit_slot2:checked + label,
-#edit_slot3:checked + label,
-#edit_slot4:checked + label,
-#edit_slot5:checked + label,
-#edit_slot6:checked + label
+#edit_trackHabit:checked + label
 {
     background-color: green;
     color: white;
@@ -197,3 +173,12 @@ a:hover, a:focus{
 .global_errors {
     color: red;
 }
+
+.category{
+    background-color: #ceecce;
+    display: inline;
+    font-weight: bold;
+    font-size: small;
+    padding: 3px;
+}
+

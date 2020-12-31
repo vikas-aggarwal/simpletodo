@@ -5,7 +5,7 @@ from typing import List
 from datetime import datetime
 from datetime import timedelta
 import pytz
-import recur
+from util import recur
 
 date_format = '%Y-%m-%d'
 
@@ -53,7 +53,8 @@ def get_task_view_model(todo: Todo, todo_logs_map, accept_languages) -> TodoList
                                     "next_due_date": None,  # TODO
                                     "due_in_days": None,
                                     "done_count": None,
-                                    "skip_count": None}  # type: TodoListViewModel
+                                    "skip_count": None,
+                                    "category": todo['category']}  # type: TodoListViewModel
     if todo['task'] is None or todo['task'] == "":
         todoModel['task'] = "<No Title>"
 

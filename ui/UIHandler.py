@@ -3,11 +3,12 @@ from TodoTypes import TodoTaskDoneOrSkipModel
 from TodoTypes import TodoLog
 from TodoTypes import TaskBuckets
 from typing import List, Any
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, make_response
 from ui import TaskUtils as task_utils
 from datetime import datetime
-from dbManager import DBManager
+from db.dbManager import DBManager
 from typing import Union
+from util import commons
 
 #__database: DBManager
 #__app: Any
@@ -24,9 +25,16 @@ def init_ui(app, dbConnection: DBManager):
     __app.add_url_rule("/todos/new/task", "createTask", __create_task, methods=["POST"])
     __app.add_url_rule("/todos/edit/<int:todo_id>", "editTask", __edit_task, methods=["POST"])
     __app.add_url_rule("/todos/filter", "filter", __filter_task, methods=["GET"])
+    __app.add_url_rule("/todos/style", "style", __generate_style, methods=["GET"])
 
+def __generate_style():
+    resp = make_response(render_template("style.css", commons=commons))
+    resp.headers['Content-Type'] = 'text/css'
+    return resp
+
+    
 def __filter_task():
-    return render_template("filter.html")
+    return render_template("filter.html", commons=commons)
 
 # Validations
 def __validateTimeSlot(timeSlot):
@@ -71,7 +79,8 @@ def __validateCreateEditPayload(formData) -> Union[PayloadError, TodoUpdatePaylo
             "task": formData.get('taskTitle'),
             "timeSlot": formData.get("slot"),
             "remindBeforeDays": formData.get('remindBeforeDays'),
-            "trackHabit": formData.get("trackHabit") == "on"
+            "trackHabit": formData.get("trackHabit") == "on",
+            "category": formData.get("category")
             }  # type: TodoUpdatePayload
 
     if 'dueDate' in formData and formData['dueDate'] != "":
@@ -106,10 +115,10 @@ def __edit_task_page(todo_id, errors=None):
     return render_template("editCreateTask.html",
                            data={"action": "edit",
                                  "taskData": todo and task_utils.get_task_view_model(todo, {}, request.accept_languages),
-                                 "errors": errors})
+                                 "errors": errors, "commons": commons})
 
 def __load_create_new_page(errors=None):
-    return render_template("editCreateTask.html", data={"action": "create", "taskData": None, "errors": errors})
+    return render_template("editCreateTask.html", data={"action": "create", "taskData": None, "errors": errors, "commons": commons})
 
 def __home_page(errors=None):
     filterString = ""
@@ -139,7 +148,7 @@ def __home_page(errors=None):
         todos_by_type[bucket].append(task_utils.get_task_view_model(todo, todo_logs_map, request.accept_languages))
 
     task_utils.sort_task_by_slots(todos_by_type[TaskBuckets.TODAY.name])
-    return render_template("homepage.html", todos=todos_by_type, errors=errors, filterString=filterString)
+    return render_template("homepage.html", todos=todos_by_type, errors=errors, filterString=filterString, commons=commons)
 
 
 def __process_updates():

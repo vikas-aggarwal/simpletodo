@@ -41,6 +41,9 @@ def newTaskStep(context,expectedTasksCount="1"):
 def task_title_is(context, title, index=0):
     assert_that(context.foundNewTask[index].find_element_by_class_name("taskTitle").text).is_equal_to(title)
 
+@then(u'Task banner should be "{task_banner}"')
+def verify_task_banner(context, task_banner, index=0):
+    assert_that(context.foundNewTask[index].find_element_by_class_name("category").text).is_equal_to(task_banner)
 
 @when(u'user enters "{title}" on title field')
 def user_enters_title(context,title):
@@ -94,6 +97,11 @@ def enter_task_due_date(context, dueDate):
 @when(u'user selects slot "{slotNumber}"')
 def user_selects_slot(context, slotNumber):
     slot = context.browser.find_element_by_css_selector("label[for=create_slot"+slotNumber+"]")
+    slot.click()
+
+@when(u'user selects category as "{category}"')
+def user_selects_slot(context, category):
+    slot = context.browser.find_element_by_css_selector("label[for=create_cat_"+category+"]")
     slot.click()
 
 

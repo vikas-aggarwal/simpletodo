@@ -3,6 +3,7 @@
   <head>
     <title>{{data['action'] | capitalize}} Task</title>
     <link rel="stylesheet" type="text/css" href="../../static/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/todos/style">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body class="createEditPage">
@@ -51,13 +52,27 @@
 	  <td colspan="2">
 	    <fieldset data-role="controlgroup" data-type="horizontal">
 	      <legend>Choose Slot:</legend>
-	      <input type="radio" name="slot" id="{{data['action']}}_slotNone" value="None" {% if data,taskData is not defined or data.taskData.timeSlot == None or data.taskData.timeSlot == 'None' %}checked="checked" {% endif %}/><label  class="button_labels" for="{{data['action']}}_slotNone">None</label>
-	      <input type="radio" name="slot" id="{{data['action']}}_slot1" value="1" {% if data.taskData.timeSlot == 1 %}checked="checked" {% endif %} /><label  class="button_labels" for="{{data['action']}}_slot1">1</label>
-	      <input type="radio" name="slot" id="{{data['action']}}_slot2" value="2" {% if data.taskData.timeSlot == 2 %}checked="checked" {% endif %} /><label  class="button_labels" for="{{data['action']}}_slot2">2</label>
-	      <input type="radio" name="slot" id="{{data['action']}}_slot3" value="3" {% if data.taskData.timeSlot == 3 %}checked="checked" {% endif %} /><label  class="button_labels" for="{{data['action']}}_slot3">3</label>
-	      <input type="radio" name="slot" id="{{data['action']}}_slot4" value="4" {% if data.taskData.timeSlot == 4 %}checked="checked" {% endif %} /><label  class="button_labels" for="{{data['action']}}_slot4">4</label>
-	      <input type="radio" name="slot" id="{{data['action']}}_slot5" value="5" {% if data.taskData.timeSlot == 5 %}checked="checked" {% endif %} /><label  class="button_labels" for="{{data['action']}}_slot5">5</label>
-	      <input type="radio" name="slot" id="{{data['action']}}_slot6" value="6" {% if data.taskData.timeSlot == 6 %}checked="checked" {% endif %} /><label  class="button_labels" for="{{data['action']}}_slot6">6</label>
+	      {% for slot in data.commons.slots|list|sort %}
+	      {% if slot == "None" %}
+	      <input type="radio" name="slot" id="{{data['action']}}_slotNone" value="None" {% if data.taskData == None or data.taskData.timeSlot == None or data.taskData.timeSlot == 'None' %}checked="checked" {% endif %}/><label  class="button_labels" for="{{data['action']}}_slotNone">{{data.commons.slots['None']}}</label>
+	      {% else %}
+	      <input type="radio" name="slot" id="{{data['action']}}_slot{{slot}}" value="{{slot}}" {% if data.taskData.timeSlot == (slot|int) or data.taskData.timeSlot == slot %}checked="checked" {% endif %} /><label  class="button_labels" for="{{data['action']}}_slot{{slot}}">{{data.commons.slots[slot]}}</label>
+	      {% endif %}
+	      {% endfor %}
+	    </fieldset>
+	  </td>
+	</tr>
+	<tr>
+	  <td colspan="2">
+	    <fieldset data-role="controlgroup" data-type="horizontal">
+	      <legend>Category:</legend>
+	      {% for cat in data.commons.categories|list|sort %}
+	      {% if cat == "uncategorized" %}
+	      <input type="radio" name="category" id="{{data['action']}}_cat_{{cat}}" value="{{cat}}" {% if data.taskData.category is not defined or data.taskData.category == None %}checked="checked" {% endif %}/><label  class="button_labels" for="{{data['action']}}_cat_{{cat}}">{{data.commons.categories[cat]}}</label>
+	      {% else %}
+	      <input type="radio" name="category" id="{{data['action']}}_cat_{{cat}}" value="{{cat}}" {% if data.taskData.category == cat %}checked="checked" {% endif %}/><label  class="button_labels" for="{{data['action']}}_cat_{{cat}}">{{data.commons.categories[cat]}}</label>
+	      {% endif %}
+	      {% endfor %}
 	    </fieldset>
 	  </td>
 	</tr>

@@ -2,7 +2,8 @@
 <html>
   <head>
   <title>Tasks</title>
-    <link rel="stylesheet" type="text/css" href="../static/css/style.css">
+  <link rel="stylesheet" type="text/css" href="../static/css/style.css">
+  <link rel="stylesheet" type="text/css" href="/todos/style">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body>
@@ -15,7 +16,12 @@
     <div class="filter_links">
       <a href="./home?query=trackHabit=True">Habit Tasks Only</a>
       <a href="./home?query=frequency=Daily">Daily Tasks Only</a>
+      {% for cat in commons.categories %}
+        {% if cat != "uncategorized" %}
+      <a href="./home?query=category={{cat}}">Tasks Belonging to category {{commons.categories[cat]}}</a>
+        {% endif %}
+      {% endfor %}
+
     </div>
-    
   </body>
 </html>

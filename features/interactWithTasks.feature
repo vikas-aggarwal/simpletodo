@@ -28,7 +28,7 @@ Feature: Interact with Tasks
     Then the due date of the task "HabitSkip" should change to "22-Apr-2018"
     And log of "Skip" should be created and the count of should be "11"
 
-
+   
 
   Scenario: Mark a habit task with frequency not supported as done
     Given the user is on task list page
@@ -100,9 +100,10 @@ Feature: Interact with Tasks
     And user edits due date as "05-Nov-2018"
     And user edits slot to "2"
     And user edits remind before to "5"
+    And user edits category as "bills"
     And user edits Track Habit
     And clicks on submit to edit
-    Then validate task with name "EditIrregular-1", frequency "Monthly", due date "05-Nov-2018", time slot "2", remind before "5" and track habit as "True"
+    Then validate task with name "EditIrregular-1", frequency "Monthly", due date "05-Nov-2018", time slot "2", remind before "5", category as "bills" and track habit as "True"
     
 
   Scenario: User edits all the fields of a habit task marking Track habit as False
@@ -116,7 +117,7 @@ Feature: Interact with Tasks
     And user edits remind before to "5"
     And user edits Track Habit
     And clicks on submit to edit
-    Then validate task with name "EditIrregular-1", frequency "Monthly", due date "05-Nov-2018", time slot "4", remind before "5" and track habit as "False"
+    Then validate task with name "EditIrregular-1", frequency "Monthly", due date "05-Nov-2018", time slot "4", remind before "5", category as "uncategorized" and track habit as "False"
 
   Scenario: Mark a non-habit task with Saturday as day of week frequency as done
     Given the user is on task list page

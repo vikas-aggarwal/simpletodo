@@ -16,7 +16,7 @@ def create_task(payload, host, port):
     http_client.request("POST", "/todos", json.dumps(payload), {'Content-Type': 'application/json'})
     response = http_client.getresponse()
     assert_that(response.status).is_equal_to(200)
-    return json.load(response)['todo_id']
+    return json.loads(str(response.read(), "UTF-8"))['todo_id']
 
 def create_task_log(payload, todo_id, host, port):
     http_client = http.client.HTTPConnection(host, port)
@@ -29,7 +29,7 @@ def get_task(todo_id, host, port):
     http_client.request("GET", "/todos/"+str(todo_id))
     response = http_client.getresponse()
     assert_that(response.status).is_equal_to(200)
-    return json.load(response)
+    return json.loads(str(response.read(), "UTF-8"))
 
 
 @when(u'user already has a non-habit task "{taskName}" with frequency "{frequency}" and due date as "{dueDate}"')
@@ -202,16 +202,23 @@ def step_impl(context,noOfDays):
     remindBefore = context.browser.find_element_by_id("edit_remindBeforeDays")
     remindBefore.send_keys(noOfDays)
 
+@when(u'user edits category as "{category}"')
+def edit_category(context, category):
+    slot = context.browser.find_element_by_css_selector("label[for=edit_cat_"+category+"]")
+    slot.click()
+
+    
 @when(u'user edits Track Habit')
 def step_impl(context):
-    track_habit = context.browser.find_element_by_xpath("/html/body/form/table/tbody/tr[6]/td/label")
+    track_habit = context.browser.find_element_by_xpath("/html/body/form/table/tbody/tr[7]/td/label")
     track_habit.click()
 
-@then(u'validate task with name "{task_name}", frequency "{frequency}", due date "{due_date}", time slot "{timeSlot}", remind before "{remindBefore}" and track habit as "{trackHabit}"')
-def step_impl(context, task_name, frequency, due_date, timeSlot, remindBefore, trackHabit):
+@then(u'validate task with name "{task_name}", frequency "{frequency}", due date "{due_date}", time slot "{timeSlot}", remind before "{remindBefore}", category as "{category}" and track habit as "{trackHabit}"')
+def step_impl(context, task_name, frequency, due_date, timeSlot, remindBefore, trackHabit, category):
     taskData = get_task(1, context.host, context.port)[0]
     assert_that(frequency).is_equal_to(taskData['frequency'])
     assert_that(task_name).is_equal_to(taskData['task'])
+    assert_that(category).is_equal_to(taskData['category'])
     assert_that(due_date).is_equal_to(datetime.datetime.fromtimestamp(taskData['due_date']['$date']/1000).strftime(context.dateFormatForFeature))
     assert_that(timeSlot).is_equal_to(str(taskData['timeSlot']))
     assert_that(remindBefore).is_equal_to(str(taskData['remindBeforeDays']))

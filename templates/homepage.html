@@ -3,6 +3,7 @@
   <head>
     <title>Tasks</title>
     <link rel="stylesheet" type="text/css" href="../static/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/todos/style">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body>
@@ -50,6 +51,7 @@
 	     {% for todo in todos[partition] %}
 	     <div class="task">
 	       <div class="taskInfo">
+		 <div class="category {{todo.category}}">{{commons.categories[todo.category or "uncategorized"]}} - {{commons.slots[(todo.timeSlot|string)]}}</div>
 		 <h4 class="taskTitle"><a href="edit/{{todo['todo_id']}}">{{todo["task"]}}</a></h4>
 		 {% if todo['frequency'] %}
 		 <div class="frequency"><i>Frequency</i>:

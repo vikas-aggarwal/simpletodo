@@ -10,6 +10,7 @@ Todo = TypedDict('Todo', {"todo_id": int,
                           "task": str,  # Default to some string
                           "timeSlot": Optional[int],
                           "trackHabit": Optional[bool],
+                          "category": Optional[str],
                           "remindBeforeDays": Optional[int]})
 
 TodoLog = TypedDict('TodoLog', {"todo_id": int,
@@ -22,6 +23,7 @@ TodoCreatePayload = TypedDict('TodoCreatePayload', {"todo_id": Optional[int],
                                                     "task": Optional[str],
                                                     "timeSlot": Optional[int],
                                                     "trackHabit": Optional[bool],
+                                                    "category": Optional[str],
                                                     "remindBeforeDays": Optional[int],
                                                     "due_date_utc": Optional[datetime]})
 
@@ -30,6 +32,7 @@ TodoUpdatePayload = TypedDict('TodoUpdatePayload', {"todo_id": int,
                                                     "frequency": Optional[str],
                                                     "task": Optional[str],
                                                     "timeSlot": Optional[int],
+                                                    "category": Optional[str],
                                                     "trackHabit": Optional[bool],
                                                     "remindBeforeDays": Optional[int],
                                                     "due_date_utc": Optional[datetime]})
@@ -46,6 +49,7 @@ TodoListViewModel = TypedDict('TodoListViewModel', {"todo_id": int,
                                                     "timeSlot": Optional[int],
                                                     "trackHabit": Optional[bool],
                                                     "due_date_str": str,
+                                                    "category": Optional[str],
                                                     "remindBeforeDays": Optional[str],
                                                     "next_due_date": Optional[str],
                                                     "due_in_days": Optional[int],
