@@ -1,0 +1,14 @@
+{% for slot in commons.slots %}
+#create_slot{{slot}}:checked + label,
+#edit_slot{{slot}}:checked + label{% if loop.last == False %},{% endif %}{% endfor %}
+{
+    background-color: green;
+    color: white;
+}
+
+{% for category in commons.categoriesColorMap %}
+#edit_cat_{{category}}:checked + label, #create_cat_{{category}}:checked + label, .{{category}} {
+    background-color: {{commons.categoriesColorMap[category]}};
+}
+
+{% endfor %}

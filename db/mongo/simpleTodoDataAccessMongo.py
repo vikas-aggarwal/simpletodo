@@ -2,7 +2,9 @@ import sys
 from datetime import datetime
 import pymongo
 from pymongo import MongoClient
-from dbManager import DBManager
+from db.dbManager import DBManager
+from TodoTypes import FilterModel
+
 
 class SimpleTodoDataAccessMongo(DBManager):
     def __init__(self, APP):
@@ -34,12 +36,23 @@ class SimpleTodoDataAccessMongo(DBManager):
                 "task": row['task'],
                 "timeSlot": row.get('timeSlot'),
                 "trackHabit": (row.get('trackHabit') == 1),
-                "remindBeforeDays": int(row.get('remindBeforeDays') or "0")
+                "remindBeforeDays": int(row.get('remindBeforeDays') or "0"),
+                "category": row.get('category')
                 }  # type: Todo
         return todo
 
-    def get_all_todos_by_due_date(self):
-        all_todos = self.db.todos.find({}).sort('due_date', pymongo.ASCENDING)
+    def get_all_todos_by_due_date(self, filters: FilterModel):
+        final_filter = {}
+        if filters:
+            for filterUnit in filters:
+                attribute = filterUnit["attribute"]
+                operator = filterUnit["operator"]
+                value = filterUnit["value"]
+                if operator == "LIKE":
+                    final_filter[attribute] = {"$regex": value}
+                else:
+                    final_filter[attribute] = value
+        all_todos = self.db.todos.find(final_filter).sort('due_date', pymongo.ASCENDING)
         data = []
         for todo in all_todos:
             data.append(self._getTodoObjectFromRow(todo))

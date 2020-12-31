@@ -23,7 +23,7 @@ class DBManager(metaclass=ABCMeta):
         return ["=", "!=", "LIKE"]
 
     def _getSupportedAttributes(self):
-        return ["frequency", "trackHabit", "task"]
+        return ["frequency", "trackHabit", "task", "category"]
 
     def _isSupportedAttribute(self, attribute):
         return attribute in self._getSupportedAttributes()
@@ -31,9 +31,12 @@ class DBManager(metaclass=ABCMeta):
     def _isSupportedOperator(self, operator):
         return operator in self._getSupportedOperators()
 
+    def getSchemaVersion(self):
+        return 1
+
     def parseFilters(self, filters):
         '''
-        Format filter=attribute=value;attribute!=value;attribute$LIKEvalue
+        Format filter=attribute=value;attribute!=value;attributeLIKEvalue
         Semicolon seperated.
         '''
         parsedFilter = []
@@ -63,15 +66,15 @@ def getDataAccessObject(APP):
     APP.config['SQLITE3_DB_PATH'] = "simpleTodo.db"
 
     if APP.config['ENV'] == "automatedTesting":
-        APP.config.from_pyfile("testing.py")
+        APP.config.from_pyfile("conf/testing.py")
     else:
-        APP.config.from_pyfile("production.py")
+        APP.config.from_pyfile("conf/production.py")
 
     if APP.config['DB_TYPE'] == "mongo":
-        import simpleTodoDataAccessMongo
+        import db.mongo.simpleTodoDataAccessMongo as simpleTodoDataAccessMongo 
         TODO_DATA = simpleTodoDataAccessMongo.SimpleTodoDataAccessMongo(APP)
     elif APP.config['DB_TYPE'] == "sqlite3":
-        import simpleTodoDataAccessSqlite3
+        import db.sqlite.simpleTodoDataAccessSqlite3 as simpleTodoDataAccessSqlite3
         TODO_DATA = simpleTodoDataAccessSqlite3.SimpleTodoDataAccessSqlite3(APP)
     else:
         raise ValueError("Invalid DB type")

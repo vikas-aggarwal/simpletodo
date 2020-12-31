@@ -3,11 +3,13 @@ import sqlite3
 from TodoTypes import Todo, TodoLog, TodoCreatePayload, TodoTaskDoneOrSkipModel
 from TodoTypes import TodoUpdatePayload, FilterModel
 from TodoTypes import TodoLogDB
-from dbManager import DBManager
+from db.dbManager import DBManager
 from typing import Dict, Any
+from db.sqlite import upgradeSqliteDatabase
+
 
 class SimpleTodoDataAccessSqlite3(DBManager):
-    TODO_SELECT_COLUMN_STRING = "todo_id, due_date as 'due_date [timestamp]', frequency, remind_before_days, task_name, time_slot, todo_action, track_habit"
+    TODO_SELECT_COLUMN_STRING = "todo_id, due_date as 'due_date [timestamp]', frequency, remind_before_days, task_name, time_slot, todo_action, track_habit, category"
 
     def __init__(self, APP):
         self.db_path = APP.config['SQLITE3_DB_PATH']
@@ -15,27 +17,7 @@ class SimpleTodoDataAccessSqlite3(DBManager):
 
         # Create schema is does not exists
         conn = self._getConnection()
-        conn.execute('''
-        CREATE TABLE if not exists todos(
-        todo_id integer,
-        due_date text,
-        frequency text,
-        remind_before_days integer,
-        task_name text,
-        time_slot integer,
-        todo_action text,
-        track_habit integer
-        )
-        ''')
-
-        conn.execute('''
-        CREATE TABLE if not exists todo_logs (
-        todo_id integer,
-        action text,
-        due_date text,
-        creation_timestamp text
-        )
-        ''')
+        upgradeSqliteDatabase.process(conn, self.getSchemaVersion())
         conn.close()
 
     def _getConnection(self):
@@ -54,7 +36,8 @@ class SimpleTodoDataAccessSqlite3(DBManager):
                 "task": row['task_name'],
                 "timeSlot": row['time_slot'],
                 "trackHabit": (row['track_habit'] == 1),
-                "remindBeforeDays": int(row['remind_before_days'] or "0")
+                "remindBeforeDays": int(row['remind_before_days'] or "0"),
+                "category": row['category']
                 }  # type: Todo
         return todo
 
@@ -76,15 +59,17 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         condition = "1=1"
         dbMap = {"task": "task_name",
                  "frequency": "frequency",
-                 "trackHabit": "track_habit"
+                 "trackHabit": "track_habit",
+                 "category": "category"
                  }
         values = []
         for filterUnit in filters:
             attribute = filterUnit["attribute"]
             operator = filterUnit["operator"]
             value = filterUnit["value"]
-
             condition = condition + " AND " + dbMap[attribute] + " " + operator + " ? "
+            if operator == "LIKE":
+                value = "%"+value+"%"
             if "trackHabit" == attribute:
                 values.append("True" == value)
             else:
@@ -101,7 +86,7 @@ class SimpleTodoDataAccessSqlite3(DBManager):
             condition = conditionAndValues[0]
             values = conditionAndValues[1]
 
-        db.execute("select " + self.TODO_SELECT_COLUMN_STRING + " from todos where "+condition+" order by datetime(due_date)", values)
+        db.execute("select " + self.TODO_SELECT_COLUMN_STRING + " from todos where "+condition+" order by datetime(due_date), time_slot", values)
         data = []
         rows = db.fetchall()
         for row in rows:
@@ -131,16 +116,17 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         dbObject['trackHabit'] = data.get('trackHabit')
         dbObject['frequency'] = data.get('frequency')
         dbObject['task'] = data.get('task')
+        dbObject['category'] = data.get('category')
 
         if todo_id is None:
-            db.execute("insert into todos (todo_id, due_date, frequency, remind_before_days, task_name, time_slot, todo_action, track_habit) values ((select coalesce(max(todo_id),count(*))+1 from todos), :due_date, :frequency, :remindBeforeDays, :task, :timeSlot, NULL, :trackHabit )", dbObject)
+            db.execute("insert into todos (todo_id, due_date, frequency, remind_before_days, task_name, time_slot, todo_action, track_habit, category) values ((select coalesce(max(todo_id),count(*))+1 from todos), :due_date, :frequency, :remindBeforeDays, :task, :timeSlot, NULL, :trackHabit, :category )", dbObject)
             last_row_id = db.lastrowid
             db.execute("select todo_id from todos where rowid = ?", (last_row_id,))
             row = db.fetchone()
             data["todo_id"] = row["todo_id"]
         else:
             data["todo_id"] = todo_id
-            db.execute("insert into todos (todo_id, due_date, frequency, remind_before_days, task_name, time_slot, todo_action, track_habit) values (:todo_id, :due_date, :frequency, :remindBeforeDays, :task, :timeSlot, NULL, :trackHabit )", dbObject)
+            db.execute("insert into todos (todo_id, due_date, frequency, remind_before_days, task_name, time_slot, todo_action, track_habit, category) values (:todo_id, :due_date, :frequency, :remindBeforeDays, :task, :timeSlot, NULL, :trackHabit, :category)", dbObject)
         conn.commit()
         conn.close()
 
@@ -179,10 +165,11 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         data['task'] = data.get('task') if "task" in data else todo_object['task']
         data['timeSlot'] = data.get('timeSlot') if "timeSlot" in data else todo_object['timeSlot']
         data['remindBeforeDays'] = data.get('remindBeforeDays') if "remindBeforeDays" in data else todo_object['remindBeforeDays']
+        data['category'] = data.get('category') if "category" in data else todo_object['category']
         db.execute("update todos set due_date=:due_date_utc," \
                    "frequency=:frequency, remind_before_days=:remindBeforeDays," \
-                   "task_name=:task, time_slot=:timeSlot, track_habit=:trackHabit" \
-                   " where todo_id = :todo_id", data)
+                   "task_name=:task, time_slot=:timeSlot, track_habit=:trackHabit," \
+                   "category=:category where todo_id = :todo_id", data)
         conn.commit()
 
         # Delete todo logs if no longer tracked as Habit
