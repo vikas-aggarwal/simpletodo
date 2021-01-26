@@ -2,16 +2,11 @@
 @media only screen and (min-width: 700px) {
     .pageContent {
 	display: flex;
-	justify-content: space-between;
+	justify-content: center;
     }
     
-    .taskList {
-	display: flex;
-	flex-wrap: wrap;
-    }
 
     .task {
-	flex: 1 1 auto;
 	width: 300px;
     }
 
@@ -43,9 +38,12 @@
 }
 
 .task {
-	border: 1px solid;
-	margin: 8px;
-	padding: 8px;
+    border: 1px solid;
+    border-radius: 5px;
+    margin: 8px;
+    padding: 8px;
+    color: #0e680e;
+    background-color: white;
 }
 
 
@@ -63,6 +61,7 @@ hr {
 
 .page_title {
     text-align: center;
+    color: #0e680e;
 }
 
 .form_submit_center {
@@ -90,31 +89,35 @@ hr {
 .page_header {
     position: sticky;
     top: 0px;
-    background-color: white;
+    background-color: #9fc39f;
     z-index: 1;
-    border-bottom: solid 1px green;
+    border-bottom: solid 1px #0e680e;
 }
 
 /* COLOR SCHEME*/
 body {
-    background-color: white;
+    background-color: #9fc39f;
 }
 
 .separator {
-    background-color: lightgrey;
+    background-color: #0a490a;
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    box-shadow: 4px 10px 10px #172617
 }
 
 a, a:link, a:visited  {
-    color: green;
+    color: #0e680e;
 }
 
 a:hover, a:focus{
     color: white;
-    background-color: green;
+    background-color: #0e680e;
 }
 
 .form_submit_button > input, .form_submit_center > input{
-    color: green;
+    color: #0e680e;
     background-color: white;
 }
 
@@ -124,11 +127,12 @@ a:hover, a:focus{
 .form_submit_center > input:focus
 {
     color: white;
-    background-color: green;
+    background-color: #0e680e;
 }
 
 .task {
-    border-color: lightgrey;
+	border-color: #b7d2b7;
+	box-shadow: 4px 2px 10px #b7d2b7;
 }
 
 .doneButton,
@@ -148,7 +152,7 @@ input[id^="create_cat"]
 #create_trackHabit:checked + label,
 #edit_trackHabit:checked + label
 {
-    background-color: green;
+    background-color: #0e680e;
     color: white;
 }
 
@@ -182,3 +186,10 @@ input[id^="create_cat"]
     padding: 3px;
 }
 
+
+.taskForm {
+	background: white;
+	color: #0e680e;
+	border-radius: 5px;
+	margin-top: 5px;
+}
