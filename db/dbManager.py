@@ -1,14 +1,20 @@
 from abc import ABCMeta, abstractmethod
 from TodoTypes import Todo, TodoTaskDoneOrSkipModel, TodoUpdatePayload, TodoCreatePayload, FilterModel, FilterUnitModel
+from typing import Union
+
 
 class DBManager(metaclass=ABCMeta):
 
     @abstractmethod
-    def get_todo(self, todo_id) -> Todo:
+    def get_todo(self, todo_id: int) -> Todo:
         pass
 
     @abstractmethod
     def create_todo(self, data: TodoCreatePayload, todo_id):
+        pass
+
+    @abstractmethod
+    def upsert_todo(self, todo_id, data: TodoUpdatePayload):
         pass
 
     @abstractmethod
@@ -18,7 +24,10 @@ class DBManager(metaclass=ABCMeta):
     @abstractmethod
     def get_all_todos_by_due_date(self, filters):
         pass
-
+    @abstractmethod
+    def delete_todo(self, todo_id):
+        pass
+    
     def _getSupportedOperators(self):
         return ["=", "!=", "LIKE"]
 
@@ -32,9 +41,9 @@ class DBManager(metaclass=ABCMeta):
         return operator in self._getSupportedOperators()
 
     def getSchemaVersion(self):
-        return 1
+        return 2
 
-    def parseFilters(self, filters):
+    def parseFilters(self, filters) -> FilterModel:
         '''
         Format filter=attribute=value;attribute!=value;attributeLIKEvalue
         Semicolon seperated.
@@ -57,6 +66,7 @@ class DBManager(metaclass=ABCMeta):
                         unitParsed = True
             if unitParsed is False:
                 return []
+        print(parsedFilter)
         return parsedFilter
 
 
@@ -71,7 +81,7 @@ def getDataAccessObject(APP):
         APP.config.from_pyfile("conf/production.py")
 
     if APP.config['DB_TYPE'] == "mongo":
-        import db.mongo.simpleTodoDataAccessMongo as simpleTodoDataAccessMongo 
+        import db.mongo.simpleTodoDataAccessMongo as simpleTodoDataAccessMongo
         TODO_DATA = simpleTodoDataAccessMongo.SimpleTodoDataAccessMongo(APP)
     elif APP.config['DB_TYPE'] == "sqlite3":
         import db.sqlite.simpleTodoDataAccessSqlite3 as simpleTodoDataAccessSqlite3

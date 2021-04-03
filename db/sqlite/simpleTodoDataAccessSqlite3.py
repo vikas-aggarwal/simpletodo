@@ -4,7 +4,7 @@ from TodoTypes import Todo, TodoLog, TodoCreatePayload, TodoTaskDoneOrSkipModel
 from TodoTypes import TodoUpdatePayload, FilterModel
 from TodoTypes import TodoLogDB
 from db.dbManager import DBManager
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from db.sqlite import upgradeSqliteDatabase
 
 
@@ -76,7 +76,7 @@ class SimpleTodoDataAccessSqlite3(DBManager):
                 values.append(value)
         return [condition, tuple(values)]
 
-    def get_all_todos_by_due_date(self, filters: FilterModel):
+    def get_all_todos_by_due_date(self, filters: Optional[FilterModel]):
         conn = self._getConnection()
         db = conn.cursor()
         condition = "1=1"
@@ -94,7 +94,7 @@ class SimpleTodoDataAccessSqlite3(DBManager):
             data.append(todo)
         return data
 
-    def get_todo(self, todo_id):
+    def get_todo(self, todo_id: int):
         conn = self._getConnection()
         db = conn.cursor()
         db.execute("select "+self.TODO_SELECT_COLUMN_STRING+" from todos where todo_id = ?", (todo_id,))
@@ -106,8 +106,7 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         conn = self._getConnection()
         db = conn.cursor()
         if data.get('due_date') is not None:
-            due_date_from_payload = data['due_date'] or 0
-            dbObject['due_date'] = datetime.utcfromtimestamp(due_date_from_payload)
+            dbObject['due_date'] = data['due_date']
         else:
             dbObject['due_date'] = None
 
@@ -150,11 +149,6 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         conn = self._getConnection()
         db = conn.cursor()
 
-        if data.get('due_date') is None:
-            data['due_date_utc'] = todo_object['due_date']
-        else:
-            data['due_date_utc'] = datetime.utcfromtimestamp(float(data['due_date'] or 0)) or datetime.now()
-
         if "trackHabit" not in data:
             data['trackHabit'] = todo_object['trackHabit']
 
@@ -166,7 +160,7 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         data['timeSlot'] = data.get('timeSlot') if "timeSlot" in data else todo_object['timeSlot']
         data['remindBeforeDays'] = data.get('remindBeforeDays') if "remindBeforeDays" in data else todo_object['remindBeforeDays']
         data['category'] = data.get('category') if "category" in data else todo_object['category']
-        db.execute("update todos set due_date=:due_date_utc," \
+        db.execute("update todos set due_date=:due_date," \
                    "frequency=:frequency, remind_before_days=:remindBeforeDays," \
                    "task_name=:task, time_slot=:timeSlot, track_habit=:trackHabit," \
                    "category=:category where todo_id = :todo_id", data)
@@ -189,7 +183,7 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         todo_object = self.get_todo(data['todo_id'])  # type: Todo
         conn = self._getConnection()
         db = conn.cursor()
-        
+
         db.execute("update todos set due_date=:due_date," \
                    "todo_action=:todo_action where todo_id = :todo_id", data)
         conn.commit()

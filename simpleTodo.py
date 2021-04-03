@@ -29,6 +29,8 @@ def get_todo(todo_id):
 @APP.route('/todos', methods=['POST'])
 def create_todos():
     data = request.get_json()
+    if 'due_date' in data:
+        data['due_date'] = datetime.utcfromtimestamp(data['due_date'])
     TODO_DATA.create_todo(data)
     return jsonify(json.loads(dumps(data)))
 
@@ -36,6 +38,8 @@ def create_todos():
 @APP.route('/todos/<int:todo_id>', methods=['POST'])
 def update_or_create_todo(todo_id):  # id is not auto generated
     data = request.get_json()
+    if 'due_date' in data:
+        data['due_date'] = datetime.utcfromtimestamp(data['due_date'])
     TODO_DATA.upsert_todo(todo_id, data)
     return jsonify(json.loads(dumps(data)))
 

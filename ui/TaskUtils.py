@@ -6,6 +6,7 @@ from datetime import datetime
 from datetime import timedelta
 import pytz
 from util import recur
+from runtime_type_checker import check_type
 
 date_format = '%Y-%m-%d'
 
@@ -78,14 +79,14 @@ def get_task_view_model(todo: Todo, todo_logs_map, accept_languages) -> TodoList
             todoModel['next_due_date'] = next_due_date.strftime(date_format)
     if todo['remindBeforeDays']:
         todoModel['remindBeforeDays'] = str(todo['remindBeforeDays'])
-          
+
     if todo["todo_id"] in todo_logs_map:
         todoModel["done_count"] = todo_logs_map[todo["todo_id"]].get("Done", 0)
         todoModel["skip_count"] = todo_logs_map[todo["todo_id"]].get("Skip", 0)
     elif todo["trackHabit"]:
         todoModel["done_count"] = 0
         todoModel["skip_count"] = 0
-
+    check_type(todoModel, TodoListViewModel)
     return todoModel
 
 

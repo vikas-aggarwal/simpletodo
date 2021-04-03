@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>{{data['action'] | capitalize}} Task</title>
+    <link rel="stylesheet" type="text/css" href="../../static/css/style.css">
+    <link rel="stylesheet" type="text/css" href="../style">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body class="deletePage">
+    <div class="page_header">
+      <h1 class="page_title">{{data['action'] | capitalize}} Task</h1>
+      <div class="action_bar">
+	<a href="../home" id="new_task">Home</a>
+      </div>
+    </div>
+    {% if data.taskData.todo_id %}
+    <form class="taskForm" method="post" action="./{{data.taskData.todo_id}}">
+      <label>Confirm Delete</label>
+      <div class="form_submit_center">
+	<input type="submit" value="{{data['action'] | capitalize}} Task">
+      </div>
+    </form>
+    {% else %}
+    <div class="taskForm">
+      Task Not Found
+    </div>
+    {% endif %}
+  </body>
+</html>

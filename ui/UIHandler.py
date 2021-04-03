@@ -1,17 +1,17 @@
 from TodoTypes import Todo, TodoUpdatePayload, PayloadError
-from TodoTypes import TodoTaskDoneOrSkipModel
+from TodoTypes import TodoTaskDoneOrSkipModel, TodoCreatePayload
 from TodoTypes import TodoLog
 from TodoTypes import TaskBuckets
-from typing import List, Any
-from flask import render_template, request, redirect, make_response
+from flask import render_template, request, redirect, make_response, Flask
 from ui import TaskUtils as task_utils
 from datetime import datetime
 from db.dbManager import DBManager
-from typing import Union
 from util import commons
+from runtime_type_checker import check_type
+from typing import List
 
-#__database: DBManager
-#__app: Any
+__database: DBManager
+__app: Flask
 
 def init_ui(app, dbConnection: DBManager):
     global __database
@@ -26,86 +26,40 @@ def init_ui(app, dbConnection: DBManager):
     __app.add_url_rule("/todos/edit/<int:todo_id>", "editTask", __edit_task, methods=["POST"])
     __app.add_url_rule("/todos/filter", "filter", __filter_task, methods=["GET"])
     __app.add_url_rule("/todos/style", "style", __generate_style, methods=["GET"])
+    __app.add_url_rule("/todos/delete/<int:todo_id>", "delete", __delete_task_page, methods=["GET"])
+    __app.add_url_rule("/todos/delete/<int:todo_id>", "deleteTask", __delete_task, methods=["POST"])
 
 def __generate_style():
     resp = make_response(render_template("style.css", commons=commons))
     resp.headers['Content-Type'] = 'text/css'
     return resp
 
-    
+
 def __filter_task():
     return render_template("filter.html", commons=commons)
 
-# Validations
-def __validateTimeSlot(timeSlot):
-    if timeSlot and (timeSlot.isdigit()):
-        timeSlot = int(timeSlot)
-        if not (timeSlot >= 1 and timeSlot <= 6):
-            return False
-    return True
-
-def __validateRemindBeforeDays(remind):
-    if remind and (not remind.isdigit()):
-        return False
-    return True
-
-
-def __validateDueDate(dueDate):
-    try:
-        if dueDate:
-            task_utils.get_local_datetime_object(dueDate).timestamp()
-    except ValueError:
-        return False
-    return True
-
-
-def __validateCreateEditPayload(formData) -> Union[PayloadError, TodoUpdatePayload]:
-    errors = {"globalErrors": []}  # type: PayloadError
-
-    if(__validateTimeSlot(formData.get("slot")) is False):
-        errors["globalErrors"].append("Invalid Time Slot")
-
-    if(__validateRemindBeforeDays(formData.get('remindBeforeDays')) is False):
-        errors["globalErrors"].append("Remind before days should be a number")
-
-    if(__validateDueDate(formData.get('dueDate')) is False):
-        errors["globalErrors"].append("Invalid Due Date. Format should be yyyy-MM-DD")
-
-    if len(errors["globalErrors"]) > 0:
-        return errors
-
-    data = {"due_date": None,
-            "frequency": formData.get('frequency'),
-            "task": formData.get('taskTitle'),
-            "timeSlot": formData.get("slot"),
-            "remindBeforeDays": formData.get('remindBeforeDays'),
-            "trackHabit": formData.get("trackHabit") == "on",
-            "category": formData.get("category")
-            }  # type: TodoUpdatePayload
-
-    if 'dueDate' in formData and formData['dueDate'] != "":
-        data['due_date'] = task_utils.get_local_datetime_object(formData["dueDate"]).timestamp()
-
-    return data
-
 
 # routes
+def __delete_task(todo_id):
+    __database.delete_todo(todo_id)
+    return redirect("/todos/home", 302)
+
 def __edit_task(todo_id):
     formData = request.form
-    data = __validateCreateEditPayload(formData)
+    data = commons.validateCreateEditPayload(formData, todo_id)
     if "globalErrors" in data:
         return __edit_task_page(todo_id, data)
+    check_type(data, TodoUpdatePayload)
     __database.upsert_todo(todo_id, data)
     return redirect("/todos/home", 302)
 
 
 def __create_task():
     formData = request.form
-    data = __validateCreateEditPayload(formData)
+    data: TodoCreatePayload = commons.validateCreateEditPayload(formData)
     if "globalErrors" in data:
         return __load_create_new_page(data)
-    if 'dueDate' in formData and formData['dueDate'] != "":
-        data['due_date'] = task_utils.get_local_datetime_object(formData["dueDate"]).timestamp()
+    check_type(data, TodoCreatePayload)
     __database.create_todo(data)
     return redirect("/todos/home", 302)
 
@@ -116,6 +70,12 @@ def __edit_task_page(todo_id, errors=None):
                            data={"action": "edit",
                                  "taskData": todo and task_utils.get_task_view_model(todo, {}, request.accept_languages),
                                  "errors": errors, "commons": commons})
+
+def __delete_task_page(todo_id, errors=None):
+    todo = __database.get_todo(todo_id)
+    return render_template("deleteTask.html", data={"action": "delete",
+                                                    "taskData": todo and task_utils.get_task_view_model(todo, {}, request.accept_languages)})
+
 
 def __load_create_new_page(errors=None):
     return render_template("editCreateTask.html", data={"action": "create", "taskData": None, "errors": errors, "commons": commons})
@@ -144,6 +104,7 @@ def __home_page(errors=None):
     }
 
     for todo in allTodos:
+        check_type(todo, Todo)
         bucket = task_utils.get_task_bucket(todo).name
         todos_by_type[bucket].append(task_utils.get_task_view_model(todo, todo_logs_map, request.accept_languages))
 
@@ -174,7 +135,7 @@ def __process_updates():
     dataToProcess = {}
     for x in submittedData:
         if 'done_or_skip' in submittedData[x] and submittedData[x]['done_or_skip'] != "None":
-            if __validateDueDate(submittedData[x]['next_due']) is False:
+            if commons.validateDueDate(submittedData[x]['next_due']) is False:
                 errors['globalErrors'].append("Invalid Due Date Detected")
             dataToProcess[x] = submittedData[x]
 
@@ -184,6 +145,7 @@ def __process_updates():
     for dataKey in dataToProcess:
         data = dataToProcess[dataKey]
         due_date = data.get("next_due") and datetime.utcfromtimestamp(task_utils.get_local_datetime_object(data['next_due']).timestamp())
-        todo_data = {'due_date': due_date, 'todo_action': data['done_or_skip'], 'todo_id': dataKey}  # type: TodoTaskDoneOrSkipModel
+        todo_data = {'due_date': due_date, 'todo_action': data['done_or_skip'], 'todo_id': int(dataKey)}  # type: TodoTaskDoneOrSkipModel
+        check_type(todo_data, TodoTaskDoneOrSkipModel)
         __database.process_todo_action(todo_data)
     return __home_page()

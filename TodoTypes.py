@@ -18,24 +18,24 @@ TodoLog = TypedDict('TodoLog', {"todo_id": int,
                                 "action": str})
 
 TodoCreatePayload = TypedDict('TodoCreatePayload', {"todo_id": Optional[int],
-                                                    "due_date": Optional[int],
+                                                    "due_date": Optional[datetime],
                                                     "frequency": Optional[str],
                                                     "task": Optional[str],
                                                     "timeSlot": Optional[int],
                                                     "trackHabit": Optional[bool],
                                                     "category": Optional[str],
-                                                    "remindBeforeDays": Optional[int],
-                                                    "due_date_utc": Optional[datetime]})
+                                                    "remindBeforeDays": Optional[int]
+                                                    })
 
 TodoUpdatePayload = TypedDict('TodoUpdatePayload', {"todo_id": int,
-                                                    "due_date": Optional[int],
+                                                    "due_date": Optional[datetime],
                                                     "frequency": Optional[str],
                                                     "task": Optional[str],
                                                     "timeSlot": Optional[int],
                                                     "category": Optional[str],
                                                     "trackHabit": Optional[bool],
-                                                    "remindBeforeDays": Optional[int],
-                                                    "due_date_utc": Optional[datetime]})
+                                                    "remindBeforeDays": Optional[int]
+                                                    })
 
 TodoLogDB = TypedDict('TodoLogDB', {"todo_id": int,
                                     "creation_timestamp": datetime,
@@ -76,3 +76,8 @@ FilterUnitModel = TypedDict('FilterUnitModel', {"attribute": str,
                                           })
 
 FilterModel = List[FilterUnitModel]
+
+RecurrenceModel = TypedDict('RecurrenceModel', {"Frequency": str,
+                                                "FrequencyCount": int,
+                                                "Day_of_week": Optional[str]
+                                                })

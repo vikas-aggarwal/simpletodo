@@ -223,3 +223,24 @@ def step_impl(context, task_name, frequency, due_date, timeSlot, remindBefore, t
     assert_that(timeSlot).is_equal_to(str(taskData['timeSlot']))
     assert_that(remindBefore).is_equal_to(str(taskData['remindBeforeDays']))
     assert_that(trackHabit).is_equal_to(str(taskData['trackHabit']))
+
+@when(u'user clicks on delete button')
+def click_on_delete(context):
+    deleteLink = context.browser.find_element_by_css_selector("#deleteLink")
+    deleteLink.click()
+
+@when(u'user confirms delete')
+def confirm_delete(context):
+    deleteSubmitBtn = context.browser.find_element_by_css_selector("input[type='submit']")
+    deleteSubmitBtn.click()
+
+@then(u'"{taskName}" task should not exists on home')
+def confirm_task_deletion(context, taskName):
+    tasks_region = context.browser.find_elements(By.CSS_SELECTOR,".taskListWithHeader")
+    for task_region in tasks_region:
+        taskNameElement = task_region.find_elements(By.CSS_SELECTOR, ".taskTitle a")
+        if len(taskNameElement) > 0:
+            assert_that(False).is_true()
+            return
+    assert_that(True).is_true()
+

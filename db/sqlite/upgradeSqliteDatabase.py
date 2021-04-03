@@ -92,5 +92,13 @@ def process(conn: sqlite3.Connection, schema_version):
             db.execute("drop table todos_temp")
             db.execute("drop table todo_logs_temp")
             __set_version_on_database(conn, schema_version)
+            version = schema_version;
             db.close()
             conn.commit()
+    if version == 2:  # run data fixes, version 2 has no schema changes, bumped up to run fixes
+        db = conn.cursor()
+        print("NULL data fix")
+        db.execute("update todos set time_slot = NULL where time_slot = 'None'")
+        db.execute("update todos set remind_before_days = NULL where remind_before_days = ''")
+        db.close()
+        conn.commit()

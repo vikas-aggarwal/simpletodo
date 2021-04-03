@@ -1,17 +1,15 @@
-import sys
 from datetime import datetime
 import pymongo
 from pymongo import MongoClient
 from db.dbManager import DBManager
-from TodoTypes import FilterModel
-
+from TodoTypes import FilterModel, Todo, TodoLog
+from typing import Optional
 
 class SimpleTodoDataAccessMongo(DBManager):
     def __init__(self, APP):
-        mongo   = MongoClient(APP.config['MONGO_HOST'], APP.config['MONGO_PORT'])
+        mongo = MongoClient(APP.config['MONGO_HOST'], APP.config['MONGO_PORT'])
         self.db = mongo[APP.config['MONGO_DB']]
 
-        
     def get_todo_logs_count(self):
         todo_count = self.db.todo_logs.aggregate([
             {"$group":{"_id":{"action":"$action", "todo_id":"$todo_id"}, "count":{"$sum": 1}}}])
@@ -34,14 +32,18 @@ class SimpleTodoDataAccessMongo(DBManager):
                 "due_date": row['due_date'],
                 "frequency": row['frequency'],
                 "task": row['task'],
-                "timeSlot": row.get('timeSlot'),
+                "timeSlot": None,
                 "trackHabit": (row.get('trackHabit') == 1),
                 "remindBeforeDays": int(row.get('remindBeforeDays') or "0"),
                 "category": row.get('category')
                 }  # type: Todo
+        if row.get('timeSlot') and row.get('timeSlot') == "None":
+            todo['timeSlot'] = None
+        elif row.get('timeSlot'):
+            todo['timeSlot'] = int(row.get('timeSlot'))
         return todo
 
-    def get_all_todos_by_due_date(self, filters: FilterModel):
+    def get_all_todos_by_due_date(self, filters: Optional[FilterModel]):
         final_filter = {}
         if filters:
             for filterUnit in filters:
@@ -51,7 +53,7 @@ class SimpleTodoDataAccessMongo(DBManager):
                 if operator == "LIKE":
                     final_filter[attribute] = {"$regex": value}
                 else:
-                    final_filter[attribute] = value
+                    final_filter[attribute] = value # type: ignore
         all_todos = self.db.todos.find(final_filter).sort('due_date', pymongo.ASCENDING)
         data = []
         for todo in all_todos:
@@ -59,14 +61,11 @@ class SimpleTodoDataAccessMongo(DBManager):
         return data
 
 
-    def get_todo(self, todo_id):
+    def get_todo(self, todo_id: int):
         todo = self.db.todos.find_one({'todo_id':todo_id})
         return todo and self._getTodoObjectFromRow(todo)
 
     def create_todo(self, data):
-        if 'due_date' in data and data['due_date']:
-            data['due_date'] = datetime.utcfromtimestamp(data['due_date'])
-
         max_data = list(self.db.todos.aggregate([
             {"$group":{"_id": "", "max_id":{"$max": "$todo_id"}}}]))
         max_todo_id = 1
@@ -86,9 +85,6 @@ class SimpleTodoDataAccessMongo(DBManager):
     def upsert_todo(self, todo_id, data):
         #Getting current state
         todo_object = self.get_todo(todo_id)
-
-        if 'due_date' in data:
-            data['due_date'] = datetime.utcfromtimestamp(data['due_date'])
 
         data['todo_id'] = todo_id
         self.db.todos.update_one({'todo_id':todo_id}, {'$set': data}, upsert=True)

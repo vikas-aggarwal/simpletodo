@@ -18,7 +18,7 @@
 	min-width: 300px;
     }
 
-    .createEditPage {
+    .createEditPage, .deletePage {
 	width:500px;
 	margin: 0 auto;
     }
@@ -191,5 +191,5 @@ input[id^="create_cat"]
 	background: white;
 	color: #0e680e;
 	border-radius: 5px;
-	margin-top: 5px;
+	padding: 15px;
 }
