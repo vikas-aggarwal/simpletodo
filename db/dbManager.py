@@ -24,15 +24,16 @@ class DBManager(metaclass=ABCMeta):
     @abstractmethod
     def get_all_todos_by_due_date(self, filters):
         pass
+
     @abstractmethod
     def delete_todo(self, todo_id):
         pass
-    
+
     def _getSupportedOperators(self):
-        return ["=", "!=", "LIKE"]
+        return ["=", "!=", "LIKE", "IN"]
 
     def _getSupportedAttributes(self):
-        return ["frequency", "trackHabit", "task", "category"]
+        return ["frequency", "trackHabit", "task", "category", "timeSlot"]
 
     def _isSupportedAttribute(self, attribute):
         return attribute in self._getSupportedAttributes()
@@ -62,6 +63,8 @@ class DBManager(metaclass=ABCMeta):
                     if len(attributeValue) == 2 and attributeValue[0] in self._getSupportedAttributes():
                         parsedUnit['attribute'] = attributeValue[0]
                         parsedUnit['value'] = attributeValue[1]
+                        if op == "IN":
+                            parsedUnit['value'] = parsedUnit['value'].split(",")
                         parsedFilter.append(parsedUnit)
                         unitParsed = True
             if unitParsed is False:
@@ -78,7 +81,8 @@ def getDataAccessObject(APP):
     if APP.config['ENV'] == "automatedTesting":
         APP.config.from_pyfile("conf/testing.py")
     else:
-        APP.config.from_pyfile("conf/production.py")
+        import os
+        APP.config.from_pyfile(os.getcwd()+"/conf/production.py")
 
     if APP.config['DB_TYPE'] == "mongo":
         import db.mongo.simpleTodoDataAccessMongo as simpleTodoDataAccessMongo

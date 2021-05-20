@@ -60,20 +60,40 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         dbMap = {"task": "task_name",
                  "frequency": "frequency",
                  "trackHabit": "track_habit",
-                 "category": "category"
+                 "category": "category",
+                 "timeSlot": "time_slot"
                  }
         values = []
         for filterUnit in filters:
             attribute = filterUnit["attribute"]
             operator = filterUnit["operator"]
             value = filterUnit["value"]
-            condition = condition + " AND " + dbMap[attribute] + " " + operator + " ? "
-            if operator == "LIKE":
-                value = "%"+value+"%"
-            if "trackHabit" == attribute:
-                values.append("True" == value)
+            # Use of coalesce needs to be re-evaluated for queries using NULL in the future.
+            if operator == "IN":
+                condition = condition + " AND COALESCE(" + dbMap[attribute] + ",'') " + operator + " ("
+                for val in range(0, len(value)):
+                    if val == 0:
+                        condition = condition + " ? "
+                    else:
+                        condition = condition + ", ? "
+                    if "trackHabit" == attribute:
+                        values.append("True" == value[val])
+                    elif "timeSlot" == attribute:
+                        values.append(int(value[val]))
+                    else:
+                        values.append(value[val])
+                condition = condition + ") "
+
             else:
-                values.append(value)
+                condition = condition + " AND COALESCE(" + dbMap[attribute] + ",'') " + operator + " ? "
+                if operator == "LIKE":
+                    value = "%"+value+"%"
+                if "trackHabit" == attribute:
+                    values.append("True" == value)
+                elif "timeSlot" == attribute:
+                    values.append(int(value))
+                else:
+                    values.append(value)
         return [condition, tuple(values)]
 
     def get_all_todos_by_due_date(self, filters: Optional[FilterModel]):

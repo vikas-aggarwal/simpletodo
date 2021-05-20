@@ -45,15 +45,26 @@ class SimpleTodoDataAccessMongo(DBManager):
 
     def get_all_todos_by_due_date(self, filters: Optional[FilterModel]):
         final_filter = {}
+        operator_map = {
+            "=": "$eq",
+            "!=": "$ne",
+            "IN": "$in"
+        }
         if filters:
+            final_filter = {"$and": []}
             for filterUnit in filters:
                 attribute = filterUnit["attribute"]
                 operator = filterUnit["operator"]
                 value = filterUnit["value"]
+                if attribute == "timeSlot":
+                    if operator == "IN":
+                        value = [int(x) for x in value]
+                    else:
+                        value = int(value)
                 if operator == "LIKE":
-                    final_filter[attribute] = {"$regex": value}
+                    final_filter["$and"].append({attribute: {"$regex": value}})
                 else:
-                    final_filter[attribute] = value # type: ignore
+                    final_filter["$and"].append({attribute: { operator_map[operator] : value}})
         all_todos = self.db.todos.find(final_filter).sort('due_date', pymongo.ASCENDING)
         data = []
         for todo in all_todos:
