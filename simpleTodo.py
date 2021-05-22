@@ -22,7 +22,8 @@ def all_todos():
 def all_todos_current():
     """Gets all todos from data source, sorted by due date in ascending order"""
     # Get current date, move to midnight and convert to UTC
-    data = TODO_DATA.get_all_todos_before_date(None, ["due_date"], pytz.utc.localize(datetime.utcnow()).astimezone(TaskUtils.__get_ui_time_zone()))
+    current_date = pytz.utc.localize(datetime.utcnow()).astimezone(TaskUtils.__get_ui_time_zone()).replace(hour=23, minute=59, second=59, microsecond=0).astimezone(pytz.UTC).replace(tzinfo=None)
+    data = TODO_DATA.get_all_todos_before_date(None, ["due_date"], current_date)
     return jsonify(json.loads(dumps(data)))
 
 @APP.route('/todos/<int:todo_id>', methods=['GET'])
