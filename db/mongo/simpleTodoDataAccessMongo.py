@@ -43,13 +43,13 @@ class SimpleTodoDataAccessMongo(DBManager):
             todo['timeSlot'] = int(row.get('timeSlot'))
         return todo
 
-    def get_all_todos_by_due_date(self, filters: Optional[FilterModel]):
-        final_filter = {}
+    def _get_filter_object(self, filters: Optional[FilterModel]):
         operator_map = {
             "=": "$eq",
             "!=": "$ne",
             "IN": "$in"
         }
+        final_filter = {}
         if filters:
             final_filter = {"$and": []}
             for filterUnit in filters:
@@ -64,13 +64,33 @@ class SimpleTodoDataAccessMongo(DBManager):
                 if operator == "LIKE":
                     final_filter["$and"].append({attribute: {"$regex": value}})
                 else:
-                    final_filter["$and"].append({attribute: { operator_map[operator] : value}})
-        all_todos = self.db.todos.find(final_filter).sort('due_date', pymongo.ASCENDING)
+                    final_filter["$and"].append({attribute: {operator_map[operator]: value}})
+        return final_filter
+
+    def get_all_todos_before_date(self, filters: Optional[FilterModel], sort_criteria, current_date):
+        filter_object = self._get_filter_object(filters)
+        if filter_object:
+            filter_object["$and"].append({"due_date": {"$lte": current_date}})
+        else:
+            filter_object = {"due_date": {"$lte": current_date}}
+        if sort_criteria:
+            sort_array = []
+            for index in range(0, len(sort_criteria)):
+                sort_array.append((sort_criteria[index], pymongo.ASCENDING))
+            all_todos = self.db.todos.find(self._get_filter_object(filters)).sort(sort_array)
+        else:
+            all_todos = self.db.todos.find(self._get_filter_object(filters))
         data = []
         for todo in all_todos:
             data.append(self._getTodoObjectFromRow(todo))
         return data
 
+    def get_all_todos_by_due_date(self, filters: Optional[FilterModel]):
+        all_todos = self.db.todos.find(self._get_filter_object(filters)).sort('due_date', pymongo.ASCENDING)
+        data = []
+        for todo in all_todos:
+            data.append(self._getTodoObjectFromRow(todo))
+        return data
 
     def get_todo(self, todo_id: int):
         todo = self.db.todos.find_one({'todo_id':todo_id})

@@ -3,7 +3,9 @@ from flask import Flask, jsonify, request
 from bson.json_util import dumps
 from db import dbManager
 from ui import UIHandler as ui
+from ui import TaskUtils
 from datetime import datetime
+import pytz
 
 APP = Flask(__name__)
 TODO_DATA = dbManager.getDataAccessObject(APP)
@@ -16,6 +18,12 @@ def all_todos():
     data = TODO_DATA.get_all_todos_by_due_date(None)
     return jsonify(json.loads(dumps(data)))
 
+@APP.route('/todos/current', methods=['GET'])
+def all_todos_current():
+    """Gets all todos from data source, sorted by due date in ascending order"""
+    # Get current date, move to midnight and convert to UTC
+    data = TODO_DATA.get_all_todos_before_date(None, ["due_date"], pytz.utc.localize(datetime.utcnow()).astimezone(TaskUtils.__get_ui_time_zone()))
+    return jsonify(json.loads(dumps(data)))
 
 @APP.route('/todos/<int:todo_id>', methods=['GET'])
 def get_todo(todo_id):

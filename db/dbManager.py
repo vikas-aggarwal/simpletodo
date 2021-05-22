@@ -26,6 +26,10 @@ class DBManager(metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    def get_all_todos_before_date(self, filters, sort_criteria, current_date):
+        pass
+
+    @abstractmethod
     def delete_todo(self, todo_id):
         pass
 

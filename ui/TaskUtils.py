@@ -17,7 +17,7 @@ def get_local_datetime_object(date_str):
 
 
 def __get_ui_time_zone():
-    # Returning default for no, will have a user preference layer in future
+    # Returning default for now, will have a user preference layer in future
     return pytz.timezone("Asia/Kolkata")
 
 

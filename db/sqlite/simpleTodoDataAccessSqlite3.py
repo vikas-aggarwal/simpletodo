@@ -10,6 +10,13 @@ from db.sqlite import upgradeSqliteDatabase
 
 class SimpleTodoDataAccessSqlite3(DBManager):
     TODO_SELECT_COLUMN_STRING = "todo_id, due_date as 'due_date [timestamp]', frequency, remind_before_days, task_name, time_slot, todo_action, track_habit, category"
+    dbMap = {"task": "task_name",
+             "frequency": "frequency",
+             "trackHabit": "track_habit",
+             "category": "category",
+             "timeSlot": "time_slot",
+             "due_date": "due_date"
+             }
 
     def __init__(self, APP):
         self.db_path = APP.config['SQLITE3_DB_PATH']
@@ -57,12 +64,6 @@ class SimpleTodoDataAccessSqlite3(DBManager):
 
     def __generateConditionsForFilters(self, filters: FilterModel):
         condition = "1=1"
-        dbMap = {"task": "task_name",
-                 "frequency": "frequency",
-                 "trackHabit": "track_habit",
-                 "category": "category",
-                 "timeSlot": "time_slot"
-                 }
         values = []
         for filterUnit in filters:
             attribute = filterUnit["attribute"]
@@ -70,7 +71,7 @@ class SimpleTodoDataAccessSqlite3(DBManager):
             value = filterUnit["value"]
             # Use of coalesce needs to be re-evaluated for queries using NULL in the future.
             if operator == "IN":
-                condition = condition + " AND COALESCE(" + dbMap[attribute] + ",'') " + operator + " ("
+                condition = condition + " AND COALESCE(" + self.dbMap[attribute] + ",'') " + operator + " ("
                 for val in range(0, len(value)):
                     if val == 0:
                         condition = condition + " ? "
@@ -85,7 +86,7 @@ class SimpleTodoDataAccessSqlite3(DBManager):
                 condition = condition + ") "
 
             else:
-                condition = condition + " AND COALESCE(" + dbMap[attribute] + ",'') " + operator + " ? "
+                condition = condition + " AND COALESCE(" + self.dbMap[attribute] + ",'') " + operator + " ? "
                 if operator == "LIKE":
                     value = "%"+value+"%"
                 if "trackHabit" == attribute:
@@ -95,6 +96,35 @@ class SimpleTodoDataAccessSqlite3(DBManager):
                 else:
                     values.append(value)
         return [condition, tuple(values)]
+
+    def get_all_todos_before_date(self, filters: Optional[FilterModel], sort_criteria, current_date):
+        conn = self._getConnection()
+        db = conn.cursor()
+        condition = "1=1"
+        values = ()
+        if filters:
+            conditionAndValues = self.__generateConditionsForFilters(filters)
+            condition = conditionAndValues[0]
+            values = conditionAndValues[1]
+        condition = condition + " AND (datetime(due_date) <= ? or due_date is null)"  # Hack: Always list null
+        values_list = list(values)
+        values_list.append(current_date)
+        values = tuple(values_list)
+        final_query = "select " + self.TODO_SELECT_COLUMN_STRING + " from todos where "+condition
+        if sort_criteria:
+            final_query = final_query + " order by "
+            for index in range(0, len(sort_criteria)):
+                if index == 0:
+                    final_query = final_query + " " + self.dbMap[sort_criteria[index]]
+                else:
+                    final_query = final_query + ", " + self.dbMap[sort_criteria[index]]
+        db.execute(final_query, values)
+        data = []
+        rows = db.fetchall()
+        for row in rows:
+            todo = self._getTodoObjectFromRow(row)  # type: Todo
+            data.append(todo)
+        return data
 
     def get_all_todos_by_due_date(self, filters: Optional[FilterModel]):
         conn = self._getConnection()
