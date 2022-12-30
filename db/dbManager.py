@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from TodoTypes import Todo, TodoTaskDoneOrSkipModel, TodoUpdatePayload, TodoCreatePayload, FilterModel, FilterUnitModel
 from typing import Union
-
+import os
 
 class DBManager(metaclass=ABCMeta):
 
@@ -82,10 +82,10 @@ def getDataAccessObject(APP):
     APP.config['DB_TYPE'] = "sqlite3"
     APP.config['SQLITE3_DB_PATH'] = "simpleTodo.db"
 
-    if APP.config['ENV'] == "automatedTesting":
+    if "automatedTesting" in os.environ:
+        print("Automated Testing Mode")
         APP.config.from_pyfile("conf/testing.py")
     else:
-        import os
         APP.config.from_pyfile(os.getcwd()+"/conf/production.py")
 
     if APP.config['DB_TYPE'] == "mongo":

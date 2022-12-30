@@ -1,7 +1,7 @@
 * Setting up environment for automated testing
   #+BEGIN_SRC bash
     #Setting mode
-    export FLASK_ENV=automatedTesting
+    export automatedTesting=
     #Start the server, DB should be up
     python app.py
   #+END_SRC
