@@ -77,6 +77,7 @@ def process(conn: sqlite3.Connection, schema_version):
         __create_tables(conn)
         __create_version_table_if_does_not_exists(conn)
         __set_version_on_database(conn, schema_version)
+        version = schema_version
     else:  # Table should exists
         version = __get_current_schema_version(conn)
         if version < schema_version:  # Upgrade
