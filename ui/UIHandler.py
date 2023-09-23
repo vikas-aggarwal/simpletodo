@@ -9,6 +9,8 @@ from db.dbManager import DBManager
 from util import commons
 from runtime_type_checker import check_type
 from typing import List
+import pytz
+import calendar
 
 __database: DBManager
 __app: Flask
@@ -80,22 +82,7 @@ def __delete_task_page(todo_id, errors=None):
 def __load_create_new_page(errors=None):
     return render_template("editCreateTask.html", data={"action": "create", "taskData": None, "errors": errors, "commons": commons})
 
-def __home_page(errors=None):
-    filterString = ""
-    if request.args.get("query"):
-        filters = __database.parseFilters(request.args.get("query"))
-        if filters:
-            filterString = request.args.get("query")
-    else:
-        filters = []
-    allTodos = __database.get_all_todos_by_due_date(filters)  # type: List[Todo]
-    todo_logs = __database.get_todo_logs_count()  # type: TodoLog
-    todo_logs_map = {}
-    for log in todo_logs:
-        if log["todo_id"] not in todo_logs_map:
-            todo_logs_map[log["todo_id"]] = {}
-        todo_logs_map[log["todo_id"]][log["action"]] = log["count"]
-
+def __group_by_status(allTodos, todo_logs_map, errors, filterString, till, groupBy):
     todos_by_type = {
         TaskBuckets.ALERTS.name: [],
         TaskBuckets.PENDING.name: [],
@@ -109,7 +96,53 @@ def __home_page(errors=None):
         todos_by_type[bucket].append(task_utils.get_task_view_model(todo, todo_logs_map, request.accept_languages))
 
     task_utils.sort_task_by_slots(todos_by_type[TaskBuckets.TODAY.name])
-    return render_template("homepage.html", todos=todos_by_type, errors=errors, filterString=filterString, commons=commons)
+    return render_template("homepage.html", todos=todos_by_type, errors=errors, filterString=filterString, commons=commons, partitions=["ALERTS", "PENDING", "TODAY", "UPCOMING"], till=till, groupBy=groupBy)
+
+def __group_by_slots(allTodos, todo_logs_map, errors, filterString, till, groupBy):
+    todos_by_slot = {};
+    
+    for slot in commons.slots:
+        todos_by_slot[commons.slots[slot]] = []
+    
+    for todo in allTodos:
+        check_type(todo, Todo)
+        if "timeSlot" not in todo or todo["timeSlot"] is None:
+            todos_by_slot[commons.slots["None"]].append(task_utils.get_task_view_model(todo, todo_logs_map, request.accept_languages))
+        else:
+            todos_by_slot[commons.slots[str(todo["timeSlot"])]].append(task_utils.get_task_view_model(todo, todo_logs_map, request.accept_languages))
+
+    return render_template("homepage.html", todos=todos_by_slot, errors=errors, filterString=filterString, commons=commons, partitions=commons.slots.values(), till=till, groupBy=groupBy)
+
+def __home_page(errors=None):
+    filterString = ""
+    if request.args.get("query"):
+        filters = __database.parseFilters(request.args.get("query"))
+        if filters:
+            filterString = request.args.get("query")
+    else:
+        filters = []
+
+    if request.args.get("till") and request.args.get("till") == "today":
+        current_date = pytz.utc.localize(datetime.utcnow()).astimezone(task_utils.__get_ui_time_zone()).replace(hour=23, minute=59, second=59, microsecond=0).astimezone(pytz.UTC).replace(tzinfo=None)
+        allTodos = __database.get_all_todos_before_date(filters, ["due_date"], current_date)  # type: List[Todo]
+    elif request.args.get("till") and request.args.get("till") == "this_month":
+        current_date = pytz.utc.localize(datetime.utcnow()).astimezone(task_utils.__get_ui_time_zone()).replace(hour=23, minute=59, second=59, microsecond=0).astimezone(pytz.UTC).replace(tzinfo=None)
+        current_date = current_date.replace(day=calendar.monthrange(current_date.year, current_date.month)[1])
+        allTodos = __database.get_all_todos_before_date(filters, ["due_date"], current_date)  # type: List[Todo]
+    else:    
+        allTodos = __database.get_all_todos_by_due_date(filters)  # type: List[Todo]
+    todo_logs = __database.get_todo_logs_count()  # type: TodoLog
+    todo_logs_map = {}
+    for log in todo_logs:
+        if log["todo_id"] not in todo_logs_map:
+            todo_logs_map[log["todo_id"]] = {}
+        todo_logs_map[log["todo_id"]][log["action"]] = log["count"]
+
+    if request.args.get("groupBy"):
+        if request.args.get("groupBy") == "slots":
+            return __group_by_slots(allTodos, todo_logs_map, errors, filterString, request.args.get("till"), request.args.get("groupBy"))
+       
+    return __group_by_status(allTodos, todo_logs_map, errors, filterString, request.args.get("till"), request.args.get("groupBy"))
 
 
 def __process_updates():

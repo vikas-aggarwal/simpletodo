@@ -17,13 +17,13 @@ categoriesColorMap = {"uncategorized": "#ceecce",
                       "bills": "#A0CCDB",
                       "learning": "#d5af56"}
 
-slots = {"None": "Anytime",
-         "1": "Post Wake up",
+slots = {"1": "Post Wake up",
          "2": "Before Bath",
          "3": "Before Lunch",
          "4": "Post Tea",
          "5": "Before Dinner",
-         "6": "Before Sleep"}
+         "6": "Before Sleep",
+         "None": "Anytime",}
 
 
 # Validations

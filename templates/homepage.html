@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body>
-     <form name="taskForm" class="listForm" method="post" action={% if filterString %}"./home?query={{filterString}}"{% else %}"./home"{% endif %}>
+     <form name="taskForm" class="listForm" method="post" action="./home?{% if filterString %}query={{filterString}}{% endif %}{% if till %}&till={{till}}{% endif %}{% if groupBy %}&groupBy={{groupBy}}{% endif %} ">
        <div class="page_header">
 	 <h3 class="page_title">Tasks</h3>
 	 <div class="action_bar">
@@ -18,11 +18,10 @@
 	   <div class="form_clear_filter_button">
 	     <a href="./home" id="clear_filter">Clear Filter</a>
 	   </div>
-	   {% else %}
+	   {% endif %}
 	   <div class="form_filter_button">
 	     <a href="./filter" id="new_filter">Filter</a>
 	   </div>
-	   {% endif %}
 	   <div class="form_submit_button">
 	     <input type="submit" value="Submit">
 	   </div>
@@ -39,8 +38,8 @@
        </div>
        
        <div class="pageContent">
-	 {% for partition in ["ALERTS", "PENDING", "TODAY", "UPCOMING"] %}
-	 <div class="taskListWithHeader">
+	 {% for partition in partitions %}
+	 <div class="taskListWithHeader {% if todos[partition] | length == 0 %} notasks {%endif%}">
 	   <div class="separator">
 	     <a name="{{partition}}_area"></a>
 	     <hr />

@@ -8,40 +8,61 @@
   </head>
   <body>
     <div class="page_header">
-      <h1 class="page_title">Filter Task</h1>
+      <h1 class="page_title">Filter and Group Tasks</h1>
       <div class="action_bar">
 	<a href="./home" id="new_task">Home</a>
       </div>
     </div>
-    <div class="filter_links">
-      <a href="./home?query=trackHabit=True">Habit Tasks Only</a>
-      <a href="./home?query=frequency=Daily">Daily Tasks Only</a>
-      <h3>By Category</h3>
-      {% set ns = namespace(query="") %}
-      {% for cat in commons.categories %}
-          {% if cat != "uncategorized" %}
-              {% if ns.query == "" %}
-                  {% set ns.query = ns.query + "category!="+cat %}
-              {% else %}
-                  {% set ns.query = ns.query + ";category!="+cat %}
-              {% endif %}
-          <a href="./home?query=category={{cat}}">Tasks Belonging to category {{commons.categories[cat]}}</a>
+    <div class="filter_group_container">
+      <div class="filter_links">
+        <h2>Group by Slots Till Today</h2>
+        <a href="./home?query=trackHabit=True&groupBy=slots&till=today">Habit Tasks Only</a>
+        <a href="./home?query=frequency=Daily&groupBy=slots&till=today">Daily Tasks Only</a>
+        <h3>By Category</h3>
+        {% set ns = namespace(query="") %}
+        {% for cat in commons.categories %}
+        {% if cat != "uncategorized" %}
+        {% if ns.query == "" %}
+        {% set ns.query = ns.query + "category!="+cat %}
+        {% else %}
+        {% set ns.query = ns.query + ";category!="+cat %}
         {% endif %}
-      {% endfor %}
-	  <a href="./home?query={{ns.query}}">Tasks Belonging to category {{commons.categories['uncategorized']}}</a>
-      <h3>By Slot</h3>
-      {% set ns = namespace(query="") %}
-      {% for slot in commons.slots %}
-          {% if slot != "None" %}
-              {% if ns.query == "" %}
-                  {% set ns.query = ns.query + "timeSlot!="+slot %}
-              {% else %}
-                  {% set ns.query = ns.query + ";timeSlot!="+slot %}
-              {% endif %}
-          <a href="./home?query=timeSlot={{slot}}">Tasks Belonging to slot {{commons.slots[slot]}}</a>
+        <a href="./home?query=category={{cat}}&groupBy=slots&till=today">Tasks Belonging to category {{commons.categories[cat]}}</a>
         {% endif %}
-      {% endfor %}
-      <a href="./home?query={{ns.query}}">Tasks Belonging to slot {{commons.slots['None']}}</a>
+        {% endfor %}
+        <a href="./home?query={{ns.query}}&groupBy=slots&till=today">Tasks Belonging to category {{commons.categories['uncategorized']}}</a>
+      </div>
+      <div class="filter_links">
+        <h2>Group by Status</h2>
+        <a href="./home?query=trackHabit=True">Habit Tasks Only</a>
+        <a href="./home?query=frequency=Daily">Daily Tasks Only</a>
+        <h3>By Category</h3>
+        {% set ns = namespace(query="") %}
+        {% for cat in commons.categories %}
+        {% if cat != "uncategorized" %}
+        {% if ns.query == "" %}
+        {% set ns.query = ns.query + "category!="+cat %}
+        {% else %}
+        {% set ns.query = ns.query + ";category!="+cat %}
+        {% endif %}
+        <a href="./home?query=category={{cat}}">Tasks Belonging to category {{commons.categories[cat]}}</a>
+        {% endif %}
+        {% endfor %}
+        <a href="./home?query={{ns.query}}">Tasks Belonging to category {{commons.categories['uncategorized']}}</a>
+        <h3>By Slot</h3>
+        {% set ns = namespace(query="") %}
+        {% for slot in commons.slots %}
+        {% if slot != "None" %}
+        {% if ns.query == "" %}
+        {% set ns.query = ns.query + "timeSlot!="+slot %}
+        {% else %}
+        {% set ns.query = ns.query + ";timeSlot!="+slot %}
+        {% endif %}
+        <a href="./home?query=timeSlot={{slot}}">Tasks Belonging to slot {{commons.slots[slot]}}</a>
+        {% endif %}
+        {% endfor %}
+        <a href="./home?query={{ns.query}}">Tasks Belonging to slot {{commons.slots['None']}}</a>
+      </div>
     </div>
   </body>
 </html>
