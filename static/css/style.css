@@ -198,3 +198,7 @@ input[id^="create_cat"]
 .notasks {
     display: none;
 }
+
+.duePast {
+    color: red;
+}

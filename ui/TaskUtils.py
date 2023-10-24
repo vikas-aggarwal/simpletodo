@@ -69,8 +69,7 @@ def get_task_view_model(todo: Todo, todo_logs_map, accept_languages) -> TodoList
 
     todoModel["due_date_str"] = todo_due_date_local.strftime(date_format)
 
-    if (todo_due_date_local.date() - currentTime.date()).days > 0:
-        todoModel['due_in_days'] = (todo_due_date_local.date() - currentTime.date()).days
+    todoModel['due_in_days'] = (todo_due_date_local.date() - currentTime.date()).days
 
     frequency_model = recur.parse_frequency(todo["frequency"])
     if frequency_model:

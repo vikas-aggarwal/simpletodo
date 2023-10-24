@@ -57,7 +57,7 @@
 		   <span class="frequencyStr">{{todo["frequency"]}}</span>
 		 </div>
 		 {% endif %}
-		 <div class="dueDate"><i>Due:</i> <span class="dueDateStr">{{todo["due_date_str"]}}</span></div>
+		 <div class="dueDate {% if todo['due_in_days'] < 0 %}duePast{%endif%}"><i>Due:</i> <span class="dueDateStr">{{todo["due_date_str"]}}</span></div>
 		 
 		 {% if partition == "ALERTS" %}
 		 <div class="dueInDays"><i>Due in</i>: {{todo['due_in_days']}} days</div>
