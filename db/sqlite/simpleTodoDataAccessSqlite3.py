@@ -1,10 +1,10 @@
 from datetime import datetime
 import sqlite3
 from TodoTypes import Todo, TodoLog, TodoCreatePayload, TodoTaskDoneOrSkipModel
-from TodoTypes import TodoUpdatePayload, FilterModel
+from TodoTypes import TodoUpdatePayload, FilterModel, TodoLogEntry
 from TodoTypes import TodoLogDB
 from db.dbManager import DBManager
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from db.sqlite import upgradeSqliteDatabase
 
 
@@ -60,6 +60,26 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         rows = db.fetchall()
         for row in rows:
             data.append(self._getTodoLogObjectFromRow(row))
+        return data
+
+    def _getTodoLogEntryFromRow(self,row) -> TodoLogEntry:
+        todo_log_entry: TodoLogEntry = {
+            "task": row['task_name'],
+            "due_date": row['due_date'],
+            "action": row['action'],
+            "todo_id": row['todo_id']
+        }
+        return todo_log_entry
+    
+    def get_todo_logs(self, startTimeStamp: datetime, endTimeStamp: datetime) -> List[TodoLogEntry]:
+        conn = self._getConnection()
+        db = conn.cursor()
+        db.execute("select t.todo_id, t.task_name, l.due_date as 'due_date [timestamp]', l.action from todos t, todo_logs l where t.todo_id = l.todo_id and datetime(l.due_date) between ? and ? order by 1,2",
+                   (startTimeStamp, endTimeStamp))
+        data = []
+        rows = db.fetchall()
+        for row in rows:
+            data.append(self._getTodoLogEntryFromRow(row))
         return data
 
     def __generateConditionsForFilters(self, filters: FilterModel):

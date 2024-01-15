@@ -74,14 +74,15 @@ def create_habit_task(context, taskName, frequency, dueDate, count):
 
 @when(u'user marks the task "{taskName}" as "{action}"')
 def mark_task_done_or_skip(context, taskName, action):
-    action_button = context.browser.find_element_by_css_selector("label[for=\""+str(context.current_todo_id)+"_"+action.lower()+"\"]")
+    action_button = context.browser.find_element(By.CSS_SELECTOR, "label[for=\""+str(context.current_todo_id)+"_"+action.lower()+"\"]")
     action_button.click()
     context.actionButton = action_button
     submit_form(context)
 
 @then(u'the due date of the task "{taskName}" should change to "{newDueDate}"')
 def due_date_of_task_should_change_to(context, taskName, newDueDate):
-    due_date = context.browser.find_element_by_class_name("dueDateStr").text
+    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".dueDateStr")))
+    due_date = context.browser.find_element(By.CLASS_NAME, "dueDateStr").text
     due_date_to_verify = datetime.datetime.strptime(due_date, context.dateFormatFromInputText).strftime(context.dateFormatForFeature)
     assert_that(due_date_to_verify).is_equal_to(newDueDate)
 
@@ -123,8 +124,8 @@ def step_impl(context):
 def step_impl(context, filterValue):
     #Only one option is available as of now, ignoring paramaters
     driver = context.browser # type: selenium.webdriver.Firefox
-    context.browser.find_element_by_xpath('//a[text()="'+filterValue+'"]').click()
-    assert_that(driver.find_element_by_id("clear_filter").is_displayed()).is_true()
+    context.browser.find_element(By.XPATH, '//a[text()="'+filterValue+'"]').click()
+    assert_that(driver.find_element(By.ID, "clear_filter").is_displayed()).is_true()
 
 @then(u'"{taskName}" should be visible')
 def step_impl(context, taskName):
@@ -157,7 +158,7 @@ def step_impl(context, taskName):
 def step_impl(context):
     driver = context.browser # type: selenium.webdriver.Firefox
     driver.find_element(By.ID, "clear_filter").click()
-    assert_that(driver.find_element_by_id("new_filter").is_displayed()).is_true()
+    assert_that(driver.find_element(By.ID, "new_filter").is_displayed()).is_true()
 
 @when(u'user clicks on the task "{taskName}" to edit it')
 def step_impl(context, taskName):
@@ -170,47 +171,47 @@ def step_impl(context, taskName):
 
 @when(u'user edits due date as "{dueDate}"')
 def enter_task_due_date(context, dueDate):
-    dueDateElement = context.browser.find_element_by_id("edit_dueDate")
+    dueDateElement = context.browser.find_element(By.ID, "edit_dueDate")
     dueDateElement.send_keys(datetime.datetime.strptime(dueDate, context.dateFormatForFeature).strftime(context.dateFormatForInput))
 
 
 @when(u'clicks on submit to edit')
 def step_impl(context):
-    editSubmitBtn = context.browser.find_element_by_css_selector("input[type='submit']")
+    editSubmitBtn = context.browser.find_element(By.CSS_SELECTOR, "input[type='submit']")
     editSubmitBtn.click()
 
 @when(u'user edits task name as "{title}"')
 def step_impl(context,title):
-    taskTitle = context.browser.find_element_by_id("edit_taskTitle")
+    taskTitle = context.browser.find_element(By.ID, "edit_taskTitle")
     taskTitle.clear()
     taskTitle.send_keys(title)
 
 @when(u'user edits frequency as "{freq}"')
 def step_impl(context,freq):
     browser = context.browser # type: selenium.webdriver.Firefox
-    frequency = browser.find_element_by_id("edit_freq")
+    frequency = browser.find_element(By.ID, "edit_freq")
     frequency.clear()
     frequency.send_keys(freq)
 
 @when(u'user edits slot to "{slotNumber}"')
 def step_impl(context, slotNumber):
-    slot = context.browser.find_element_by_css_selector("label[for=edit_slot"+slotNumber+"]")
+    slot = context.browser.find_element(By.CSS_SELECTOR, "label[for=edit_slot"+slotNumber+"]")
     slot.click()
 
 @when(u'user edits remind before to "{noOfDays}"')
 def step_impl(context,noOfDays):
-    remindBefore = context.browser.find_element_by_id("edit_remindBeforeDays")
+    remindBefore = context.browser.find_element(By.ID, "edit_remindBeforeDays")
     remindBefore.send_keys(noOfDays)
 
 @when(u'user edits category as "{category}"')
 def edit_category(context, category):
-    slot = context.browser.find_element_by_css_selector("label[for=edit_cat_"+category+"]")
+    slot = context.browser.find_element(By.CSS_SELECTOR, "label[for=edit_cat_"+category+"]")
     slot.click()
 
     
 @when(u'user edits Track Habit')
 def step_impl(context):
-    track_habit = context.browser.find_element_by_xpath("/html/body/form/table/tbody/tr[7]/td/label")
+    track_habit = context.browser.find_element(By.XPATH, "/html/body/form/table/tbody/tr[7]/td/label")
     track_habit.click()
 
 @then(u'validate task with name "{task_name}", frequency "{frequency}", due date "{due_date}", time slot "{timeSlot}", remind before "{remindBefore}", category as "{category}" and track habit as "{trackHabit}"')
@@ -226,12 +227,12 @@ def step_impl(context, task_name, frequency, due_date, timeSlot, remindBefore, t
 
 @when(u'user clicks on delete button')
 def click_on_delete(context):
-    deleteLink = context.browser.find_element_by_css_selector("#deleteLink")
+    deleteLink = context.browser.find_element(By.CSS_SELECTOR, "#deleteLink")
     deleteLink.click()
 
 @when(u'user confirms delete')
 def confirm_delete(context):
-    deleteSubmitBtn = context.browser.find_element_by_css_selector("input[type='submit']")
+    deleteSubmitBtn = context.browser.find_element(By.CSS_SELECTOR, "input[type='submit']")
     deleteSubmitBtn.click()
 
 @then(u'"{taskName}" task should not exists on home')

@@ -21,6 +21,19 @@ def __get_ui_time_zone():
     return pytz.timezone("Asia/Kolkata")
 
 
+def get_task_logs_entry_by_id(todo_logs_entry):
+    entries = {}
+    for log_entry in todo_logs_entry :
+        todo_id = log_entry['todo_id']
+        if todo_id not in entries:
+            entries[todo_id]={"task":"", "logs": {}}
+        entries[todo_id]["task"] = log_entry["task"]
+        print(log_entry["due_date"])
+        print(log_entry["due_date"].astimezone(__get_ui_time_zone()))
+        print(pytz.utc.localize(log_entry["due_date"]).astimezone(__get_ui_time_zone()))
+        entries[todo_id]["logs"][pytz.utc.localize(log_entry["due_date"]).astimezone(__get_ui_time_zone()).day] = log_entry["action"]
+    return entries
+        
 def get_task_bucket(todo: Todo) -> TaskBuckets:
     if todo['due_date'] is None:
         return TaskBuckets.TODAY
@@ -91,3 +104,8 @@ def get_task_view_model(todo: Todo, todo_logs_map, accept_languages) -> TodoList
 
 def sort_task_by_slots(todos: List[TodoListViewModel]):
     todos.sort(key=lambda todo: (todo["timeSlot"] and ((todo["timeSlot"] == "None" and 9) or todo["timeSlot"])) or 9)
+
+
+def get_current_month_year():
+    currentTime = pytz.utc.localize(datetime.utcnow()).astimezone(__get_ui_time_zone())
+    return [currentTime.month, currentTime.year]

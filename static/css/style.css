@@ -202,3 +202,40 @@ input[id^="create_cat"]
 .duePast {
     color: red;
 }
+
+
+
+
+table, th, td {
+  border: 1px solid;
+}
+
+td {
+    padding: 5px;
+}
+
+.done-False {
+    background: red;
+}
+
+.done-True {
+    background: green;
+}
+
+.habit_report_table_container {
+    padding: 10px;
+}
+
+.habit_report_table_container table {
+    margin: 0 auto;
+    border: 0px;
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    color: #0e680e;
+}
+
+.habit_report_table_container > tr,td,th {
+    border: 0px;
+    min-width:20px;
+}

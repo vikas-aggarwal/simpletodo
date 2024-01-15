@@ -17,6 +17,12 @@ TodoLog = TypedDict('TodoLog', {"todo_id": int,
                                 "count": int,
                                 "action": str})
 
+TodoLogEntry = TypedDict('TodoLogEntry', {"task": str,
+                                          "due_date": datetime,
+                                          "action": str,
+                                          "todo_id": int
+                                          })
+
 TodoCreatePayload = TypedDict('TodoCreatePayload', {"todo_id": Optional[int],
                                                     "due_date": Optional[datetime],
                                                     "frequency": Optional[str],

@@ -4,7 +4,7 @@ from TodoTypes import TodoLog
 from TodoTypes import TaskBuckets
 from flask import render_template, request, redirect, make_response, Flask
 from ui import TaskUtils as task_utils
-from datetime import datetime
+from datetime import datetime, timedelta
 from db.dbManager import DBManager
 from util import commons
 from runtime_type_checker import check_type
@@ -30,7 +30,8 @@ def init_ui(app, dbConnection: DBManager):
     __app.add_url_rule("/todos/style", "style", __generate_style, methods=["GET"])
     __app.add_url_rule("/todos/delete/<int:todo_id>", "delete", __delete_task_page, methods=["GET"])
     __app.add_url_rule("/todos/delete/<int:todo_id>", "deleteTask", __delete_task, methods=["POST"])
-
+    __app.add_url_rule("/todos/habitReport", "habitReport", __habit_report, methods=["GET"])
+    
 def __generate_style():
     resp = make_response(render_template("style.css", commons=commons))
     resp.headers['Content-Type'] = 'text/css'
@@ -42,6 +43,23 @@ def __filter_task():
 
 
 # routes
+def __habit_report():
+    month = request.args.get("month")
+    year = request.args.get("year")
+    start_date = datetime(int(year), int(month), 1,0,0,0,0, tzinfo=task_utils.__get_ui_time_zone()).astimezone(pytz.UTC).replace(tzinfo=None)
+    if month != 12:
+        end_date = (datetime(int(year), int(month)+1, 1, tzinfo=task_utils.__get_ui_time_zone()) + timedelta(days=-1))
+    else:
+        end_date = (datetime(int(year)+1, 1, 1, tzinfo=task_utils.__get_ui_time_zone()) + timedelta(days=-1))
+
+    end_day = end_date.day
+    end_date = end_date.astimezone(pytz.UTC).replace(tzinfo=None)
+    todo_logs_entry = __database.get_todo_logs(start_date, end_date)
+    print(todo_logs_entry)
+    todo_logs_entry_by_id = task_utils.get_task_logs_entry_by_id(todo_logs_entry)
+    print(todo_logs_entry_by_id)
+    return render_template("habitReport.html", entries=todo_logs_entry_by_id, month=month, year=year, start_day=1, end_day=end_day)
+
 def __delete_task(todo_id):
     __database.delete_todo(todo_id)
     return redirect("/todos/home", 302)
@@ -96,7 +114,7 @@ def __group_by_status(allTodos, todo_logs_map, errors, filterString, till, group
         todos_by_type[bucket].append(task_utils.get_task_view_model(todo, todo_logs_map, request.accept_languages))
 
     task_utils.sort_task_by_slots(todos_by_type[TaskBuckets.TODAY.name])
-    return render_template("homepage.html", todos=todos_by_type, errors=errors, filterString=filterString, commons=commons, partitions=["ALERTS", "PENDING", "TODAY", "UPCOMING"], till=till, groupBy=groupBy)
+    return render_template("homepage.html", todos=todos_by_type, errors=errors, filterString=filterString, commons=commons, partitions=["ALERTS", "PENDING", "TODAY", "UPCOMING"], till=till, groupBy=groupBy, currentMonthYear=task_utils.get_current_month_year())
 
 def __group_by_slots(allTodos, todo_logs_map, errors, filterString, till, groupBy):
     todos_by_slot = {};
@@ -111,7 +129,7 @@ def __group_by_slots(allTodos, todo_logs_map, errors, filterString, till, groupB
         else:
             todos_by_slot[commons.slots[str(todo["timeSlot"])]].append(task_utils.get_task_view_model(todo, todo_logs_map, request.accept_languages))
 
-    return render_template("homepage.html", todos=todos_by_slot, errors=errors, filterString=filterString, commons=commons, partitions=commons.slots.values(), till=till, groupBy=groupBy)
+    return render_template("homepage.html", todos=todos_by_slot, errors=errors, filterString=filterString, commons=commons, partitions=commons.slots.values(), till=till, groupBy=groupBy, currentMonthYear=task_utils.get_current_month_year())
 
 def __home_page(errors=None):
     filterString = ""
@@ -137,7 +155,7 @@ def __home_page(errors=None):
         if log["todo_id"] not in todo_logs_map:
             todo_logs_map[log["todo_id"]] = {}
         todo_logs_map[log["todo_id"]][log["action"]] = log["count"]
-
+        
     if request.args.get("groupBy"):
         if request.args.get("groupBy") == "slots":
             return __group_by_slots(allTodos, todo_logs_map, errors, filterString, request.args.get("till"), request.args.get("groupBy"))

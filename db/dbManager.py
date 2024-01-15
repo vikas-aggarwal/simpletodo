@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from TodoTypes import Todo, TodoTaskDoneOrSkipModel, TodoUpdatePayload, TodoCreatePayload, FilterModel, FilterUnitModel
-from typing import Union
+from typing import Union, List
 import os
 
 class DBManager(metaclass=ABCMeta):
@@ -33,10 +33,14 @@ class DBManager(metaclass=ABCMeta):
     def delete_todo(self, todo_id):
         pass
 
-    def _getSupportedOperators(self):
+    @abstractmethod
+    def get_todo_logs(self, startTimeStamp, endTimeStamp):
+        pass
+    
+    def _getSupportedOperators(self) -> List[str]:
         return ["=", "!=", "LIKE", "IN"]
 
-    def _getSupportedAttributes(self):
+    def _getSupportedAttributes(self) -> List[str]:
         return ["frequency", "trackHabit", "task", "category", "timeSlot"]
 
     def _isSupportedAttribute(self, attribute):

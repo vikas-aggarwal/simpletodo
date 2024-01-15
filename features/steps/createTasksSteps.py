@@ -18,7 +18,7 @@ def userOnTaskListPage(context):
 
 @when(u'user clicks on New')
 def userClicksOnNew(context):
-    new_button_link = context.browser.find_element_by_id("new_task")
+    new_button_link = context.browser.find_element(By.ID, "new_task")
     new_button_link.click()
 
 @when(u'clicks on submit')
@@ -30,24 +30,24 @@ def userClicksOnSubmit(context):
 @then(u'a new task should be created')
 def newTaskStep(context,expectedTasksCount="1"):
     driver = context.browser # type: selenium.webdriver.Firefox
-    task_count = len(driver.find_elements_by_class_name("task"))
+    task_count = len(driver.find_elements(By.CLASS_NAME,"task"))
     context.foundNewTask = []
     assert_that(task_count).is_equal_to(int(expectedTasksCount))
-    for task in driver.find_elements_by_class_name("task"):
+    for task in driver.find_elements(By.CLASS_NAME,"task"):
         context.foundNewTask.append(task)
 
 
 @then(u'Task title is "{title}"')
 def task_title_is(context, title, index=0):
-    assert_that(context.foundNewTask[index].find_element_by_class_name("taskTitle").text).is_equal_to(title)
+    assert_that(context.foundNewTask[index].find_element(By.CLASS_NAME, "taskTitle").text).is_equal_to(title)
 
 @then(u'Task banner should be "{task_banner}"')
 def verify_task_banner(context, task_banner, index=0):
-    assert_that(context.foundNewTask[index].find_element_by_class_name("category").text).is_equal_to(task_banner)
+    assert_that(context.foundNewTask[index].find_element(By.CLASS_NAME, "category").text).is_equal_to(task_banner)
 
 @when(u'user enters "{title}" on title field')
 def user_enters_title(context,title):
-    taskTitle = context.browser.find_element_by_id("create_taskTitle")
+    taskTitle = context.browser.find_element(By.ID, "create_taskTitle")
     taskTitle.send_keys(title)
 
 @then(u'Task Due Date is "{dueDate}"')
@@ -56,20 +56,20 @@ def task_due_date_is(context, dueDate):
         dueDateString = datetime.datetime.now().strftime(context.dateFormatForFeature);
     else:
         dueDateString = dueDate;
-    due_date_str = context.foundNewTask[0].find_element_by_class_name("dueDateStr").text
+    due_date_str = context.foundNewTask[0].find_element(By.CLASS_NAME, "dueDateStr").text
     due_date_to_verify = datetime.datetime.strptime(due_date_str, context.dateFormatFromInputText).strftime(context.dateFormatForFeature)
     assert_that(due_date_to_verify).is_equal_to(dueDateString);
 
 
 @when(u'user enters "{freq}" on the frequency field')
 def user_enters_frequency(context,freq):
-    frequency = context.browser.find_element_by_id("create_freq");
+    frequency = context.browser.find_element(By.ID, "create_freq");
     frequency.send_keys(freq);
 
 
 @then(u'Task Frequency is "{freq}"')
 def task_frequency_is(context,freq):
-    frequencyText = context.foundNewTask[0].find_element_by_class_name("frequencyStr").text
+    frequencyText = context.foundNewTask[0].find_element(By.CLASS_NAME, "frequencyStr").text
     assert_that(frequencyText).is_equal_to(freq);
     
 
@@ -83,25 +83,25 @@ def task_next_is(context,noOfDays,dueDate):
         
     nextDate = datetime.datetime.strptime(dueDateString, context.dateFormatForFeature) + datetime.timedelta(days=int(noOfDays))
     nextDateString = nextDate.strftime(context.dateFormatForFeature)
-    nextDateSpan = context.foundNewTask[0].find_element_by_css_selector(".nextDate input")
+    nextDateSpan = context.foundNewTask[0].find_element(By.CSS_SELECTOR, ".nextDate input")
     next_date_to_verify = datetime.datetime.strptime(nextDateSpan.get_attribute("value"), context.dateFormatForInput).strftime(context.dateFormatForFeature)
     assert_that(next_date_to_verify).is_equal_to(nextDateString);
 
 
 @when(u'user enters due date as "{dueDate}"')
 def enter_task_due_date(context, dueDate):
-    dueDateElement = context.browser.find_element_by_id("create_dueDate")
+    dueDateElement = context.browser.find_element(By.ID, "create_dueDate")
     dueDateElement.send_keys(datetime.datetime.strptime(dueDate, context.dateFormatForFeature).strftime(context.dateFormatForInput))
 
 
 @when(u'user selects slot "{slotNumber}"')
 def user_selects_slot(context, slotNumber):
-    slot = context.browser.find_element_by_css_selector("label[for=create_slot"+slotNumber+"]")
+    slot = context.browser.find_element(By.CSS_SELECTOR, "label[for=create_slot"+slotNumber+"]")
     slot.click()
 
 @when(u'user selects category as "{category}"')
 def user_selects_slot(context, category):
-    slot = context.browser.find_element_by_css_selector("label[for=create_cat_"+category+"]")
+    slot = context.browser.find_element(By.CSS_SELECTOR, "label[for=create_cat_"+category+"]")
     slot.click()
 
 
@@ -116,13 +116,13 @@ def appear_before(context, beforeTask, afterTask):
 
 @when(u'user enters "{noOfDays}" in remind before field')
 def step_impl(context,noOfDays):
-    remindBefore = context.browser.find_element_by_id("create_remindBeforeDays")
+    remindBefore = context.browser.find_element(By.ID, "create_remindBeforeDays")
     remindBefore.send_keys(noOfDays)
 
 @then(u'"{taskName}" should appear in the alerts section')
 def task_appear_in_alerts(context,taskName):
-    taskListWebElement = context.browser.find_elements_by_class_name("taskList")[0]
-    taskListElements = taskListWebElement.find_elements_by_class_name("task")
+    taskListWebElement = context.browser.find_elements(By.CLASS_NAME, "taskList")[0]
+    taskListElements = taskListWebElement.find_elements(By.CLASS_NAME, "task")
     foundInAlert = len(taskListElements) == 1
     assert_that(foundInAlert).is_true();    
 
@@ -136,7 +136,7 @@ def step_impl(context,noOfDays):
 
 @when(u'user selects Track Habit')
 def user_selects_track_habit(context):
-    track_habit = context.browser.find_element_by_css_selector("label[for=create_trackHabit")
+    track_habit = context.browser.find_element(By.CSS_SELECTOR, "label[for=create_trackHabit")
     track_habit.click()
 
 
@@ -144,7 +144,7 @@ def user_selects_track_habit(context):
 def step_impl(context,taskName):
     task = context.foundNewTask[0]
     task_title_is(context, taskName)
-    buttons = task.find_elements_by_class_name("button_labels")
+    buttons = task.find_elements(By.CLASS_NAME, "button_labels")
     assert_that(len(buttons)).is_equal_to(3)
     assert_that(buttons[0].text).is_equal_to("X")
     assert_that(buttons[1].text).is_equal_to("Done (0)")

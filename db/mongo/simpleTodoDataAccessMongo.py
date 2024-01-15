@@ -2,8 +2,8 @@ from datetime import datetime
 import pymongo
 from pymongo import MongoClient
 from db.dbManager import DBManager
-from TodoTypes import FilterModel, Todo, TodoLog
-from typing import Optional
+from TodoTypes import FilterModel, Todo, TodoLog, TodoLogEntry
+from typing import Optional, List
 
 class SimpleTodoDataAccessMongo(DBManager):
     def __init__(self, APP):
@@ -18,6 +18,30 @@ class SimpleTodoDataAccessMongo(DBManager):
             data.append(self._getTodoLogObjectFromRow(row))
         return data
 
+    def _getTodoLogEntryFromRow(self, row, todo_id_map) -> TodoLogEntry:
+        todo_log_entry: TodoLogEntry = {
+            "task": todo_id_map[row['todo_id']],
+            "due_date": row['due_date'],
+            "action": row['action'],
+            "todo_id": row['todo_id']
+        }
+        return todo_log_entry
+
+    def get_todo_logs(self, startTimeStamp: datetime, endTimeStamp: datetime) -> List[TodoLogEntry]:
+        print(startTimeStamp)
+        print(endTimeStamp)
+        todo_logs = self.db.todo_logs.find({"due_date": {"$lte": endTimeStamp, "$gte": startTimeStamp}})
+        todo_id_map = {}
+        todos = self.db.todos.find(projection=["task","todo_id"])
+
+        for todo in todos:
+            todo_id_map[todo['todo_id']] = todo['task']
+            
+        data = []
+        for todo_log in todo_logs:
+            data.append(self._getTodoLogEntryFromRow(todo_log, todo_id_map))
+        return data
+    
     def _getTodoLogObjectFromRow(self, row):
         print(row)
         todo_log = {"todo_id": row['_id']['todo_id'], "action":row['_id']['action'], "count" : row['count']} #type: TodoLog
@@ -137,7 +161,7 @@ class SimpleTodoDataAccessMongo(DBManager):
             if 'due_date' in todo_object:
                 todo_log['due_date'] = todo_object['due_date']
                 #insert into todo_logs collection
-                self.db.todo_logs.insert(todo_log)
+                self.db.todo_logs.insert_one(todo_log)
 
     def process_todo_action(self, data):
 
@@ -155,5 +179,5 @@ class SimpleTodoDataAccessMongo(DBManager):
             if 'due_date' in todo_object:
                 todo_log['due_date'] = todo_object['due_date']
                 #insert into todo_logs collection
-                self.db.todo_logs.insert(todo_log)
+                self.db.todo_logs.insert_one(todo_log)
 
