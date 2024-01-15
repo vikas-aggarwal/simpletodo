@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>Habit Report</title>
+  <link rel="stylesheet" type="text/css" href="../static/css/style.css">
+  <link rel="stylesheet" type="text/css" href="./style">
+  </head>
+  <body>
+    <div class="page_header">
+      <h1 class="page_title">Habit Report</h1>
+      <div class="action_bar">
+	<a href="./home">Home</a>
+      </div>
+    </div>
+    {% if entries|length != 0 %}
+    <div class="habit_report_table_container">
+      <table>
+	<tr>
+	  <td></td>
+	  {% for i in range(start_day, end_day+1) %}
+	  <th>{{i}}</th>
+	  {% endfor %}
+	</tr>
+      {% for entry in entries %}
+	<tr>
+	  <th>{{entries[entry]['task']}}</th>
+	  {% for i in range(start_day, end_day+1) %}
+	  <td class="done-{{entries[entry]['logs'][i] == 'Done'}}"></td>
+	  {% endfor %}
+	</tr>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if entries|length == 0 %}
+    No Entries Found
+    {% endif %}
+  </body>
+</html>
