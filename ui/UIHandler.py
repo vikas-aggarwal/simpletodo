@@ -47,7 +47,7 @@ def __habit_report():
     month = request.args.get("month")
     year = request.args.get("year")
     start_date = datetime(int(year), int(month), 1,0,0,0,0, tzinfo=task_utils.__get_ui_time_zone()).astimezone(pytz.UTC).replace(tzinfo=None)
-    if month != 12:
+    if int(month) != 12:
         end_date = (datetime(int(year), int(month)+1, 1, tzinfo=task_utils.__get_ui_time_zone()) + timedelta(days=-1))
     else:
         end_date = (datetime(int(year)+1, 1, 1, tzinfo=task_utils.__get_ui_time_zone()) + timedelta(days=-1))
@@ -55,9 +55,7 @@ def __habit_report():
     end_day = end_date.day
     end_date = end_date.astimezone(pytz.UTC).replace(tzinfo=None)
     todo_logs_entry = __database.get_todo_logs(start_date, end_date)
-    print(todo_logs_entry)
     todo_logs_entry_by_id = task_utils.get_task_logs_entry_by_id(todo_logs_entry)
-    print(todo_logs_entry_by_id)
     return render_template("habitReport.html", entries=todo_logs_entry_by_id, month=month, year=year, start_day=1, end_day=end_day)
 
 def __delete_task(todo_id):
