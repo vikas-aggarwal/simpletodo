@@ -53,7 +53,7 @@
 	     {% for todo in todos[partition] %}
 	     <div class="task">
 	       <div class="taskInfo">
-		 <div class="category {{todo.category}}">{{commons.categories[todo.category or "uncategorized"]}} - {{commons.slots[(todo.timeSlot|string)]}}</div>
+		 <div class="category {{todo.category}}">{{categories[todo.category or "uncategorized"]["display_name"]}} - {{commons.slots[(todo.timeSlot|string)]}}</div>
 		 <h4 class="taskTitle"><a href="edit/{{todo['todo_id']}}">{{todo["task"]}}</a></h4>
 		 {% if todo['frequency'] %}
 		 <div class="frequency"><i>Frequency</i>:

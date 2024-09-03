@@ -4,6 +4,10 @@ from datetime import datetime
 from enum import Enum
 
 
+Category = TypedDict('Category', {"internal_name": str,
+                                  "display_name": str,
+                                  "background_color": str})
+
 Todo = TypedDict('Todo', {"todo_id": int,
                           "due_date": Optional[datetime],
                           "frequency": Optional[str],

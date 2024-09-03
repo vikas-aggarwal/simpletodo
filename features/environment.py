@@ -5,7 +5,13 @@ import datetime
 import os
 
 def before_all(context):
-    context.browser = webdriver.Firefox()
+    firefox_bin = "/snap/firefox/current/usr/lib/firefox/firefox"
+    firefoxdriver_bin = "/snap/firefox/current/usr/lib/firefox/geckodriver"
+    service = webdriver.firefox.service.Service(executable_path=firefoxdriver_bin)
+    options = webdriver.firefox.options.Options()
+    #options.add_argument('--headless')
+    options.binary_location = firefox_bin
+    context.browser = webdriver.Firefox(options=options, service=service)
     context.wait = WebDriverWait(context.browser, 10)
     context.host = "localhost"
     context.port = "8080"

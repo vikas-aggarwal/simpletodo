@@ -6,9 +6,9 @@
     color: white;
 }
 
-{% for category in commons.categoriesColorMap %}
+{% for category in categories %}
 #edit_cat_{{category}}:checked + label, #create_cat_{{category}}:checked + label, .{{category}} {
-    background-color: {{commons.categoriesColorMap[category]}};
+    background-color: {{categories[category]["background_color"]}};
 }
 
 {% endfor %}

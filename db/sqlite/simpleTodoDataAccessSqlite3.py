@@ -271,3 +271,16 @@ class SimpleTodoDataAccessSqlite3(DBManager):
             conn.commit()
 
         conn.close()
+
+    def get_categories(self):
+        categories = {}
+        conn = self._getConnection()
+        db = conn.cursor()
+        db.execute("select internal_name, display_name, background_color from categories order by display_name")
+        rows = db.fetchall()
+        for row in rows:
+            categories[row["internal_name"]] = {"internal_name": row["internal_name"],
+                               "display_name": row["display_name"],
+                               "background_color": row["background_color"]}
+        db.close()
+        return categories

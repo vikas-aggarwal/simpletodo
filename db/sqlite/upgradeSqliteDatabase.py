@@ -8,6 +8,21 @@ def __is_new_database(conn):
     if len(rows) == 0:
         return True
 
+
+def __create_categories_seed_data_if_does_not_exists(conn):
+    db = conn.cursor()
+    db.execute("select internal_name from categories")
+    rows = db.fetchall()
+    if len(rows) == 0:
+        db.execute("insert into categories(internal_name, display_name, background_color) values('uncategorized', 'Uncategorized', '#ceecce')")
+        db.execute("insert into categories(internal_name, display_name, background_color) values('health', 'Health', '#9eb0e3')")
+        db.execute("insert into categories(internal_name, display_name, background_color) values('finance', 'Finance','#eae485')")
+        db.execute("insert into categories(internal_name, display_name, background_color) values('maintenance', 'Maintenance', '#e8bdbd')")
+        db.execute("insert into categories(internal_name, display_name, background_color) values('bills', 'Bills', '#A0CCDB')")
+        db.execute("insert into categories(internal_name, display_name, background_color) values('learning', 'Learning', '#d5af56')")
+    db.close()
+    conn.commit()
+    
 def __create_version_table_if_does_not_exists(conn):
     conn.execute('''
     CREATE TABLE if not exists todo_schema_version (
@@ -37,6 +52,14 @@ def __create_tables(conn):
     action text,
     due_date text,
     creation_timestamp text
+    )
+    ''')
+
+    conn.execute('''
+    CREATE TABLE if not exists categories (
+    internal_name text,
+    display_name text,
+    background_color text
     )
     ''')
 
@@ -76,30 +99,18 @@ def process(conn: sqlite3.Connection, schema_version):
         print("New Database detected")
         __create_tables(conn)
         __create_version_table_if_does_not_exists(conn)
+        __create_categories_seed_data_if_does_not_exists(conn)
         __set_version_on_database(conn, schema_version)
+        conn.commit()
         version = schema_version
     else:  # Table should exists
         version = __get_current_schema_version(conn)
-        if version < schema_version:  # Upgrade
-            print("Older version detected, updating from " + str(version) + " to " + str(schema_version));
-            db = conn.cursor()
-            db.execute("alter table todos rename to todos_temp")
-            db.execute("alter table todo_logs rename to todo_logs_temp")
+        if version == 2:  # run data fixes, version 2 has no schema changes, bumped up to run fixes
+            print("Upgrading database")
             __create_tables(conn)
-            todos_temp_column = __get_columns_for_table_csv(conn, 'todos_temp')
-            db.execute("insert into todos (" + todos_temp_column + ") select " + todos_temp_column + " from todos_temp")
-            todo_logs_temp_column = __get_columns_for_table_csv(conn, 'todo_logs_temp')
-            db.execute("insert into todo_logs (" + todo_logs_temp_column + ") select " + todo_logs_temp_column + " from todo_logs_temp")
-            db.execute("drop table todos_temp")
-            db.execute("drop table todo_logs_temp")
+            __create_version_table_if_does_not_exists(conn)
+            __create_categories_seed_data_if_does_not_exists(conn)
             __set_version_on_database(conn, schema_version)
-            version = schema_version;
-            db.close()
             conn.commit()
-    if version == 2:  # run data fixes, version 2 has no schema changes, bumped up to run fixes
-        db = conn.cursor()
-        print("NULL data fix")
-        db.execute("update todos set time_slot = NULL where time_slot = 'None'")
-        db.execute("update todos set remind_before_days = NULL where remind_before_days = ''")
-        db.close()
-        conn.commit()
+        elif version != schema_version:
+            raise Exception("Invalid Database version detected")

@@ -1,10 +1,14 @@
 from abc import ABCMeta, abstractmethod
-from TodoTypes import Todo, TodoTaskDoneOrSkipModel, TodoUpdatePayload, TodoCreatePayload, FilterModel, FilterUnitModel
+from TodoTypes import Todo, TodoTaskDoneOrSkipModel, TodoUpdatePayload, TodoCreatePayload, FilterModel, FilterUnitModel, Category
 from typing import Union, List
 import os
 
 class DBManager(metaclass=ABCMeta):
 
+    @abstractmethod
+    def get_categories(self) -> dict[str, Category]:
+        pass
+    
     @abstractmethod
     def get_todo(self, todo_id: int) -> Todo:
         pass
@@ -50,7 +54,7 @@ class DBManager(metaclass=ABCMeta):
         return operator in self._getSupportedOperators()
 
     def getSchemaVersion(self):
-        return 2
+        return 3
 
     def parseFilters(self, filters) -> FilterModel:
         '''

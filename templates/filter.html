@@ -20,17 +20,17 @@
         <a href="./home?query=frequency=Daily&groupBy=slots&till=today">Daily Tasks Only</a>
         <h3>By Category</h3>
         {% set ns = namespace(query="") %}
-        {% for cat in commons.categories %}
+        {% for cat in categories %}
         {% if cat != "uncategorized" %}
         {% if ns.query == "" %}
         {% set ns.query = ns.query + "category!="+cat %}
         {% else %}
         {% set ns.query = ns.query + ";category!="+cat %}
         {% endif %}
-        <a href="./home?query=category={{cat}}&groupBy=slots&till=today">Tasks Belonging to category {{commons.categories[cat]}}</a>
+        <a href="./home?query=category={{cat}}&groupBy=slots&till=today">Tasks Belonging to category {{categories[cat]["display_name"]}}</a>
         {% endif %}
         {% endfor %}
-        <a href="./home?query={{ns.query}}&groupBy=slots&till=today">Tasks Belonging to category {{commons.categories['uncategorized']}}</a>
+        <a href="./home?query={{ns.query}}&groupBy=slots&till=today">Tasks Belonging to category {{categories['uncategorized']["display_name"]}}</a>
       </div>
       <div class="filter_links">
         <h2>Group by Status</h2>
@@ -38,17 +38,17 @@
         <a href="./home?query=frequency=Daily">Daily Tasks Only</a>
         <h3>By Category</h3>
         {% set ns = namespace(query="") %}
-        {% for cat in commons.categories %}
+        {% for cat in categories %}
         {% if cat != "uncategorized" %}
         {% if ns.query == "" %}
         {% set ns.query = ns.query + "category!="+cat %}
         {% else %}
         {% set ns.query = ns.query + ";category!="+cat %}
         {% endif %}
-        <a href="./home?query=category={{cat}}">Tasks Belonging to category {{commons.categories[cat]}}</a>
+        <a href="./home?query=category={{cat}}">Tasks Belonging to category {{categories[cat]["display_name"]}}</a>
         {% endif %}
         {% endfor %}
-        <a href="./home?query={{ns.query}}">Tasks Belonging to category {{commons.categories['uncategorized']}}</a>
+        <a href="./home?query={{ns.query}}">Tasks Belonging to category {{categories['uncategorized']["display_name"]}}</a>
         <h3>By Slot</h3>
         {% set ns = namespace(query="") %}
         {% for slot in commons.slots %}

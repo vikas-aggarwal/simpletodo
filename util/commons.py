@@ -3,20 +3,6 @@ import pytz
 from TodoTypes import PayloadError, TodoUpdatePayload
 from typing import Union
 
-categories = {"uncategorized": "Uncategorized",
-              "health": "Health",
-              "finance": "Finance",
-              "maintenance": "Maintenance",
-              "bills": "Bills",
-              "learning": "Learning"}
-
-categoriesColorMap = {"uncategorized": "#ceecce",
-                      "health": "#9eb0e3",
-                      "finance": "#eae485",
-                      "maintenance": "#e8bdbd",
-                      "bills": "#A0CCDB",
-                      "learning": "#d5af56"}
-
 slots = {"1": "Post Wake up",
          "2": "Before Bath",
          "3": "Before Lunch",

@@ -33,13 +33,13 @@ def init_ui(app, dbConnection: DBManager):
     __app.add_url_rule("/todos/habitReport", "habitReport", __habit_report, methods=["GET"])
     
 def __generate_style():
-    resp = make_response(render_template("style.css", commons=commons))
+    resp = make_response(render_template("style.css", commons=commons, categories=__database.get_categories()))
     resp.headers['Content-Type'] = 'text/css'
     return resp
 
 
 def __filter_task():
-    return render_template("filter.html", commons=commons)
+    return render_template("filter.html", commons=commons, categories=__database.get_categories())
 
 
 # routes
@@ -87,7 +87,7 @@ def __edit_task_page(todo_id, errors=None):
     return render_template("editCreateTask.html",
                            data={"action": "edit",
                                  "taskData": todo and task_utils.get_task_view_model(todo, {}, request.accept_languages),
-                                 "errors": errors, "commons": commons})
+                                 "errors": errors, "commons": commons, "categories":__database.get_categories()})
 
 def __delete_task_page(todo_id, errors=None):
     todo = __database.get_todo(todo_id)
@@ -96,7 +96,7 @@ def __delete_task_page(todo_id, errors=None):
 
 
 def __load_create_new_page(errors=None):
-    return render_template("editCreateTask.html", data={"action": "create", "taskData": None, "errors": errors, "commons": commons})
+    return render_template("editCreateTask.html", data={"action": "create", "taskData": None, "errors": errors, "commons": commons, "categories":__database.get_categories()})
 
 def __group_by_status(allTodos, todo_logs_map, errors, filterString, till, groupBy):
     todos_by_type = {
@@ -112,7 +112,7 @@ def __group_by_status(allTodos, todo_logs_map, errors, filterString, till, group
         todos_by_type[bucket].append(task_utils.get_task_view_model(todo, todo_logs_map, request.accept_languages))
 
     task_utils.sort_task_by_slots(todos_by_type[TaskBuckets.TODAY.name])
-    return render_template("homepage.html", todos=todos_by_type, errors=errors, filterString=filterString, commons=commons, partitions=["ALERTS", "PENDING", "TODAY", "UPCOMING"], till=till, groupBy=groupBy, currentMonthYear=task_utils.get_current_month_year())
+    return render_template("homepage.html", todos=todos_by_type, errors=errors, filterString=filterString, commons=commons, partitions=["ALERTS", "PENDING", "TODAY", "UPCOMING"], till=till, groupBy=groupBy, currentMonthYear=task_utils.get_current_month_year(), categories=__database.get_categories())
 
 def __group_by_slots(allTodos, todo_logs_map, errors, filterString, till, groupBy):
     todos_by_slot = {};
@@ -127,7 +127,7 @@ def __group_by_slots(allTodos, todo_logs_map, errors, filterString, till, groupB
         else:
             todos_by_slot[commons.slots[str(todo["timeSlot"])]].append(task_utils.get_task_view_model(todo, todo_logs_map, request.accept_languages))
 
-    return render_template("homepage.html", todos=todos_by_slot, errors=errors, filterString=filterString, commons=commons, partitions=commons.slots.values(), till=till, groupBy=groupBy, currentMonthYear=task_utils.get_current_month_year())
+    return render_template("homepage.html", todos=todos_by_slot, errors=errors, filterString=filterString, commons=commons, partitions=commons.slots.values(), till=till, groupBy=groupBy, currentMonthYear=task_utils.get_current_month_year(), categories=__database.get_categories())
 
 def __home_page(errors=None):
     filterString = ""

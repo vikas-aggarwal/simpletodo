@@ -66,11 +66,11 @@
 	  <td colspan="2">
 	    <fieldset data-role="controlgroup" data-type="horizontal">
 	      <legend>Category:</legend>
-	      {% for cat in data.commons.categories|list|sort %}
+	      {% for cat in data.categories|list|sort %}
 	      {% if cat == "uncategorized" %}
-	      <input type="radio" name="category" id="{{data['action']}}_cat_{{cat}}" value="{{cat}}" {% if data.taskData.category is not defined or data.taskData.category == None %}checked="checked" {% endif %}/><label  class="button_labels" for="{{data['action']}}_cat_{{cat}}">{{data.commons.categories[cat]}}</label>
+	      <input type="radio" name="category" id="{{data['action']}}_cat_{{cat}}" value="{{cat}}" {% if data.taskData.category is not defined or data.taskData.category == None %}checked="checked" {% endif %}/><label  class="button_labels" for="{{data['action']}}_cat_{{cat}}">{{data.categories[cat]["display_name"]}}</label>
 	      {% else %}
-	      <input type="radio" name="category" id="{{data['action']}}_cat_{{cat}}" value="{{cat}}" {% if data.taskData.category == cat %}checked="checked" {% endif %}/><label  class="button_labels" for="{{data['action']}}_cat_{{cat}}">{{data.commons.categories[cat]}}</label>
+	      <input type="radio" name="category" id="{{data['action']}}_cat_{{cat}}" value="{{cat}}" {% if data.taskData.category == cat %}checked="checked" {% endif %}/><label  class="button_labels" for="{{data['action']}}_cat_{{cat}}">{{data.categories[cat]["display_name"]}}</label>
 	      {% endif %}
 	      {% endfor %}
 	    </fieldset>
