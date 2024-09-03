@@ -181,3 +181,29 @@ class SimpleTodoDataAccessMongo(DBManager):
                 #insert into todo_logs collection
                 self.db.todo_logs.insert_one(todo_log)
 
+    def get_categories(self):
+        categories = {}
+        categoryDocuments = self.db.categories.find()
+        category_found = False
+        for category in categoryDocuments:
+            category_found = True
+            categories[category["internal_name"]] = {"internal_name": category["internal_name"],
+                               "display_name": category["display_name"],
+                               "background_color": category["background_color"]}
+        if category_found != True:
+            seed_categories = [{"internal_name":"uncategorized","display_name":"Uncategorized","background_color":"#ceecce"},
+                               {"internal_name":"health","display_name":"Health","background_color":"#9eb0e3"},
+                               {"internal_name":"finance","display_name":"Finance","background_color":"#eae485"},
+                               {"internal_name":"maintenance","display_name":"Maintenance","background_color":"#e8bdbd"},
+                               {"internal_name":"bills","display_name":"Bills","background_color":"#A0CCDB"},
+                               {"internal_name":"learning","display_name":"Learning","background_color":"#d5af56"}]
+
+            self.db.categories.insert_many(seed_categories)
+            categoryDocuments = self.db.categories.find()
+            category_found = False
+            for category in categoryDocuments:
+                category_found = True
+                categories[category["internal_name"]] = {"internal_name": category["internal_name"],
+                                                         "display_name": category["display_name"],
+                                                         "background_color": category["background_color"]}
+        return categories
