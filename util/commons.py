@@ -1,7 +1,8 @@
 from ui import TaskUtils as task_utils
 import pytz
-from TodoTypes import PayloadError, TodoUpdatePayload
+from TodoTypes import PayloadError, TodoUpdatePayload, CategoryCreateEditPayload
 from typing import Union
+import re
 
 slots = {"1": "Post Wake up",
          "2": "Before Bath",
@@ -72,4 +73,27 @@ def validateCreateEditPayload(formData, todo_id=None) -> Union[PayloadError, Tod
         data["remindBeforeDays"] = None
     elif formData.get("remindBeforeDays"):
         data["remindBeforeDays"] = int(formData.get("remindBeforeDays"))
+    return data
+
+def validateCreateEditCategoryPayload(formData) -> Union[PayloadError, CategoryCreateEditPayload]:
+    errors = {"globalErrors": []}  # type: PayloadError
+
+    if(formData.get("displayName") is None or re.fullmatch("[A-Z][a-z0-9]{2,10}", formData.get("displayName")) is None):
+        errors["globalErrors"].append("Invalid Display Name")
+
+    if(formData.get("internalName") is None or re.fullmatch("[a-z0-9]{3,11}", formData.get("internalName")) is None):
+        errors["globalErrors"].append("Invalid Internal Name")
+
+    if(formData.get("backgroundColor") is None or re.fullmatch("#[a-f0-9]{6}", formData.get("backgroundColor")) is None):
+        errors["globalErrors"].append("Invalid Background Color")
+
+    if len(errors["globalErrors"]) > 0:
+        return errors
+
+    data = {
+        "internal_name": formData.get("internalName"),
+        "display_name": formData.get("displayName"),
+        "background_color": formData.get("backgroundColor")
+    }  # type: CategoryCreateEditPayload
+
     return data

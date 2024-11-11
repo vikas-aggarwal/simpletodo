@@ -91,3 +91,8 @@ RecurrenceModel = TypedDict('RecurrenceModel', {"Frequency": str,
                                                 "FrequencyCount": int,
                                                 "Day_of_week": Optional[str]
                                                 })
+
+CategoryCreateEditPayload = TypedDict('CategoryCreateEditPayload', {"internal_name": str,
+                                                            "display_name": str,
+                                                            "background_color": str
+                                                            })

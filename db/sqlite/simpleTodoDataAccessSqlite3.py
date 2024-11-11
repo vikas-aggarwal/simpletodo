@@ -284,3 +284,12 @@ class SimpleTodoDataAccessSqlite3(DBManager):
                                "background_color": row["background_color"]}
         db.close()
         return categories
+
+
+    def create_category(self, data):
+        print(data)
+        conn = self._getConnection()
+        db = conn.cursor()
+        db.execute("insert into categories (internal_name, display_name, background_color) values (:internal_name, :display_name, :background_color)", data)
+        conn.commit()
+        conn.close()

@@ -1,5 +1,5 @@
 from TodoTypes import Todo, TodoUpdatePayload, PayloadError
-from TodoTypes import TodoTaskDoneOrSkipModel, TodoCreatePayload
+from TodoTypes import TodoTaskDoneOrSkipModel, TodoCreatePayload, CategoryCreateEditPayload
 from TodoTypes import TodoLog
 from TodoTypes import TaskBuckets
 from flask import render_template, request, redirect, make_response, Flask
@@ -31,6 +31,9 @@ def init_ui(app, dbConnection: DBManager):
     __app.add_url_rule("/todos/delete/<int:todo_id>", "delete", __delete_task_page, methods=["GET"])
     __app.add_url_rule("/todos/delete/<int:todo_id>", "deleteTask", __delete_task, methods=["POST"])
     __app.add_url_rule("/todos/habitReport", "habitReport", __habit_report, methods=["GET"])
+
+    __app.add_url_rule("/categories/new/category", "newCategory", __load_category_new_page, methods=["GET"])
+    __app.add_url_rule("/categories/new/category", "createCategory", __create_category, methods=["POST"])
     
 def __generate_style():
     resp = make_response(render_template("style.css", commons=commons, categories=__database.get_categories()))
@@ -198,3 +201,17 @@ def __process_updates():
         check_type(todo_data, TodoTaskDoneOrSkipModel)
         __database.process_todo_action(todo_data)
     return __home_page()
+
+
+def __load_category_new_page(errors=None):
+    return render_template("editCreateCategory.html", data={"errors": errors})
+
+
+def __create_category():
+    formData = request.form
+    data: CategoryCreateEditPayload = commons.validateCreateEditCategoryPayload(formData)
+    if "globalErrors" in data:
+        return __load_category_new_page(data)
+    check_type(data, CategoryCreateEditPayload)
+    __database.create_category(data)
+    return redirect("/todos/home", 302)

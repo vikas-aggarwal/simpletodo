@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Create Category</title>
+    <link rel="stylesheet" type="text/css" href="../../static/css/style.css">
+    <link rel="stylesheet" type="text/css" href="../style">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body class="createEditPage">
+    <div class="page_header">
+      <h1 class="page_title">Create Category</h1>
+      <div class="action_bar">
+	<a href="../../todos/home" id="new_task">Home</a>
+      </div>
+    </div>
+    {% if data.errors %}
+    <div class="global_errors">
+      <ul>
+      {% for error in data.errors.globalErrors %}
+        <li>{{error}}</li>
+      {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    <form name="categoryForm" class="taskForm" method="post" action="./category">
+      <table>
+	<tr>
+	  <td>
+	    <label for="displayName">Display Name:</label>
+	  </td>
+	  <td>
+	    <input type="text" name="displayName" id="category_display_name" />
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <label for="internalName">Internal Name:</label>
+	  </td>
+	  <td>
+	    <input type="text" name="internalName" id="category_internal_name" />
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <label for="backgroundColor">Background Color:</label>
+	  </td>
+	  <td>
+	    <input type="color" name="backgroundColor" id="category_background" value="#ceecce" />
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <label>Preview:</label>
+	  </td>
+	  <td>
+	    <div class="task">
+	       <div class="taskInfo">
+		 <div class="category health" id="category_preview">Health - Anytime</div>
+		 <h4 class="taskTitle"><a href="#">Task Title</a></h4>
+	       </div>
+	     </div>
+	  </td>
+	</tr>
+	<tr>
+	  <td colspan="2" class="form_submit_center">
+	    <input type="submit" value="Create">
+	  </td>
+	</tr>
+      </table>
+    </form>
+    <script type="text/javascript">
+      document.getElementById("category_display_name").oninput = function(){
+	  document.getElementById("category_preview").innerHTML = document.getElementById("category_display_name").value + " - Anytime";
+      }
+
+      document.getElementById("category_background").onchange = function(){
+	  document.getElementById("category_preview").style.background = document.getElementById("category_background").value;
+      }
+
+      
+    </script>
+  </body>
+</html>
+
