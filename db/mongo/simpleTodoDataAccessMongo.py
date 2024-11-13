@@ -28,8 +28,6 @@ class SimpleTodoDataAccessMongo(DBManager):
         return todo_log_entry
 
     def get_todo_logs(self, startTimeStamp: datetime, endTimeStamp: datetime) -> List[TodoLogEntry]:
-        print(startTimeStamp)
-        print(endTimeStamp)
         todo_logs = self.db.todo_logs.find({"due_date": {"$lte": endTimeStamp, "$gte": startTimeStamp}})
         todo_id_map = {}
         todos = self.db.todos.find(projection=["task","todo_id"])
@@ -43,7 +41,6 @@ class SimpleTodoDataAccessMongo(DBManager):
         return data
     
     def _getTodoLogObjectFromRow(self, row):
-        print(row)
         todo_log = {"todo_id": row['_id']['todo_id'], "action":row['_id']['action'], "count" : row['count']} #type: TodoLog
         return todo_log
 
@@ -207,3 +204,10 @@ class SimpleTodoDataAccessMongo(DBManager):
                                                          "display_name": category["display_name"],
                                                          "background_color": category["background_color"]}
         return categories
+
+    def create_category(self, data):
+        existing_category = self.db.categories.find_one({"internal_name": {"$eq": data["internal_name"]}})
+        if existing_category is None:
+            self.db.categories.insert_one(data)
+        else:
+            raise Exception("Category already present")

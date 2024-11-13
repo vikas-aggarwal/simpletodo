@@ -287,9 +287,13 @@ class SimpleTodoDataAccessSqlite3(DBManager):
 
 
     def create_category(self, data):
-        print(data)
         conn = self._getConnection()
         db = conn.cursor()
-        db.execute("insert into categories (internal_name, display_name, background_color) values (:internal_name, :display_name, :background_color)", data)
-        conn.commit()
-        conn.close()
+        db.execute("select internal_name from categories where internal_name = :internal_name", data)
+        rows = db.fetchone()
+        if rows is None:
+            db.execute("insert into categories (internal_name, display_name, background_color) values (:internal_name, :display_name, :background_color)", data)
+            conn.commit()
+            conn.close()
+        else:
+            raise Exception("Category already exists")

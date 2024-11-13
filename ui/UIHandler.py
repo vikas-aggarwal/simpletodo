@@ -213,5 +213,8 @@ def __create_category():
     if "globalErrors" in data:
         return __load_category_new_page(data)
     check_type(data, CategoryCreateEditPayload)
-    __database.create_category(data)
+    try:
+        __database.create_category(data)
+    except Exception as e:
+        return __load_category_new_page({"globalErrors":[str(e)]})
     return redirect("/todos/home", 302)

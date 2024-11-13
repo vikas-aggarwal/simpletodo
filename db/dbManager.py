@@ -62,7 +62,7 @@ class DBManager(metaclass=ABCMeta):
         Semicolon seperated.
         '''
         parsedFilter = []
-        print("Parsing " + str(filters))
+
         for unit in filters.split(";"):
             unitParsed = False
             parsedUnit = {"attribute": "",
@@ -81,7 +81,6 @@ class DBManager(metaclass=ABCMeta):
                         unitParsed = True
             if unitParsed is False:
                 return []
-        print(parsedFilter)
         return parsedFilter
 
 
