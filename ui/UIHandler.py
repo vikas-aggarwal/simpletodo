@@ -82,7 +82,7 @@ def __create_task():
         return __load_create_new_page(data)
     check_type(data, TodoCreatePayload)
     __database.create_todo(data)
-    return redirect("/todos/home", 302)
+    return redirect("../../todos/home", 302)
 
 
 def __edit_task_page(todo_id, errors=None):
