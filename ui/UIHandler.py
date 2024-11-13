@@ -204,7 +204,7 @@ def __process_updates():
 
 
 def __load_category_new_page(errors=None):
-    return render_template("editCreateCategory.html", data={"errors": errors})
+    return render_template("editCreateCategory.html", data={"errors": errors, "categories": __database.get_categories()})
 
 
 def __create_category():
