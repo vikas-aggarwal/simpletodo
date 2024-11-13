@@ -63,7 +63,7 @@ def __habit_report():
 
 def __delete_task(todo_id):
     __database.delete_todo(todo_id)
-    return redirect("/todos/home", 302)
+    return redirect("../../todos/home", 302)
 
 def __edit_task(todo_id):
     formData = request.form
@@ -72,7 +72,7 @@ def __edit_task(todo_id):
         return __edit_task_page(todo_id, data)
     check_type(data, TodoUpdatePayload)
     __database.upsert_todo(todo_id, data)
-    return redirect("/todos/home", 302)
+    return redirect("../../todos/home", 302)
 
 
 def __create_task():
@@ -217,4 +217,4 @@ def __create_category():
         __database.create_category(data)
     except Exception as e:
         return __load_category_new_page({"globalErrors":[str(e)]})
-    return redirect("/todos/home", 302)
+    return redirect("../../todos/home", 302)
