@@ -49,6 +49,22 @@
 	  </td>
 	</tr>
 	<tr>
+		<td>
+		  <label for="duration">Duration (mins):</label>
+		</td>
+		<td>
+		  <input type="text" name="duration" id="{{data['action']}}_duration" value="{{data.taskData.duration if data.taskData.duration is not none}}"/>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		  <label for="description">Description:</label>
+		</td>
+		<td>
+		  <input type="text" name="description" id="{{data['action']}}_description" value="{{data.taskData.description if data.taskData.description is not none}}"/>
+		</td>
+	</tr>
+	<tr>
 	  <td colspan="2">
 	    <fieldset data-role="controlgroup" data-type="horizontal">
 	      <legend>Choose Slot:</legend>

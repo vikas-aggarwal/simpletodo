@@ -130,3 +130,13 @@ Feature: Interact with Tasks
     When user already has a non-habit task "NonHabitDone" with frequency "Monday" and due date as "24-Dec-2020"
     And user marks the task "NonHabitDone" as "Done"
     Then the due date of the task "NonHabitDone" should change to "04-Jan-2021"
+
+  Scenario: User edits duration and description fields
+    Given the user is on task list page
+    When user already has a non-habit task "TaskWithDurationDescription" with duration as "10" mins and description as "Task Desc 1""
+    And user clicks on the task "TaskWithDurationDescription" to edit it
+    And user edits duration as "20" mins
+    And user edits description as "Task Description 2"
+    And clicks on submit to edit
+    And user clicks on the task "TaskWithDurationDescription" to edit it
+    Then validate the duration is "20" mins and description is "Task Description 2"

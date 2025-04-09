@@ -9,7 +9,7 @@ from db.sqlite import upgradeSqliteDatabase
 
 
 class SimpleTodoDataAccessSqlite3(DBManager):
-    TODO_SELECT_COLUMN_STRING = "todo_id, due_date as 'due_date [timestamp]', frequency, remind_before_days, task_name, time_slot, todo_action, track_habit, category"
+    TODO_SELECT_COLUMN_STRING = "todo_id, due_date as 'due_date [timestamp]', frequency, remind_before_days, task_name, time_slot, todo_action, track_habit, category, duration, description"
     dbMap = {"task": "task_name",
              "frequency": "frequency",
              "trackHabit": "track_habit",
@@ -44,7 +44,9 @@ class SimpleTodoDataAccessSqlite3(DBManager):
                 "timeSlot": row['time_slot'],
                 "trackHabit": (row['track_habit'] == 1),
                 "remindBeforeDays": int(row['remind_before_days'] or "0"),
-                "category": row['category']
+                "category": row['category'],
+                "duration": row['duration'],
+                "description": row['description']
                 }  # type: Todo
         return todo
 
@@ -186,16 +188,18 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         dbObject['frequency'] = data.get('frequency')
         dbObject['task'] = data.get('task')
         dbObject['category'] = data.get('category')
+        dbObject['duration'] = data.get('duration')
+        dbObject['description'] = data.get('description')
 
         if todo_id is None:
-            db.execute("insert into todos (todo_id, due_date, frequency, remind_before_days, task_name, time_slot, todo_action, track_habit, category) values ((select coalesce(max(todo_id),count(*))+1 from todos), :due_date, :frequency, :remindBeforeDays, :task, :timeSlot, NULL, :trackHabit, :category )", dbObject)
+            db.execute("insert into todos (todo_id, due_date, frequency, remind_before_days, task_name, time_slot, todo_action, track_habit, category, duration, description) values ((select coalesce(max(todo_id),count(*))+1 from todos), :due_date, :frequency, :remindBeforeDays, :task, :timeSlot, NULL, :trackHabit, :category, :duration, :description )", dbObject)
             last_row_id = db.lastrowid
             db.execute("select todo_id from todos where rowid = ?", (last_row_id,))
             row = db.fetchone()
             data["todo_id"] = row["todo_id"]
         else:
             data["todo_id"] = todo_id
-            db.execute("insert into todos (todo_id, due_date, frequency, remind_before_days, task_name, time_slot, todo_action, track_habit, category) values (:todo_id, :due_date, :frequency, :remindBeforeDays, :task, :timeSlot, NULL, :trackHabit, :category)", dbObject)
+            db.execute("insert into todos (todo_id, due_date, frequency, remind_before_days, task_name, time_slot, todo_action, track_habit, category, duration, description) values (:todo_id, :due_date, :frequency, :remindBeforeDays, :task, :timeSlot, NULL, :trackHabit, :category, :duration, :description)", dbObject)
         conn.commit()
         conn.close()
 
@@ -230,10 +234,13 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         data['timeSlot'] = data.get('timeSlot') if "timeSlot" in data else todo_object['timeSlot']
         data['remindBeforeDays'] = data.get('remindBeforeDays') if "remindBeforeDays" in data else todo_object['remindBeforeDays']
         data['category'] = data.get('category') if "category" in data else todo_object['category']
+        data['duration'] = data.get('duration') if "duration" in data else todo_object['duration']
+        data['description'] = data.get('description') if "description" in data else todo_object['description']
+        
         db.execute("update todos set due_date=:due_date," \
                    "frequency=:frequency, remind_before_days=:remindBeforeDays," \
                    "task_name=:task, time_slot=:timeSlot, track_habit=:trackHabit," \
-                   "category=:category where todo_id = :todo_id", data)
+                   "category=:category, duration=:duration, description=:description where todo_id = :todo_id", data)
         conn.commit()
 
         # Delete todo logs if no longer tracked as Habit

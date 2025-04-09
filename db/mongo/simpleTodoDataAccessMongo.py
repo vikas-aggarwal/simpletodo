@@ -50,13 +50,15 @@ class SimpleTodoDataAccessMongo(DBManager):
             return None
 
         todo = {"todo_id": row['todo_id'],
-                "due_date": row['due_date'],
-                "frequency": row['frequency'],
+                "due_date": row.get('due_date'),
+                "frequency": row.get('frequency'),
                 "task": row['task'],
                 "timeSlot": None,
                 "trackHabit": (row.get('trackHabit') == 1),
                 "remindBeforeDays": int(row.get('remindBeforeDays') or "0"),
-                "category": row.get('category')
+                "category": row.get('category'),
+                "duration": row.get('duration'),
+                "description": row.get('description')
                 }  # type: Todo
         if row.get('timeSlot') and row.get('timeSlot') == "None":
             todo['timeSlot'] = None

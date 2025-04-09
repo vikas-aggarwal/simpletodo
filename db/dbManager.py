@@ -54,7 +54,7 @@ class DBManager(metaclass=ABCMeta):
         return operator in self._getSupportedOperators()
 
     def getSchemaVersion(self):
-        return 3
+        return 4
 
     def parseFilters(self, filters) -> FilterModel:
         '''

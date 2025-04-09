@@ -15,7 +15,9 @@ Todo = TypedDict('Todo', {"todo_id": int,
                           "timeSlot": Optional[int],
                           "trackHabit": Optional[bool],
                           "category": Optional[str],
-                          "remindBeforeDays": Optional[int]})
+                          "remindBeforeDays": Optional[int],
+                          "duration": Optional[int],
+                          "description": Optional[str]})
 
 TodoLog = TypedDict('TodoLog', {"todo_id": int,
                                 "count": int,
@@ -34,7 +36,9 @@ TodoCreatePayload = TypedDict('TodoCreatePayload', {"todo_id": Optional[int],
                                                     "timeSlot": Optional[int],
                                                     "trackHabit": Optional[bool],
                                                     "category": Optional[str],
-                                                    "remindBeforeDays": Optional[int]
+                                                    "remindBeforeDays": Optional[int],
+                                                    "duration": Optional[int],
+                                                    "description": Optional[str]
                                                     })
 
 TodoUpdatePayload = TypedDict('TodoUpdatePayload', {"todo_id": int,
@@ -44,7 +48,9 @@ TodoUpdatePayload = TypedDict('TodoUpdatePayload', {"todo_id": int,
                                                     "timeSlot": Optional[int],
                                                     "category": Optional[str],
                                                     "trackHabit": Optional[bool],
-                                                    "remindBeforeDays": Optional[int]
+                                                    "remindBeforeDays": Optional[int],
+                                                    "duration": Optional[int],
+                                                    "description": Optional[str]
                                                     })
 
 TodoLogDB = TypedDict('TodoLogDB', {"todo_id": int,
@@ -64,7 +70,9 @@ TodoListViewModel = TypedDict('TodoListViewModel', {"todo_id": int,
                                                     "next_due_date": Optional[str],
                                                     "due_in_days": Optional[int],
                                                     "done_count": Optional[int],
-                                                    "skip_count": Optional[int]})
+                                                    "skip_count": Optional[int],
+                                                    "duration": Optional[int],
+                                                    "description": Optional[str]})
 
 TodoTaskDoneOrSkipModel = TypedDict('TodoTaskDoneOrSkipModel', {"todo_id": int,
                                                                 "todo_action": str,

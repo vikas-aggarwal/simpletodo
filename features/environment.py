@@ -31,6 +31,7 @@ def before_scenario(context, scenario):
         db = client["automatedTesting"]
         db.todos.drop()
         db.todo_logs.drop()
+        db.categories.drop()
         client.close()
     else:
         import sqlite3
@@ -38,5 +39,6 @@ def before_scenario(context, scenario):
         db = conn.cursor();
         db.execute("delete from todos")
         db.execute("delete from todo_logs")
+        db.execute("delete from categories where internal_name = 'testing'")
         conn.commit()
         conn.close()

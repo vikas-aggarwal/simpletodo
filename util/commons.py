@@ -35,6 +35,10 @@ def validateDueDate(dueDate):
         return False
     return True
 
+def validateDuration(duration):
+    if duration and (not duration.isdigit()):
+        return False
+    return True
 
 def validateCreateEditPayload(formData, todo_id=None) -> Union[PayloadError, TodoUpdatePayload]:
     errors = {"globalErrors": []}  # type: PayloadError
@@ -48,6 +52,9 @@ def validateCreateEditPayload(formData, todo_id=None) -> Union[PayloadError, Tod
     if(validateDueDate(formData.get('dueDate')) is False):
         errors["globalErrors"].append("Invalid Due Date. Format should be yyyy-MM-DD")
 
+    if(validateDuration(formData.get('duration')) is False):
+        errors["globalErrors"].append("Invalid Duration. Should be a number")
+
     if len(errors["globalErrors"]) > 0:
         return errors
 
@@ -58,7 +65,9 @@ def validateCreateEditPayload(formData, todo_id=None) -> Union[PayloadError, Tod
             "remindBeforeDays": None,
             "trackHabit": formData.get("trackHabit") == "on",
             "category": formData.get("category"),
-            "todo_id": todo_id
+            "todo_id": todo_id,
+            "description": formData.get('description'),
+            "duration": None
             }  # type: TodoUpdatePayload
 
     if 'slot' in formData and formData['slot'] == "None":
@@ -73,6 +82,12 @@ def validateCreateEditPayload(formData, todo_id=None) -> Union[PayloadError, Tod
         data["remindBeforeDays"] = None
     elif formData.get("remindBeforeDays"):
         data["remindBeforeDays"] = int(formData.get("remindBeforeDays"))
+
+    if formData.get("duration") and formData.get("duration") == "":
+        data["duration"] = None
+    elif formData.get("duration"):
+        data["duration"] = int(formData.get("duration"))
+
     return data
 
 def validateCreateEditCategoryPayload(formData) -> Union[PayloadError, CategoryCreateEditPayload]:

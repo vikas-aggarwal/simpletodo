@@ -32,6 +32,19 @@ def get_task(todo_id, host, port):
     return json.loads(str(response.read(), "UTF-8"))
 
 
+@when(u'user already has a non-habit task "{taskName}" with duration as "{duration}" mins and description as "{description}""')
+def step_impl(context, taskName, duration, description):
+    payload = {}
+    payload['duration'] = int(duration)
+    payload['task'] = taskName
+    payload['description'] = description
+    todo_id = create_task(payload, context.host, context.port)
+    context.current_todo_id = todo_id
+    driver = context.browser  # type: selenium.webdriver.Firefox
+    driver.refresh()
+
+
+
 @when(u'user already has a non-habit task "{taskName}" with frequency "{frequency}" and due date as "{dueDate}"')
 def create_non_habit_task(context, taskName, frequency, dueDate):
     payload = {}
@@ -211,8 +224,34 @@ def edit_category(context, category):
     
 @when(u'user edits Track Habit')
 def step_impl(context):
-    track_habit = context.browser.find_element(By.XPATH, "/html/body/form/table/tbody/tr[7]/td/label")
+    track_habit = context.browser.find_element(By.XPATH, "/html/body/form/table/tbody/tr[9]/td/label")
     track_habit.click()
+
+
+@when(u'user edits duration as "{duration}" mins')
+def edit_duration(context, duration):
+    browser = context.browser # type: selenium.webdriver.Firefox
+    durationElem = browser.find_element(By.ID, "edit_duration")
+    durationElem.clear()
+    durationElem.send_keys(duration)
+
+
+@when(u'user edits description as "{description}"')
+def edit_description(context, description):
+    browser = context.browser # type: selenium.webdriver.Firefox
+    descriptionElem = browser.find_element(By.ID, "edit_description")
+    descriptionElem.clear()
+    descriptionElem.send_keys(description)
+
+@then(u'validate the duration is "{duration}" mins and description is "{description}"')
+def validate_edited_duration_and_description(context, duration, description):
+    browser = context.browser # type: selenium.webdriver.Firefox
+    descriptionElem = browser.find_element(By.ID, "edit_description")
+    durationElem = browser.find_element(By.ID, "edit_duration")
+    assert_that(descriptionElem.get_attribute("value")).is_equal_to(description)
+    assert_that(durationElem.get_attribute("value")).is_equal_to(duration)
+
+
 
 @then(u'validate task with name "{task_name}", frequency "{frequency}", due date "{due_date}", time slot "{timeSlot}", remind before "{remindBefore}", category as "{category}" and track habit as "{trackHabit}"')
 def step_impl(context, task_name, frequency, due_date, timeSlot, remindBefore, trackHabit, category):

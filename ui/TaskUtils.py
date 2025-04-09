@@ -65,7 +65,9 @@ def get_task_view_model(todo: Todo, todo_logs_map, accept_languages) -> TodoList
                                     "due_in_days": None,
                                     "done_count": None,
                                     "skip_count": None,
-                                    "category": todo['category']}  # type: TodoListViewModel
+                                    "category": todo['category'],
+                                    "duration": todo['duration'],
+                                    "description": todo['description']}  # type: TodoListViewModel
     if todo['task'] is None or todo['task'] == "":
         todoModel['task'] = "<No Title>"
 

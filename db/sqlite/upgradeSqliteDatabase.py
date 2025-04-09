@@ -42,7 +42,9 @@ def __create_tables(conn):
     time_slot integer,
     todo_action text,
     track_habit integer,
-    category text
+    category text,
+    duration integer,
+    description integer
     )
     ''')
 
@@ -94,6 +96,10 @@ def __get_columns_for_table_csv(conn, table):
     db.close()
     return ",".join(columns)
 
+def __alter_todos_table(conn: sqlite3.Connection):
+    conn.execute('''alter table todos add column duration integer''')
+    conn.execute('''alter table todos add column description text''')
+
 def process(conn: sqlite3.Connection, schema_version):
     if __is_new_database(conn):
         print("New Database detected")
@@ -105,9 +111,10 @@ def process(conn: sqlite3.Connection, schema_version):
         version = schema_version
     else:  # Table should exists
         version = __get_current_schema_version(conn)
-        if version == 2:  # run data fixes, version 2 has no schema changes, bumped up to run fixes
+        if version == 3:
             print("Upgrading database")
             __create_tables(conn)
+            __alter_todos_table(conn) #for version 4 only
             __create_version_table_if_does_not_exists(conn)
             __create_categories_seed_data_if_does_not_exists(conn)
             __set_version_on_database(conn, schema_version)

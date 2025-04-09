@@ -151,3 +151,18 @@ def step_impl(context,taskName):
     assert_that(buttons[2].text).is_equal_to("Skip (0)")
     
     
+@when(u'user enters duration as "{duration}" mins')
+def step_impl(context, duration):
+    durationElem = context.browser.find_element(By.ID, "create_duration")
+    durationElem.send_keys(duration)
+
+
+@when(u'user enters the description as "{description}"')
+def step_impl(context, description):
+    descriptionElem = context.browser.find_element(By.ID, "create_description")
+    descriptionElem.send_keys(description)
+
+@then(u'Duration should be displayed as "{duration}" mins')
+def step_impl(context, duration):
+    durationElem = context.browser.find_element(By.CLASS_NAME, "durationStr")
+    assert_that(durationElem.text).is_equal_to(duration+" mins")

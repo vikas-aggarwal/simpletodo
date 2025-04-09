@@ -87,3 +87,14 @@ Feature: Create Task
     Then the user is on task list page
     And "1" new tasks should be created
     And "HabitTask" should have Done and Skip button with 0 count
+
+  Scenario: Create Tasks with Title ,Duration and Description
+    Given the user is on task list page
+    When user clicks on New
+    And user enters "DurationTaskWithDesc" on title field
+    And user enters duration as "10" mins
+    And user enters the description as "Description of Task"
+    And clicks on submit
+    Then the user is on task list page
+    And "1" new tasks should be created
+    And Duration should be displayed as "10" mins
