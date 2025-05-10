@@ -31,7 +31,8 @@ def step_impl(context, color):
 
 @then(u'a new category should be created with "{category}" as text, "{internal_val}" as internal value and "{color}" as background')
 def step_impl(context, category, color, internal_val):
+    context.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "label[for=create_cat_"+internal_val+"]")))
     category = context.browser.find_element(By.CSS_SELECTOR, "label[for=create_cat_"+internal_val+"]")
     category.click()
     computed_color = context.browser.execute_script('return window.getComputedStyle(document.querySelector("label[for=create_cat_'+ internal_val +']")).getPropertyValue("background-color")')
-    assert_that(computed_color).is_equal_to(color)
+    assert_that(color).is_equal_to(computed_color)

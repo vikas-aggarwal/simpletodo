@@ -2,67 +2,69 @@
 <html>
   <head>
   <title>Tasks</title>
-  <link rel="stylesheet" type="text/css" href="../static/css/style.css">
-  <link rel="stylesheet" type="text/css" href="./style">
+  <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/style.css')}}">
+  <link rel="stylesheet" type="text/css" href="{{url_for('style')}}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body>
-    <div class="page_header">
-      <h1 class="page_title">Filter and Group Tasks</h1>
-      <div class="action_bar">
-	<a href="./home" id="new_task">Home</a>
+    <turbo-frame id="overlay">
+      <div class="page_content">
+        <div class="page_header">
+          <h1 class="page_title">Filter and Group Tasks</h1>
+          <a id="cancelLink" href="" data-action="click->overlay#hideModal">Cancel</a>
+        </div>
+        <div class="filter_group_container">
+          <div class="filter_links">
+            <h2>Group by Slots Till Today</h2>
+            <a href="./home?query=trackHabit=True&groupBy=slots&till=today" data-turbo-frame="_top">Habit Tasks Only</a>
+            <a href="./home?query=frequency=Daily&groupBy=slots&till=today" data-turbo-frame="_top">Daily Tasks Only</a>
+            <h3>By Category</h3>
+            {% set ns = namespace(query="") %}
+            {% for cat in categories %}
+            {% if cat != "uncategorized" %}
+            {% if ns.query == "" %}
+            {% set ns.query = ns.query + "category!="+cat %}
+            {% else %}
+            {% set ns.query = ns.query + ";category!="+cat %}
+            {% endif %}
+            <a href="./home?query=category={{cat}}&groupBy=slots&till=today" data-turbo-frame="_top">Tasks Belonging to category {{categories[cat]["display_name"]}}</a>
+            {% endif %}
+            {% endfor %}
+            <a href="./home?query={{ns.query}}&groupBy=slots&till=today" data-turbo-frame="_top">Tasks Belonging to category {{categories['uncategorized']["display_name"]}}</a>
+          </div>
+          <div class="filter_links">
+            <h2>Group by Status</h2>
+            <a href="./home?query=trackHabit=True" data-turbo-frame="_top">Habit Tasks Only</a>
+            <a href="./home?query=frequency=Daily" data-turbo-frame="_top">Daily Tasks Only</a>
+            <h3>By Category</h3>
+            {% set ns = namespace(query="") %}
+            {% for cat in categories %}
+            {% if cat != "uncategorized" %}
+            {% if ns.query == "" %}
+            {% set ns.query = ns.query + "category!="+cat %}
+            {% else %}
+            {% set ns.query = ns.query + ";category!="+cat %}
+            {% endif %}
+            <a href="./home?query=category={{cat}}" data-turbo-frame="_top">Tasks Belonging to category {{categories[cat]["display_name"]}}</a>
+            {% endif %}
+            {% endfor %}
+            <a href="./home?query={{ns.query}}" data-turbo-frame="_top">Tasks Belonging to category {{categories['uncategorized']["display_name"]}}</a>
+            <h3>By Slot</h3>
+            {% set ns = namespace(query="") %}
+            {% for slot in commons.slots %}
+            {% if slot != "None" %}
+            {% if ns.query == "" %}
+            {% set ns.query = ns.query + "timeSlot!="+slot %}
+            {% else %}
+            {% set ns.query = ns.query + ";timeSlot!="+slot %}
+            {% endif %}
+            <a href="./home?query=timeSlot={{slot}}" data-turbo-frame="_top">Tasks Belonging to slot {{commons.slots[slot]}}</a>
+            {% endif %}
+            {% endfor %}
+            <a href="./home?query={{ns.query}}" data-turbo-frame="_top">Tasks Belonging to slot {{commons.slots['None']}}</a>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="filter_group_container">
-      <div class="filter_links">
-        <h2>Group by Slots Till Today</h2>
-        <a href="./home?query=trackHabit=True&groupBy=slots&till=today">Habit Tasks Only</a>
-        <a href="./home?query=frequency=Daily&groupBy=slots&till=today">Daily Tasks Only</a>
-        <h3>By Category</h3>
-        {% set ns = namespace(query="") %}
-        {% for cat in categories %}
-        {% if cat != "uncategorized" %}
-        {% if ns.query == "" %}
-        {% set ns.query = ns.query + "category!="+cat %}
-        {% else %}
-        {% set ns.query = ns.query + ";category!="+cat %}
-        {% endif %}
-        <a href="./home?query=category={{cat}}&groupBy=slots&till=today">Tasks Belonging to category {{categories[cat]["display_name"]}}</a>
-        {% endif %}
-        {% endfor %}
-        <a href="./home?query={{ns.query}}&groupBy=slots&till=today">Tasks Belonging to category {{categories['uncategorized']["display_name"]}}</a>
-      </div>
-      <div class="filter_links">
-        <h2>Group by Status</h2>
-        <a href="./home?query=trackHabit=True">Habit Tasks Only</a>
-        <a href="./home?query=frequency=Daily">Daily Tasks Only</a>
-        <h3>By Category</h3>
-        {% set ns = namespace(query="") %}
-        {% for cat in categories %}
-        {% if cat != "uncategorized" %}
-        {% if ns.query == "" %}
-        {% set ns.query = ns.query + "category!="+cat %}
-        {% else %}
-        {% set ns.query = ns.query + ";category!="+cat %}
-        {% endif %}
-        <a href="./home?query=category={{cat}}">Tasks Belonging to category {{categories[cat]["display_name"]}}</a>
-        {% endif %}
-        {% endfor %}
-        <a href="./home?query={{ns.query}}">Tasks Belonging to category {{categories['uncategorized']["display_name"]}}</a>
-        <h3>By Slot</h3>
-        {% set ns = namespace(query="") %}
-        {% for slot in commons.slots %}
-        {% if slot != "None" %}
-        {% if ns.query == "" %}
-        {% set ns.query = ns.query + "timeSlot!="+slot %}
-        {% else %}
-        {% set ns.query = ns.query + ";timeSlot!="+slot %}
-        {% endif %}
-        <a href="./home?query=timeSlot={{slot}}">Tasks Belonging to slot {{commons.slots[slot]}}</a>
-        {% endif %}
-        {% endfor %}
-        <a href="./home?query={{ns.query}}">Tasks Belonging to slot {{commons.slots['None']}}</a>
-      </div>
-    </div>
+    </turbo-frame>
   </body>
 </html>

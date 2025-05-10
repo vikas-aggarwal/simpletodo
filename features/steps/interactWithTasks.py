@@ -224,7 +224,7 @@ def edit_category(context, category):
     
 @when(u'user edits Track Habit')
 def step_impl(context):
-    track_habit = context.browser.find_element(By.XPATH, "/html/body/form/table/tbody/tr[9]/td/label")
+    track_habit = context.browser.find_element(By.XPATH, "/html/body/turbo-frame/div/form/table/tbody/tr[9]/td/label")
     track_habit.click()
 
 

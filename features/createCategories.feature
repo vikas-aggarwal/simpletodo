@@ -8,4 +8,5 @@ Feature: Create Category
     And user enters "#f66151" as category background color
     And clicks on submit
     And user clicks on New
+    And user enters "CustomCategoryTask" on title field
     Then a new category should be created with "Testing" as text, "testing" as internal value and "rgb(246, 97, 81)" as background

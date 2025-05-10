@@ -2,122 +2,127 @@
 <html>
   <head>
     <title>{{data['action'] | capitalize}} Task</title>
-    <link rel="stylesheet" type="text/css" href="../../static/css/style.css">
-    <link rel="stylesheet" type="text/css" href="../style">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/style.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('style')}}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body class="createEditPage">
-    <div class="page_header">
-      <h1 class="page_title">{{data['action'] | capitalize}} Task</h1>
-      <div class="action_bar">
-	<a href="../home" id="new_task">Home</a>
-      </div>
-    </div>
-    {% if data.errors %}
-    <div class="global_errors">
-      <ul>
-      {% for error in data.errors.globalErrors %}
-        <li>{{error}}</li>
-      {% endfor %}
-      </ul>
-    </div>
-    {% endif %}
-    <form name="taskForm" class="taskForm" method="post" action="./{{data.taskData.todo_id if data['action'] == 'edit'}}{{"task" if data['action'] == 'create'}}">
-      <table>
-	<tr>
-	  <td>
-	    <label for="taskTitle">Title:</label>
-	  </td>
-	  <td>
-	    <input type="text" name="taskTitle" id="{{data['action']}}_taskTitle" value="{{data.taskData.task|default('')}}">
-	  </td>
-	</tr>
-	<tr>
-	  <td>
-	    <label for="freq">Frequency:</label>
-	  </td>
-	  <td>
-	    <input type="text" name="frequency" id="{{data['action']}}_freq" value="{{data.taskData.frequency| default('')}}">
-	  </td>
-	</tr>
-	<tr>
-	  <td>
-	    <label for="dueDate">Due Date:</label>
-	  </td>
-	  <td>
-	    <input type="date" name="dueDate" id="{{data['action']}}_dueDate" value="{{data.taskData.due_date_str | default('')}}"/>
-	  </td>
-	</tr>
-	<tr>
-		<td>
-		  <label for="duration">Duration (mins):</label>
-		</td>
-		<td>
-		  <input type="text" name="duration" id="{{data['action']}}_duration" value="{{data.taskData.duration if data.taskData.duration is not none}}"/>
-		</td>
-	</tr>
-	<tr>
-		<td>
-		  <label for="description">Description:</label>
-		</td>
-		<td>
-		  <input type="text" name="description" id="{{data['action']}}_description" value="{{data.taskData.description if data.taskData.description is not none}}"/>
-		</td>
-	</tr>
-	<tr>
-	  <td colspan="2">
-	    <fieldset data-role="controlgroup" data-type="horizontal">
-	      <legend>Choose Slot:</legend>
-	      {% for slot in data.commons.slots|list|sort %}
-	      {% if slot == "None" %}
-	      <input type="radio" name="slot" id="{{data['action']}}_slotNone" value="None" {% if data.taskData == None or data.taskData.timeSlot == None or data.taskData.timeSlot == 'None' %}checked="checked" {% endif %}/><label  class="button_labels" for="{{data['action']}}_slotNone">{{data.commons.slots['None']}}</label>
-	      {% else %}
-	      <input type="radio" name="slot" id="{{data['action']}}_slot{{slot}}" value="{{slot}}" {% if data.taskData.timeSlot == (slot|int) or data.taskData.timeSlot == slot %}checked="checked" {% endif %} /><label  class="button_labels" for="{{data['action']}}_slot{{slot}}">{{data.commons.slots[slot]}}</label>
-	      {% endif %}
-	      {% endfor %}
-	    </fieldset>
-	  </td>
-	</tr>
-	<tr>
-	  <td colspan="2">
-	    <fieldset data-role="controlgroup" data-type="horizontal">
-	      <legend>Category:</legend>
-	      {% for cat in data.categories|list|sort %}
-	      {% if cat == "uncategorized" %}
-	      <input type="radio" name="category" id="{{data['action']}}_cat_{{cat}}" value="{{cat}}" {% if data.taskData.category is not defined or data.taskData.category == None %}checked="checked" {% endif %}/><label  class="button_labels" for="{{data['action']}}_cat_{{cat}}">{{data.categories[cat]["display_name"]}}</label>
-	      {% else %}
-	      <input type="radio" name="category" id="{{data['action']}}_cat_{{cat}}" value="{{cat}}" {% if data.taskData.category == cat %}checked="checked" {% endif %}/><label  class="button_labels" for="{{data['action']}}_cat_{{cat}}">{{data.categories[cat]["display_name"]}}</label>
-	      {% endif %}
-	      {% endfor %}
-	    </fieldset>
-	  </td>
-	</tr>
-	<tr>
-	  <td>
-	    <label for="remindBefore">Remind Before (Days):</label>
-	  </td>
-	  <td>
-	    <input type="text" name="remindBeforeDays" id="{{data['action']}}_remindBeforeDays" value="{{data.taskData.remindBeforeDays | default('')}}">
-	  </td>
-	</tr>
-	<tr>
-	  <td colspan="2">
-	      {% if data.taskData.trackHabit %}
-              <input name="trackHabit" type="checkbox" id="{{data['action']}}_trackHabit" checked="checked">
-	      {% else %}
-	      <input name="trackHabit" type="checkbox" id="{{data['action']}}_trackHabit">
-	      {% endif %}
-	      <label for="{{data['action']}}_trackHabit" class="button_labels">Track Habit</label>
-	  </td>
-	</tr>
-	<tr>
-	  <td colspan="2" class="form_submit_center">
-	    <input type="submit" value="{{data['action'] | capitalize}} Task">
-	    &nbsp;
-	    <a id="deleteLink" href="../delete/{{data.taskData.todo_id}}">Delete</a>
-	  </td>
-	</tr>
-      </table>
-    </form>
+	<turbo-frame id="overlay">
+		<div class="page_content">
+			<div class="page_header">
+			<h1 class="page_title">{{data['action'] | capitalize}} Task</h1>
+			</div>
+			{% if data.errors %}
+			<div class="global_errors">
+			<ul>
+			{% for error in data.errors.globalErrors %}
+				<li>{{error}}</li>
+			{% endfor %}
+			</ul>
+			</div>
+			{% endif %}
+			<form name="taskForm" class="taskForm" method="post" action="{{url_for('editTask', todo_id=data.taskData.todo_id) if data['action'] == 'edit'}}{{url_for('createTask') if data['action'] == 'create'}}">
+			<table>
+			<tr>
+			<td>
+				<label for="taskTitle">Title:</label>
+			</td>
+			<td>
+				<input type="text" name="taskTitle" id="{{data['action']}}_taskTitle" value="{{data.taskData.task|default('')}}">
+			</td>
+			</tr>
+			<tr>
+			<td>
+				<label for="freq">Frequency:</label>
+			</td>
+			<td>
+				<input type="text" name="frequency" id="{{data['action']}}_freq" value="{{data.taskData.frequency| default('')}}">
+			</td>
+			</tr>
+			<tr>
+			<td>
+				<label for="dueDate">Due Date:</label>
+			</td>
+			<td>
+				<input type="date" name="dueDate" id="{{data['action']}}_dueDate" value="{{data.taskData.due_date_str | default('')}}"/>
+			</td>
+			</tr>
+			<tr>
+				<td>
+				<label for="duration">Duration (mins):</label>
+				</td>
+				<td>
+				<input type="text" name="duration" id="{{data['action']}}_duration" value="{{data.taskData.duration if data.taskData.duration is not none}}"/>
+				</td>
+			</tr>
+			<tr>
+				<td>
+				<label for="description">Description:</label>
+				</td>
+				<td>
+				<input type="text" name="description" id="{{data['action']}}_description" value="{{data.taskData.description if data.taskData.description is not none}}"/>
+				</td>
+			</tr>
+			<tr>
+			<td colspan="2">
+				<fieldset data-role="controlgroup" data-type="horizontal">
+				<legend>Choose Slot:</legend>
+				{% for slot in data.commons.slots|list|sort %}
+				{% if slot == "None" %}
+				<input type="radio" name="slot" id="{{data['action']}}_slotNone" value="None" {% if data.taskData == None or data.taskData.timeSlot == None or data.taskData.timeSlot == 'None' %}checked="checked" {% endif %}/><label  class="button_labels" for="{{data['action']}}_slotNone">{{data.commons.slots['None']}}</label>
+				{% else %}
+				<input type="radio" name="slot" id="{{data['action']}}_slot{{slot}}" value="{{slot}}" {% if data.taskData.timeSlot == (slot|int) or data.taskData.timeSlot == slot %}checked="checked" {% endif %} /><label  class="button_labels" for="{{data['action']}}_slot{{slot}}">{{data.commons.slots[slot]}}</label>
+				{% endif %}
+				{% endfor %}
+				</fieldset>
+			</td>
+			</tr>
+			<tr>
+			<td colspan="2">
+				<fieldset data-role="controlgroup" data-type="horizontal">
+				<legend>Category:</legend>
+				{% for cat in data.categories|list|sort %}
+				{% if cat == "uncategorized" %}
+				<input type="radio" name="category" id="{{data['action']}}_cat_{{cat}}" value="{{cat}}" {% if data.taskData.category is not defined or data.taskData.category == None %}checked="checked" {% endif %}/><label  class="button_labels" for="{{data['action']}}_cat_{{cat}}">{{data.categories[cat]["display_name"]}}</label>
+				{% else %}
+				<input type="radio" name="category" id="{{data['action']}}_cat_{{cat}}" value="{{cat}}" {% if data.taskData.category == cat %}checked="checked" {% endif %}/><label  class="button_labels" for="{{data['action']}}_cat_{{cat}}">{{data.categories[cat]["display_name"]}}</label>
+				{% endif %}
+				{% endfor %}
+				</fieldset>
+			</td>
+			</tr>
+			<tr>
+			<td>
+				<label for="remindBefore">Remind Before (Days):</label>
+			</td>
+			<td>
+				<input type="text" name="remindBeforeDays" id="{{data['action']}}_remindBeforeDays" value="{{data.taskData.remindBeforeDays | default('')}}">
+			</td>
+			</tr>
+			<tr>
+			<td colspan="2">
+				{% if data.taskData.trackHabit %}
+					<input name="trackHabit" type="checkbox" id="{{data['action']}}_trackHabit" checked="checked">
+				{% else %}
+				<input name="trackHabit" type="checkbox" id="{{data['action']}}_trackHabit">
+				{% endif %}
+				<label for="{{data['action']}}_trackHabit" class="button_labels">Track Habit</label>
+			</td>
+			</tr>
+			<tr>
+			<td colspan="2" class="form_submit_center">
+				<input type="submit" value="{{data['action'] | capitalize}} Task" data-turbo-frame="_top">
+				{% if data.taskData.todo_id %}
+				&nbsp;
+				<a id="deleteLink" href="{{url_for('deletePage', todo_id=data.taskData.todo_id)}}">Delete</a>
+				{% endif %}
+				&nbsp;
+				<a id="cancelLink" href="" data-action="click->overlay#hideModal">Cancel</a>
+			</td>
+			</tr>
+			</table>
+			</form>
+		</div>
+	</turbo-frame>
   </body>
 </html>

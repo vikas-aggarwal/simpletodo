@@ -1,0 +1,21 @@
+#overlay {
+	display: block;
+	position: fixed;
+    z-index: 2; /* Sit on top */
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    margin: 8px;
+}
+
+
+
+#overlay > * {
+
+    max-width: 500px;
+    margin: 0 auto;
+}

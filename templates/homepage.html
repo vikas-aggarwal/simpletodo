@@ -2,34 +2,39 @@
 <html>
   <head>
     <title>Tasks</title>
-    <link rel="stylesheet" type="text/css" href="../static/css/style.css">
-    <link rel="stylesheet" type="text/css" href="./style">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/style.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('style')}}">
+	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/homepage.css')}}">
+	<script type="module" src="{{url_for('static', filename='js/turbo.es2017-esm.js')}}"></script>
+	<script type="module" src="{{url_for('static', filename='js//homepage.js')}}"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body>
+	 <turbo-frame id="overlay" style="display: none" data-controller="overlay" data-action="click->overlay#hideModalFromFrame"></turbo-frame>
+
      <form name="taskForm" class="listForm" method="post" action="./home?{% if filterString %}query={{filterString}}{% endif %}{% if till %}&till={{till}}{% endif %}{% if groupBy %}&groupBy={{groupBy}}{% endif %} ">
-       <div class="page_header">
+       <div class="page_header_homepage">
 	 <h3 class="page_title">Tasks</h3>
 	 <div class="action_bar">
 	   <div class="form_new_button">
-	     <a href="new/task" id="new_task">New</a>
+	     <a href="new/task" id="new_task" data-turbo-frame="overlay">New</a>
 	   </div>
 	   {% if filterString %}
 	   <div class="form_clear_filter_button">
-	     <a href="./home" id="clear_filter">Clear Filter</a>
+	     <a href="./home" id="clear_filter" data-turbo="false">Clear Filter</a>
 	   </div>
 	   {% endif %}
 	   <div class="form_filter_button">
-	     <a href="./filter" id="new_filter">Filter</a>
+	     <a href="./filter" id="new_filter" data-turbo-frame="overlay">Filter</a>
 	   </div>
 	   <div class="form_new_button">
 	     <a href="habitReport?month={{currentMonthYear[0]}}&year={{currentMonthYear[1]}}" id="habit_report">Habit Report</a>
 	   </div>
 	    <div class="form_new_button">
-	     <a href="../categories/new/category" id="new_category">Create Category</a>
+	     <a href="{{url_for('newCategory')}}" id="new_category"  data-turbo="false">Create Category</a>
 	   </div>
 	   <div class="form_submit_button">
-	     <input type="submit" value="Submit">
+	     <input type="submit" value="Submit" data-turbo="false">
 	   </div>
 	 </div>
 	 {% if errors %}
@@ -57,7 +62,7 @@
 	     <div class="task">
 	       <div class="taskInfo">
 		 <div class="category {{todo.category}}">{{categories[todo.category or "uncategorized"]["display_name"]}} - {{commons.slots[(todo.timeSlot|string)]}}</div>
-		 <h4 class="taskTitle"><a href="edit/{{todo['todo_id']}}">{{todo["task"]}}</a></h4>
+		 <h4 class="taskTitle"><a href="edit/{{todo['todo_id']}}" data-turbo-frame="overlay">{{todo["task"]}}</a></h4>
 		 {% if todo['frequency'] %}
 		 <div class="frequency"><i>Frequency</i>:
 		   <span class="frequencyStr">{{todo["frequency"]}}</span>

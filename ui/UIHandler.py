@@ -2,7 +2,7 @@ from TodoTypes import Todo, TodoUpdatePayload, PayloadError
 from TodoTypes import TodoTaskDoneOrSkipModel, TodoCreatePayload, CategoryCreateEditPayload
 from TodoTypes import TodoLog
 from TodoTypes import TaskBuckets
-from flask import render_template, request, redirect, make_response, Flask
+from flask import render_template, request, redirect, make_response, Flask, url_for
 from ui import TaskUtils as task_utils
 from datetime import datetime, timedelta
 from db.dbManager import DBManager
@@ -21,14 +21,14 @@ def init_ui(app, dbConnection: DBManager):
     global __app
     __app = app
     __app.add_url_rule("/todos/home", "home", __home_page, methods=["GET"])
-    __app.add_url_rule("/todos/home", "submit", __process_updates, methods=["POST"])
-    __app.add_url_rule("/todos/new/task", "new", __load_create_new_page, methods=["GET"])
-    __app.add_url_rule("/todos/edit/<int:todo_id>", "edit", __edit_task_page, methods=["GET"])
+    __app.add_url_rule("/todos/home", "processUpdates", __process_updates, methods=["POST"])
+    __app.add_url_rule("/todos/new/task", "newPage", __load_create_new_page, methods=["GET"])
+    __app.add_url_rule("/todos/edit/<int:todo_id>", "editPage", __edit_task_page, methods=["GET"])
     __app.add_url_rule("/todos/new/task", "createTask", __create_task, methods=["POST"])
     __app.add_url_rule("/todos/edit/<int:todo_id>", "editTask", __edit_task, methods=["POST"])
     __app.add_url_rule("/todos/filter", "filter", __filter_task, methods=["GET"])
     __app.add_url_rule("/todos/style", "style", __generate_style, methods=["GET"])
-    __app.add_url_rule("/todos/delete/<int:todo_id>", "delete", __delete_task_page, methods=["GET"])
+    __app.add_url_rule("/todos/delete/<int:todo_id>", "deletePage", __delete_task_page, methods=["GET"])
     __app.add_url_rule("/todos/delete/<int:todo_id>", "deleteTask", __delete_task, methods=["POST"])
     __app.add_url_rule("/todos/habitReport", "habitReport", __habit_report, methods=["GET"])
 
@@ -63,7 +63,7 @@ def __habit_report():
 
 def __delete_task(todo_id):
     __database.delete_todo(todo_id)
-    return redirect("../../todos/home", 302)
+    return redirect(url_for("home"), 302)
 
 def __edit_task(todo_id):
     formData = request.form
@@ -72,7 +72,7 @@ def __edit_task(todo_id):
         return __edit_task_page(todo_id, data)
     check_type(data, TodoUpdatePayload)
     __database.upsert_todo(todo_id, data)
-    return redirect("../../todos/home", 302)
+    return redirect(url_for("home"), 302)
 
 
 def __create_task():
@@ -82,7 +82,7 @@ def __create_task():
         return __load_create_new_page(data)
     check_type(data, TodoCreatePayload)
     __database.create_todo(data)
-    return redirect("../../todos/home", 302)
+    return redirect(url_for("home"), 302)
 
 
 def __edit_task_page(todo_id, errors=None):
@@ -99,7 +99,7 @@ def __delete_task_page(todo_id, errors=None):
 
 
 def __load_create_new_page(errors=None):
-    return render_template("editCreateTask.html", data={"action": "create", "taskData": None, "errors": errors, "commons": commons, "categories":__database.get_categories()})
+    return render_template("editCreateTask.html", data={"action": "create", "taskData": None, "errors": errors, "commons": commons, "categories":__database.get_categories()}), 422 if errors else 200
 
 def __group_by_status(allTodos, todo_logs_map, errors, filterString, till, groupBy):
     todos_by_type = {
@@ -217,4 +217,4 @@ def __create_category():
         __database.create_category(data)
     except Exception as e:
         return __load_category_new_page({"globalErrors":[str(e)]})
-    return redirect("../../todos/home", 302)
+    return redirect(url_for("home"), 302)

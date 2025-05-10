@@ -6,8 +6,10 @@ from ui import UIHandler as ui
 from ui import TaskUtils
 from datetime import datetime
 import pytz
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 APP = Flask(__name__)
+APP.wsgi_app = ProxyFix(APP.wsgi_app, x_prefix=1)
 TODO_DATA = dbManager.getDataAccessObject(APP)
 
 ui.init_ui(APP, TODO_DATA)
