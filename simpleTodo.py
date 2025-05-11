@@ -77,5 +77,6 @@ def get_todo_logs_counts_by_action():
     return jsonify(json.loads(dumps(data, json_options=LEGACY_JSON_OPTIONS)))
 
 
+
 if __name__ == "__main__":
     APP.run(debug=True, host='0.0.0.0')

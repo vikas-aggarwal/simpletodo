@@ -4,13 +4,14 @@ from TodoTypes import TodoLog
 from TodoTypes import TaskBuckets
 from flask import render_template, request, redirect, make_response, Flask, url_for
 from ui import TaskUtils as task_utils
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from db.dbManager import DBManager
-from util import commons
+from util import commons, recur
 from runtime_type_checker import check_type
 from typing import List
 import pytz
 import calendar
+
 
 __database: DBManager
 __app: Flask
@@ -34,7 +35,8 @@ def init_ui(app, dbConnection: DBManager):
 
     __app.add_url_rule("/categories/new/category", "newCategory", __load_category_new_page, methods=["GET"])
     __app.add_url_rule("/categories/new/category", "createCategory", __create_category, methods=["POST"])
-    
+    __app.add_url_rule("/todos/plan", "plan", __generate_todo_plan, methods=["GET"])
+
 def __generate_style():
     resp = make_response(render_template("style.css", commons=commons, categories=__database.get_categories()))
     resp.headers['Content-Type'] = 'text/css'
@@ -218,3 +220,48 @@ def __create_category():
     except Exception as e:
         return __load_category_new_page({"globalErrors":[str(e)]})
     return redirect(url_for("home"), 302)
+
+
+def __generate_todo_plan():
+
+    startDateFromRequest  = request.args.get("startDate");
+    endDateFromRequest = request.args.get("endDate");
+
+    startDate = date.today() if startDateFromRequest is None else datetime.strptime(startDateFromRequest, "%Y-%m-%d").date()
+    endDate = startDate + timedelta(days=7) if endDateFromRequest is None else datetime.strptime(endDateFromRequest, "%Y-%m-%d").date()
+
+
+    tasks = {};
+    dayOfWeekMapping={}
+    currentDate = startDate.replace() # cloning
+    while currentDate <= endDate:
+        tasks[currentDate] = {}
+        dayOfWeekMapping[currentDate] = calendar.day_name[currentDate.weekday()]
+        for slot in commons.slots:
+            tasks[currentDate][slot]=[]
+        currentDate = currentDate + timedelta(days=1)
+
+    data = __database.get_all_todos_by_due_date(None)
+    for todo in data:
+        
+        if todo["due_date"]:
+            todo_due_date_local = pytz.utc.localize(todo["due_date"]).astimezone(task_utils.__get_ui_time_zone());
+        else:
+            todo_due_date_local = datetime.now(pytz.UTC).astimezone(task_utils.__get_ui_time_zone());
+        
+        todo_due = todo_due_date_local.date()
+
+        if todo_due >= startDate and todo_due <= endDate:
+            tasks[todo_due][str(todo["timeSlot"])].append(todo)
+
+        frequency_model = recur.parse_frequency(todo["frequency"])
+        if frequency_model:           
+            next_due_date = recur.get_next_occurrence(frequency_model, todo_due_date_local)
+
+            while next_due_date.date() <= endDate:
+                if next_due_date.date() >= startDate:
+                    tasks[next_due_date.date()][str(todo["timeSlot"])].append(todo)
+                todo_due_date_local = next_due_date
+                next_due_date = recur.get_next_occurrence(frequency_model, todo_due_date_local)
+        
+    return render_template("plan.html", data={"tasks": tasks, "slots": commons.slots, "dayOfWeekMapping":dayOfWeekMapping});

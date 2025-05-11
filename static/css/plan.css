@@ -1,0 +1,14 @@
+body {
+    width: 297mm;
+    height: 210mm;
+    margin: 0;
+    padding: 0;
+    border:  1px solid;
+    font-size: 10px;
+}
+
+.page_title {
+    color: #0e680e;
+    margin: 0 auto;
+    text-align: center;
+}
