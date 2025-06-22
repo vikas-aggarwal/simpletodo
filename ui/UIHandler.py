@@ -2,11 +2,11 @@ from TodoTypes import Todo, TodoUpdatePayload, PayloadError
 from TodoTypes import TodoTaskDoneOrSkipModel, TodoCreatePayload, CategoryCreateEditPayload
 from TodoTypes import TodoLog
 from TodoTypes import TaskBuckets
-from flask import render_template, request, redirect, make_response, Flask, url_for
+from flask import render_template, request, redirect, make_response, Flask, url_for, send_file
 from ui import TaskUtils as task_utils
 from datetime import datetime, timedelta, date
 from db.dbManager import DBManager
-from util import commons, recur
+from util import commons, recur, thermalPrintImageGenerator
 from runtime_type_checker import check_type
 from typing import List
 import pytz
@@ -36,6 +36,7 @@ def init_ui(app, dbConnection: DBManager):
     __app.add_url_rule("/categories/new/category", "newCategory", __load_category_new_page, methods=["GET"])
     __app.add_url_rule("/categories/new/category", "createCategory", __create_category, methods=["POST"])
     __app.add_url_rule("/todos/plan", "plan", __generate_todo_plan, methods=["GET"])
+    __app.add_url_rule("/todos/thermalPrintImage","thermalPrintImage", __generate_thermal_print_image, methods=["GET"])
 
 def __generate_style():
     resp = make_response(render_template("style.css", commons=commons, categories=__database.get_categories()))
@@ -222,21 +223,12 @@ def __create_category():
     return redirect(url_for("home"), 302)
 
 
-def __generate_todo_plan():
-
-    startDateFromRequest  = request.args.get("startDate");
-    endDateFromRequest = request.args.get("endDate");
-
-    startDate = date.today() if startDateFromRequest is None else datetime.strptime(startDateFromRequest, "%Y-%m-%d").date()
-    endDate = startDate + timedelta(days=7) if endDateFromRequest is None else datetime.strptime(endDateFromRequest, "%Y-%m-%d").date()
-
+def __generate_todo_plan_task_list(startDate, endDate):
 
     tasks = {};
-    dayOfWeekMapping={}
     currentDate = startDate.replace() # cloning
     while currentDate <= endDate:
         tasks[currentDate] = {}
-        dayOfWeekMapping[currentDate] = calendar.day_name[currentDate.weekday()]
         for slot in commons.slots:
             tasks[currentDate][slot]=[]
         currentDate = currentDate + timedelta(days=1)
@@ -263,5 +255,38 @@ def __generate_todo_plan():
                     tasks[next_due_date.date()][str(todo["timeSlot"])].append(todo)
                 todo_due_date_local = next_due_date
                 next_due_date = recur.get_next_occurrence(frequency_model, todo_due_date_local)
-        
+    return tasks
+
+def __generate_todo_plan():
+    
+    startDateFromRequest  = request.args.get("startDate");
+    endDateFromRequest = request.args.get("endDate");
+
+    startDate = date.today() if startDateFromRequest is None else datetime.strptime(startDateFromRequest, "%Y-%m-%d").date()
+    endDate = startDate + timedelta(days=7) if endDateFromRequest is None else datetime.strptime(endDateFromRequest, "%Y-%m-%d").date()
+
+    dayOfWeekMapping={}
+    currentDate = startDate.replace() # cloning
+    while currentDate <= endDate:
+        dayOfWeekMapping[currentDate] = calendar.day_name[currentDate.weekday()]
+        currentDate = currentDate + timedelta(days=1)
+
+
+    tasks = __generate_todo_plan_task_list(startDate, endDate)    
     return render_template("plan.html", data={"tasks": tasks, "slots": commons.slots, "dayOfWeekMapping":dayOfWeekMapping});
+
+def __generate_thermal_print_image():
+    startDateFromRequest  = request.args.get("startDate");
+
+    startDate = date.today() if startDateFromRequest is None else datetime.strptime(startDateFromRequest, "%Y-%m-%d").date()
+    taskList = __generate_todo_plan_task_list(startDate, startDate)
+
+    finalTaskList = []
+    for slot in taskList[startDate]:
+        for task in taskList[startDate][slot]:
+            finalTaskList.append(task["task"])
+
+    return send_file(thermalPrintImageGenerator.create_image_from_list(calendar.day_name[startDate.weekday()][0:3] + ":" + startDate.strftime("%Y-%m-%d")
+ ,finalTaskList), mimetype="image/png")
+
+

@@ -3,7 +3,6 @@ body {
     height: 210mm;
     margin: 0;
     padding: 0;
-    border:  1px solid;
     font-size: 10px;
 }
 
@@ -11,4 +10,17 @@ body {
     color: #0e680e;
     margin: 0 auto;
     text-align: center;
+    padding-bottom: 10px;
+}
+
+.taskList {
+    border-right: 1px solid black;
+}
+
+h3 {
+   border-bottom: 1px solid black; 
+}
+
+ul {
+	padding-left: 20px;
 }

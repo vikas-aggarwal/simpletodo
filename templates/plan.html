@@ -11,7 +11,7 @@
     <h2 class="page_title">Tasks</h2>
     <div style="display: flex">
     {% for currentDate in data.tasks %}
-        <div>
+        <div class="taskList">
             <h3 class="page_title">{{ currentDate }} - {{data.dayOfWeekMapping[currentDate]}}</h3>
             {% for x in data.tasks[currentDate] %}
             <ul {% if x == 'None' %} style="color: blue" {% endif %}>
