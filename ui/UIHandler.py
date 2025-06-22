@@ -287,6 +287,6 @@ def __generate_thermal_print_image():
             finalTaskList.append(task["task"])
 
     return send_file(thermalPrintImageGenerator.create_image_from_list(calendar.day_name[startDate.weekday()][0:3] + ":" + startDate.strftime("%Y-%m-%d")
- ,finalTaskList), mimetype="image/png")
+ ,finalTaskList), mimetype="image/png", as_attachment=True, download_name="today.png")
 
 
