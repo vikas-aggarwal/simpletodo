@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Manage Habit Task Occurrences</title>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/style.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('style')}}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body class="createEditPage">
+	<turbo-frame id="overlay">
+    <div class="page_content">
+			<div class="page_header">
+			<h1 class="page_title">{{data.taskData.task}}</h1>
+			</div>
+			{% if data.errors %}
+			<div class="global_errors">
+			<ul>
+			{% for error in data.errors.globalErrors %}
+				<li>{{error}}</li>
+			{% endfor %}
+			</ul>
+			</div>
+			{% endif %}
+			<form name="manageHabitTaskForm" class="taskForm" method="post" action="{{url_for('manageHabitTask', todo_id=data.taskData.todo_id)}}">
+        <div>
+        {% for occur in data.occurrences %}
+        <div>
+          {{occur}}
+          <div class="button">
+            <input type="radio" class="doneButton" id="{{occur}}_done" name="{{occur}}" value="Done">
+            <label class="button_labels" for="{{occur}}_done">Done</label>
+          </div>
+          <div class="button">
+            <input type="radio" class="skipButton" id="{{occur}}_skip" name="{{occur}}" value="Skip" checked="checked">
+            <label class="button_labels" for="{{occur}}_skip">Skip</label>
+          </div>
+        </div>
+        {% endfor %}
+        </div>
+        <div class="form_submit_center">
+          <input type="submit" value="Save" data-turbo-frame="_top">
+          &nbsp;
+          <a id="cancelLink" href="" data-action="click->overlay#hideModal">Cancel</a>
+        </div>
+      </form>
+  </turbo-frame>
+  </body>
+</html>

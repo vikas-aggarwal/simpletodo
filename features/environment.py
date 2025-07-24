@@ -1,8 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from conf import testing
-import datetime
-import os
 
 def before_all(context):
     firefox_bin = "/snap/firefox/current/usr/lib/firefox/firefox"
@@ -36,7 +34,7 @@ def before_scenario(context, scenario):
     else:
         import sqlite3
         conn = sqlite3.connect(testing.SQLITE3_DB_PATH)
-        db = conn.cursor();
+        db = conn.cursor()
         db.execute("delete from todos")
         db.execute("delete from todo_logs")
         db.execute("delete from categories where internal_name = 'testing'")

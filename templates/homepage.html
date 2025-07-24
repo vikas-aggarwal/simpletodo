@@ -101,6 +101,9 @@
 		   <input type="radio" class="skipButton" id="{{todo['todo_id']}}_skip" name="{{todo['todo_id']}}_done_or_skip" value="Skip">
 		   <label class="button_labels" for="{{todo['todo_id']}}_skip">Skip ({{todo["skip_count"]}})</label>
 		 </div>
+		 {% if todo["next_due_date"] %}
+		 <a href="{{url_for('manageHabitTaskPage', todo_id=todo['todo_id'])}}"  data-turbo-frame="overlay">Manage</a>
+		 {% endif %}
 		 {% endif %}
 		 
 		 {% if todo['trackHabit'] == False %}

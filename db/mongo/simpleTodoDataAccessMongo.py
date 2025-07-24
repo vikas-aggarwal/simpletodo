@@ -2,7 +2,7 @@ from datetime import datetime
 import pymongo
 from pymongo import MongoClient
 from db.dbManager import DBManager
-from TodoTypes import FilterModel, Todo, TodoLog, TodoLogEntry
+from TodoTypes import FilterModel, TodoLogEntry, TodoLog, Todo
 from typing import Optional, List
 
 class SimpleTodoDataAccessMongo(DBManager):
@@ -41,7 +41,7 @@ class SimpleTodoDataAccessMongo(DBManager):
         return data
     
     def _getTodoLogObjectFromRow(self, row):
-        todo_log = {"todo_id": row['_id']['todo_id'], "action":row['_id']['action'], "count" : row['count']} #type: TodoLog
+        todo_log: TodoLog = {"todo_id": row['_id']['todo_id'], "action":row['_id']['action'], "count" : row['count']}
         return todo_log
 
     def _getTodoObjectFromRow(self, row):
@@ -49,7 +49,7 @@ class SimpleTodoDataAccessMongo(DBManager):
         if row is None:
             return None
 
-        todo = {"todo_id": row['todo_id'],
+        todo: Todo = {"todo_id": row['todo_id'],
                 "due_date": row.get('due_date'),
                 "frequency": row.get('frequency'),
                 "task": row['task'],
@@ -59,7 +59,7 @@ class SimpleTodoDataAccessMongo(DBManager):
                 "category": row.get('category'),
                 "duration": row.get('duration'),
                 "description": row.get('description')
-                }  # type: Todo
+                }
         if row.get('timeSlot') and row.get('timeSlot') == "None":
             todo['timeSlot'] = None
         elif row.get('timeSlot'):

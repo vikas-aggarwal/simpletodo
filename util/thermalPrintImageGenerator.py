@@ -6,7 +6,7 @@ def create_image_from_list(title, items, width_in_inches=2, dpi=300, font_path="
     # Set dimensions
     width_px = int(width_in_inches * dpi)
     #bullet_char="☐"
-    bullet_char = "•";
+    bullet_char = "•"
     font = ImageFont.truetype(font_path, font_size)
 
     # Prepare drawing context to calculate size
@@ -22,7 +22,7 @@ def create_image_from_list(title, items, width_in_inches=2, dpi=300, font_path="
     for item in items:
         boundary = draw.textbbox((0, 0), bullet_char+" "+item, font=font)
         if(boundary[2] - boundary[0]) > width_px:
-            words = re.split(r"(\s+)", bullet_char+" "+item);
+            words = re.split(r"(\s+)", bullet_char+" "+item)
             #find the max items that can be accomodated
             currPosition=0
      

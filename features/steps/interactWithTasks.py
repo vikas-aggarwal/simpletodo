@@ -56,6 +56,13 @@ def create_non_habit_task(context, taskName, frequency, dueDate):
     driver = context.browser  # type: selenium.webdriver.Firefox
     driver.refresh()
 
+@when(u'user already has a habit task "{taskName}" with frequency "{frequency}" and due date as "{days}" days ago')
+def create_habit_task_days_ago(context, taskName, frequency, days):
+    dueDate = datetime.datetime.now()
+    dueDate = dueDate - datetime.timedelta(int(days))
+    dueDateString= dueDate.strftime(context.dateFormatForFeature)
+    create_habit_task(context, taskName, frequency, dueDateString, 0)
+
 
 @when(u'user already has a habit task "{taskName}" with frequency "{frequency}" and due date as "{dueDate}" with count "{count}"')
 def create_habit_task(context, taskName, frequency, dueDate, count):
@@ -92,8 +99,32 @@ def mark_task_done_or_skip(context, taskName, action):
     context.actionButton = action_button
     submit_form(context)
 
+
+@then(u'the due date of the task "{taskName}" should change to "{days}" days from today')
+def task_next_after_days(context, taskName, days):
+    finalDate = datetime.datetime.now()
+    finalDate = finalDate + datetime.timedelta(days=int(days))
+    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".dueDateStr")))
+    due_date = context.browser.find_element(By.CLASS_NAME, "dueDateStr").text
+    due_date_to_verify = datetime.datetime.strptime(due_date, context.dateFormatFromInputText).strftime(context.dateFormatForFeature)
+    assert_that(due_date_to_verify).is_equal_to(finalDate.strftime(context.dateFormatForFeature))
+
+@then(u'the due date of the task "{taskName}" should change to day of week "{dayOfWeek}"')
+def task_next_is_specified_day_of_week(context, taskName, dayOfWeek):
+    todayDate = datetime.datetime.now()
+    while(todayDate.weekday() != int(dayOfWeek)):
+        todayDate = todayDate + datetime.timedelta(days=1)
+    newDueDate = todayDate.strftime(context.dateFormatForFeature)
+    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".dueDateStr")))
+    due_date = context.browser.find_element(By.CLASS_NAME, "dueDateStr").text
+    due_date_to_verify = datetime.datetime.strptime(due_date, context.dateFormatFromInputText).strftime(context.dateFormatForFeature)
+    assert_that(due_date_to_verify).is_equal_to(newDueDate)
+
 @then(u'the due date of the task "{taskName}" should change to "{newDueDate}"')
 def due_date_of_task_should_change_to(context, taskName, newDueDate):
+    if newDueDate == "tomorrow":
+        newDueDate = datetime.datetime.now() + datetime.timedelta(days=1)
+        newDueDate = newDueDate.strftime(context.dateFormatForFeature)
     context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".dueDateStr")))
     due_date = context.browser.find_element(By.CLASS_NAME, "dueDateStr").text
     due_date_to_verify = datetime.datetime.strptime(due_date, context.dateFormatFromInputText).strftime(context.dateFormatForFeature)
@@ -284,3 +315,33 @@ def confirm_task_deletion(context, taskName):
             return
     assert_that(True).is_true()
 
+@when(u'user clicks on Manage button on the task "{taskName}"')
+def click_on_manage_button_for_habit(context, taskName):
+    tasks_region = context.browser.find_elements(By.CSS_SELECTOR,".taskListWithHeader")
+    for task_region in tasks_region:
+        taskNameElements = task_region.find_elements(By.CSS_SELECTOR, ".task")
+        for task_element in taskNameElements:
+            if task_element.find_element(By.CSS_SELECTOR, ".taskTitle a").text == taskName:
+                task_element.find_elements(By.CSS_SELECTOR, "a")[-1].click()
+
+@when(u'user marks all the occurrences as Done and submit')
+def mark_all_as_done_on_manage_habit(context):
+    manageForm = context.browser.find_element(By.CSS_SELECTOR,"[name='manageHabitTaskForm']")
+    allButtons = manageForm.find_elements(By.CSS_SELECTOR, "label")
+    for button in allButtons:
+        if button.text == "Done":
+            button.click()
+    manageForm.find_element(By.CSS_SELECTOR, "input[value='Save']").click()
+    context.wait.until(EC.invisibility_of_element((By.CSS_SELECTOR, "input[value='Save']")))
+
+
+@then(u'Habit report should have "{count}" green bars from today')
+def count_on_habit(context, count):
+    context.browser.find_element(By.ID, "habit_report").click()
+    bars = context.browser.find_elements(By.CSS_SELECTOR, "tr")[-1].find_elements(By.CSS_SELECTOR, "td")
+    day = datetime.datetime.now().day
+    calc_count = 0
+    for i in range(0, day):
+        if bars[i].get_attribute("class")  == "done-True":
+            calc_count =  calc_count + 1;
+    assert_that(calc_count).is_equal_to(int(count))

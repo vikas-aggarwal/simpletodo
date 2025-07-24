@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import os
 from simpleTodo import APP as application
 
 if __name__ == '__main__':

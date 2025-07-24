@@ -1,10 +1,8 @@
 from datetime import datetime
 import sqlite3
-from TodoTypes import Todo, TodoLog, TodoCreatePayload, TodoTaskDoneOrSkipModel
-from TodoTypes import TodoUpdatePayload, FilterModel, TodoLogEntry
-from TodoTypes import TodoLogDB
+from TodoTypes import FilterModel, TodoLogEntry, TodoCreatePayload, Todo, TodoLogDB, TodoLog, TodoUpdatePayload, TodoTaskDoneOrSkipModel
 from db.dbManager import DBManager
-from typing import Dict, Any, Optional, List
+from typing import Optional, List, Dict, Any
 from db.sqlite import upgradeSqliteDatabase
 
 
@@ -37,7 +35,7 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         if row is None:
             return None
 
-        todo = {"todo_id": row['todo_id'],
+        todo: Todo = {"todo_id": row['todo_id'],
                 "due_date": row['due_date'],
                 "frequency": row['frequency'],
                 "task": row['task_name'],
@@ -47,11 +45,11 @@ class SimpleTodoDataAccessSqlite3(DBManager):
                 "category": row['category'],
                 "duration": row['duration'],
                 "description": row['description']
-                }  # type: Todo
+                }
         return todo
 
     def _getTodoLogObjectFromRow(self, row):
-        todo_log = {"todo_id": row['todo_id'], "action": row['action'], "count": row['count']}  # type: TodoLog
+        todo_log: TodoLog = {"todo_id": row['todo_id'], "action": row['action'], "count": row['count']}
         return todo_log
 
     def get_todo_logs_count(self):
@@ -144,7 +142,7 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         data = []
         rows = db.fetchall()
         for row in rows:
-            todo = self._getTodoObjectFromRow(row)  # type: Todo
+            todo: Todo = self._getTodoObjectFromRow(row)
             data.append(todo)
         return data
 
@@ -162,7 +160,7 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         data = []
         rows = db.fetchall()
         for row in rows:
-            todo = self._getTodoObjectFromRow(row)  # type: Todo
+            todo: Todo = self._getTodoObjectFromRow(row)
             data.append(todo)
         return data
 
@@ -174,7 +172,7 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         return self._getTodoObjectFromRow(row)
 
     def create_todo(self, data: TodoCreatePayload, todo_id=None):
-        dbObject = {}  # type: Dict[str, Any]
+        dbObject: Dict[str, Any] = {}
         conn = self._getConnection()
         db = conn.cursor()
         if data.get('due_date') is not None:
@@ -211,10 +209,9 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         conn.commit()
         conn.close()
 
-    def upsert_todo(self, todo_id, data  # type: TodoUpdatePayload
-                    ):
+    def upsert_todo(self, todo_id, data: TodoUpdatePayload):
         # Getting current state
-        todo_object = self.get_todo(todo_id)  # type: Todo
+        todo_object: Todo = self.get_todo(todo_id)
 
         if todo_object is None:  # insert
             self.create_todo(data, todo_id)
@@ -254,10 +251,9 @@ class SimpleTodoDataAccessSqlite3(DBManager):
 
         conn.close()
 
-    def process_todo_action(self, data  # type: TodoTaskDoneOrSkipModel
-                            ):
+    def process_todo_action(self, data: TodoTaskDoneOrSkipModel):
 
-        todo_object = self.get_todo(data['todo_id'])  # type: Todo
+        todo_object: Todo = self.get_todo(data['todo_id'])
         conn = self._getConnection()
         db = conn.cursor()
 
@@ -266,12 +262,12 @@ class SimpleTodoDataAccessSqlite3(DBManager):
         conn.commit()
 
         if ('trackHabit' in todo_object) and todo_object['trackHabit']:
-            todo_log = {
+            todo_log: TodoLogDB = {
                 'action': data['todo_action'],
                 'creation_timestamp': datetime.utcnow(),
                 'todo_id': data['todo_id'],
                 'due_date': todo_object['due_date'],
-            }  # type: TodoLogDB
+            }
 
             # insert into todo_logs collection
             db.execute("insert into todo_logs (todo_id, action, due_date, creation_timestamp) values (:todo_id, :action, :due_date, :creation_timestamp)", todo_log)

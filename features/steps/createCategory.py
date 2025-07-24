@@ -1,8 +1,7 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from behave import then, given, when
+from behave import then, when
 from assertpy import assert_that
-import time
 
 @when(u'user clicks on Create Category')
 def step_impl(context):

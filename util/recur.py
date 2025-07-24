@@ -2,6 +2,14 @@ from datetime import timedelta, datetime
 from TodoTypes import RecurrenceModel
 from typing import Optional, Dict
 
+
+def get_next_occurrence_after(recur: RecurrenceModel, start_date: datetime, end_date: datetime):
+    next_date = get_next_occurrence(recur, start_date)
+    if next_date:
+        while(next_date and next_date < end_date):
+            next_date = get_next_occurrence(recur, next_date)
+    return next_date
+
 def get_next_occurrence(recur: RecurrenceModel, start_date:datetime) -> Optional[datetime]:
     # start_date should be in the end users timezone for day of week to work correctly
     day_of_week_map = {"Sun": 7, "Mon": 1, "Tue": 2, "Wed": 3, "Thu": 4, "Fri": 5, "Sat": 6}
@@ -44,7 +52,7 @@ def parse_frequency(frequencyString:str) -> Optional[RecurrenceModel]:
         components = frequencyString.split()
 
         if len(components) == 1:
-            simpleFreq = {
+            simpleFreq: Dict[str, RecurrenceModel] = {
                 "daily": {"Frequency": "Day", "FrequencyCount": 1, "Day_of_week" : None},
                 "monday": {"Frequency" : "Week","FrequencyCount" : 1,"Day_of_week" : "Mon"},
                 "tuesday":{"Frequency" : "Week","FrequencyCount" : 1,"Day_of_week" : "Tue"},
@@ -56,14 +64,14 @@ def parse_frequency(frequencyString:str) -> Optional[RecurrenceModel]:
                 "monthly":{"Frequency" : "Month","FrequencyCount" : 1, "Day_of_week" : None},
                 "weekly":{"Frequency" : "Week","FrequencyCount" : 1, "Day_of_week" : None},
                 "yearly":{"Frequency" : "Year","FrequencyCount" : 1, "Day_of_week" : None}
-            }  # type: Dict[str, RecurrenceModel]
+            }
             if components[0] in simpleFreq:
                 return simpleFreq[components[0]]
         elif len(components) == 3:
             if components[0] == "every":
                 try:
                     if isinstance(int(components[1]), int):
-                        x = ["week","weeks", "month",  "months" ,"year" , "years" , "day" , "days"];
+                        x = ["week","weeks", "month",  "months" ,"year" , "years" , "day" , "days"]
                         if components[2] in x:
                             if components[2][0] == 'w':
                                 return {"Frequency" : "Week",
@@ -87,4 +95,4 @@ def parse_frequency(frequencyString:str) -> Optional[RecurrenceModel]:
                                         }
                 except:
                     pass 
-    return None;
+    return None

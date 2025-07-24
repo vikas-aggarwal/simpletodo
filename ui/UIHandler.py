@@ -1,16 +1,15 @@
-from TodoTypes import Todo, TodoUpdatePayload, PayloadError
+from TodoTypes import Todo, TodoUpdatePayload
 from TodoTypes import TodoTaskDoneOrSkipModel, TodoCreatePayload, CategoryCreateEditPayload
-from TodoTypes import TodoLog
-from TodoTypes import TaskBuckets
+from TodoTypes import TaskBuckets, TodoLog, PayloadError
 from flask import render_template, request, redirect, make_response, Flask, url_for, send_file
 from ui import TaskUtils as task_utils
 from datetime import datetime, timedelta, date
 from db.dbManager import DBManager
 from util import commons, recur, thermalPrintImageGenerator
 from runtime_type_checker import check_type
-from typing import List
 import pytz
 import calendar
+from typing import List
 
 
 __database: DBManager
@@ -37,6 +36,9 @@ def init_ui(app, dbConnection: DBManager):
     __app.add_url_rule("/categories/new/category", "createCategory", __create_category, methods=["POST"])
     __app.add_url_rule("/todos/plan", "plan", __generate_todo_plan, methods=["GET"])
     __app.add_url_rule("/todos/thermalPrintImage","thermalPrintImage", __generate_thermal_print_image, methods=["GET"])
+
+    __app.add_url_rule("/todos/manage/<int:todo_id>", "manageHabitTaskPage", __manage_habit_task_page, methods=["GET"])
+    __app.add_url_rule("/todos/manage/<int:todo_id>", "manageHabitTask", __manage_habit_task, methods=["POST"])
 
 def __generate_style():
     resp = make_response(render_template("style.css", commons=commons, categories=__database.get_categories()))
@@ -121,7 +123,7 @@ def __group_by_status(allTodos, todo_logs_map, errors, filterString, till, group
     return render_template("homepage.html", todos=todos_by_type, errors=errors, filterString=filterString, commons=commons, partitions=["ALERTS", "PENDING", "TODAY", "UPCOMING"], till=till, groupBy=groupBy, currentMonthYear=task_utils.get_current_month_year(), categories=__database.get_categories())
 
 def __group_by_slots(allTodos, todo_logs_map, errors, filterString, till, groupBy):
-    todos_by_slot = {};
+    todos_by_slot = {}
     
     for slot in commons.slots:
         todos_by_slot[commons.slots[slot]] = []
@@ -146,14 +148,14 @@ def __home_page(errors=None):
 
     if request.args.get("till") and request.args.get("till") == "today":
         current_date = pytz.utc.localize(datetime.utcnow()).astimezone(task_utils.__get_ui_time_zone()).replace(hour=23, minute=59, second=59, microsecond=0).astimezone(pytz.UTC).replace(tzinfo=None)
-        allTodos = __database.get_all_todos_before_date(filters, ["due_date"], current_date)  # type: List[Todo]
+        allTodos: List[Todo] = __database.get_all_todos_before_date(filters, ["due_date"], current_date)
     elif request.args.get("till") and request.args.get("till") == "this_month":
         current_date = pytz.utc.localize(datetime.utcnow()).astimezone(task_utils.__get_ui_time_zone()).replace(hour=23, minute=59, second=59, microsecond=0).astimezone(pytz.UTC).replace(tzinfo=None)
         current_date = current_date.replace(day=calendar.monthrange(current_date.year, current_date.month)[1])
-        allTodos = __database.get_all_todos_before_date(filters, ["due_date"], current_date)  # type: List[Todo]
+        allTodos: List[Todo] = __database.get_all_todos_before_date(filters, ["due_date"], current_date)
     else:    
-        allTodos = __database.get_all_todos_by_due_date(filters)  # type: List[Todo]
-    todo_logs = __database.get_todo_logs_count()  # type: TodoLog
+        allTodos: List[Todo] = __database.get_all_todos_by_due_date(filters)
+    todo_logs: TodoLog = __database.get_todo_logs_count()
     todo_logs_map = {}
     for log in todo_logs:
         if log["todo_id"] not in todo_logs_map:
@@ -168,7 +170,7 @@ def __home_page(errors=None):
 
 
 def __process_updates():
-    errors = {"globalErrors": []}  # type: PayloadError
+    errors: PayloadError = {"globalErrors": []}
     formData = request.form
     submittedData = {}
     for dataKey in formData:
@@ -200,7 +202,7 @@ def __process_updates():
     for dataKey in dataToProcess:
         data = dataToProcess[dataKey]
         due_date = data.get("next_due") and datetime.utcfromtimestamp(task_utils.get_local_datetime_object(data['next_due']).timestamp())
-        todo_data = {'due_date': due_date, 'todo_action': data['done_or_skip'], 'todo_id': int(dataKey)}  # type: TodoTaskDoneOrSkipModel
+        todo_data: TodoTaskDoneOrSkipModel = {'due_date': due_date, 'todo_action': data['done_or_skip'], 'todo_id': int(dataKey)}
         check_type(todo_data, TodoTaskDoneOrSkipModel)
         __database.process_todo_action(todo_data)
     return __home_page()
@@ -225,7 +227,7 @@ def __create_category():
 
 def __generate_todo_plan_task_list(startDate, endDate):
 
-    tasks = {};
+    tasks = {}
     currentDate = startDate.replace() # cloning
     while currentDate <= endDate:
         tasks[currentDate] = {}
@@ -237,9 +239,9 @@ def __generate_todo_plan_task_list(startDate, endDate):
     for todo in data:
         
         if todo["due_date"]:
-            todo_due_date_local = pytz.utc.localize(todo["due_date"]).astimezone(task_utils.__get_ui_time_zone());
+            todo_due_date_local = pytz.utc.localize(todo["due_date"]).astimezone(task_utils.__get_ui_time_zone())
         else:
-            todo_due_date_local = datetime.now(pytz.UTC).astimezone(task_utils.__get_ui_time_zone());
+            todo_due_date_local = datetime.now(pytz.UTC).astimezone(task_utils.__get_ui_time_zone())
         
         todo_due = todo_due_date_local.date()
 
@@ -259,8 +261,8 @@ def __generate_todo_plan_task_list(startDate, endDate):
 
 def __generate_todo_plan():
     
-    startDateFromRequest  = request.args.get("startDate");
-    endDateFromRequest = request.args.get("endDate");
+    startDateFromRequest  = request.args.get("startDate")
+    endDateFromRequest = request.args.get("endDate")
 
     startDate = date.today() if startDateFromRequest is None else datetime.strptime(startDateFromRequest, "%Y-%m-%d").date()
     endDate = startDate + timedelta(days=7) if endDateFromRequest is None else datetime.strptime(endDateFromRequest, "%Y-%m-%d").date()
@@ -273,10 +275,10 @@ def __generate_todo_plan():
 
 
     tasks = __generate_todo_plan_task_list(startDate, endDate)    
-    return render_template("plan.html", data={"tasks": tasks, "slots": commons.slots, "dayOfWeekMapping":dayOfWeekMapping});
+    return render_template("plan.html", data={"tasks": tasks, "slots": commons.slots, "dayOfWeekMapping":dayOfWeekMapping})
 
 def __generate_thermal_print_image():
-    startDateFromRequest  = request.args.get("startDate");
+    startDateFromRequest  = request.args.get("startDate")
 
     startDate = date.today() if startDateFromRequest is None else datetime.strptime(startDateFromRequest, "%Y-%m-%d").date()
     taskList = __generate_todo_plan_task_list(startDate, startDate)
@@ -289,4 +291,28 @@ def __generate_thermal_print_image():
     return send_file(thermalPrintImageGenerator.create_image_from_list(calendar.day_name[startDate.weekday()][0:3] + ":" + startDate.strftime("%Y-%m-%d")
  ,finalTaskList), mimetype="image/png", as_attachment=True, download_name="today.png")
 
+
+
+def __manage_habit_task_page(todo_id):
+    todo = __database.get_todo(todo_id)
+    taskOccurences = task_utils.get_all_occurrences_till_today_with_next(todo)
+    return render_template("manageHabitTask.html",
+                           data={"taskData": todo and task_utils.get_task_view_model(todo, {}, request.accept_languages),
+                                 "errors": "", "occurrences": taskOccurences})
+
+def __manage_habit_task(todo_id):
+    formData = request.form
+    taskInputs = sorted(formData)
+    todo = __database.get_todo(todo_id)
+    print(taskInputs)
+    for i in range(0, len(taskInputs)):
+        if i == len(taskInputs) - 1:
+            next_due = task_utils.get_next_occurrence_from_date_str(todo, taskInputs[i])
+            todo_data: TodoTaskDoneOrSkipModel = {'due_date': next_due, 'todo_action': formData[taskInputs[i]], 'todo_id': int(todo_id)}
+        else:
+            todo_data: TodoTaskDoneOrSkipModel = {'due_date': datetime.utcfromtimestamp(task_utils.get_local_datetime_object(taskInputs[i+1]).timestamp()), 'todo_action': formData[taskInputs[i]], 'todo_id': int(todo_id)}
+        check_type(todo_data, TodoTaskDoneOrSkipModel)
+        print(todo_data)
+        __database.process_todo_action(todo_data)
+    return redirect(url_for("home"), 302)
 

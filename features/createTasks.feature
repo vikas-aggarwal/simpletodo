@@ -49,7 +49,7 @@ Feature: Create Task
     And Task Due Date is "05-Nov-2018"
     And Task Frequency is "Daily"
     And Task banner should be "Bills - Anytime"
-    And Task Next is "1" day after "05-Nov-2018"
+    And Task Next is "1" day after "today"
     And the user is on task list page
   
   Scenario: Create Tasks with Title and Time Slots

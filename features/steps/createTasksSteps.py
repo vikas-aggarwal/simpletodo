@@ -23,7 +23,7 @@ def userClicksOnNew(context):
 
 @when(u'clicks on submit')
 def userClicksOnSubmit(context):
-    createSubmitBtn = context.browser.find_element(By.CSS_SELECTOR, "input[type='submit']"); 
+    createSubmitBtn = context.browser.find_element(By.CSS_SELECTOR, "input[type='submit']") 
     createSubmitBtn.click()
 
 
@@ -53,39 +53,38 @@ def user_enters_title(context,title):
 @then(u'Task Due Date is "{dueDate}"')
 def task_due_date_is(context, dueDate):
     if dueDate == "today":
-        dueDateString = datetime.datetime.now().strftime(context.dateFormatForFeature);
+        dueDateString = datetime.datetime.now().strftime(context.dateFormatForFeature)
     else:
-        dueDateString = dueDate;
+        dueDateString = dueDate
     due_date_str = context.foundNewTask[0].find_element(By.CLASS_NAME, "dueDateStr").text
     due_date_to_verify = datetime.datetime.strptime(due_date_str, context.dateFormatFromInputText).strftime(context.dateFormatForFeature)
-    assert_that(due_date_to_verify).is_equal_to(dueDateString);
+    assert_that(due_date_to_verify).is_equal_to(dueDateString)
 
 
 @when(u'user enters "{freq}" on the frequency field')
 def user_enters_frequency(context,freq):
-    frequency = context.browser.find_element(By.ID, "create_freq");
-    frequency.send_keys(freq);
+    frequency = context.browser.find_element(By.ID, "create_freq")
+    frequency.send_keys(freq)
 
 
 @then(u'Task Frequency is "{freq}"')
 def task_frequency_is(context,freq):
     frequencyText = context.foundNewTask[0].find_element(By.CLASS_NAME, "frequencyStr").text
-    assert_that(frequencyText).is_equal_to(freq);
+    assert_that(frequencyText).is_equal_to(freq)
     
-
 
 @then(u'Task Next is "{noOfDays}" day after "{dueDate}"')
 def task_next_is(context,noOfDays,dueDate):
     if dueDate == "today":
-        dueDateString = datetime.datetime.now().strftime(context.dateFormatForFeature);
+        dueDateString = datetime.datetime.now().strftime(context.dateFormatForFeature)
     else:
-        dueDateString = dueDate;
+        dueDateString = dueDate
         
     nextDate = datetime.datetime.strptime(dueDateString, context.dateFormatForFeature) + datetime.timedelta(days=int(noOfDays))
     nextDateString = nextDate.strftime(context.dateFormatForFeature)
     nextDateSpan = context.foundNewTask[0].find_element(By.CSS_SELECTOR, ".nextDate input")
     next_date_to_verify = datetime.datetime.strptime(nextDateSpan.get_attribute("value"), context.dateFormatForInput).strftime(context.dateFormatForFeature)
-    assert_that(next_date_to_verify).is_equal_to(nextDateString);
+    assert_that(next_date_to_verify).is_equal_to(nextDateString)
 
 
 @when(u'user enters due date as "{dueDate}"')
@@ -124,7 +123,7 @@ def task_appear_in_alerts(context,taskName):
     taskListWebElement = context.browser.find_elements(By.CLASS_NAME, "taskList")[0]
     taskListElements = taskListWebElement.find_elements(By.CLASS_NAME, "task")
     foundInAlert = len(taskListElements) == 1
-    assert_that(foundInAlert).is_true();    
+    assert_that(foundInAlert).is_true()    
 
     
 
