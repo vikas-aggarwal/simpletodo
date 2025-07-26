@@ -3,11 +3,15 @@ from TodoTypes import RecurrenceModel
 from typing import Optional, Dict
 
 
-def get_next_occurrence_after(recur: RecurrenceModel, start_date: datetime, end_date: datetime):
+def get_last_occurrence_before_or_immediate_next(recur: RecurrenceModel, start_date: datetime, end_date: datetime):
     next_date = get_next_occurrence(recur, start_date)
+    prev_date = None
     if next_date:
         while(next_date and next_date < end_date):
+            prev_date = next_date
             next_date = get_next_occurrence(recur, next_date)
+    if prev_date:
+        return prev_date
     return next_date
 
 def get_next_occurrence(recur: RecurrenceModel, start_date:datetime) -> Optional[datetime]:

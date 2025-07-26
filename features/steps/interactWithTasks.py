@@ -113,7 +113,7 @@ def task_next_after_days(context, taskName, days):
 def task_next_is_specified_day_of_week(context, taskName, dayOfWeek):
     todayDate = datetime.datetime.now()
     while(todayDate.weekday() != int(dayOfWeek)):
-        todayDate = todayDate + datetime.timedelta(days=1)
+        todayDate = todayDate - datetime.timedelta(days=1)
     newDueDate = todayDate.strftime(context.dateFormatForFeature)
     context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".dueDateStr")))
     due_date = context.browser.find_element(By.CLASS_NAME, "dueDateStr").text
@@ -122,8 +122,8 @@ def task_next_is_specified_day_of_week(context, taskName, dayOfWeek):
 
 @then(u'the due date of the task "{taskName}" should change to "{newDueDate}"')
 def due_date_of_task_should_change_to(context, taskName, newDueDate):
-    if newDueDate == "tomorrow":
-        newDueDate = datetime.datetime.now() + datetime.timedelta(days=1)
+    if newDueDate == "today":
+        newDueDate = datetime.datetime.now()
         newDueDate = newDueDate.strftime(context.dateFormatForFeature)
     context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".dueDateStr")))
     due_date = context.browser.find_element(By.CLASS_NAME, "dueDateStr").text

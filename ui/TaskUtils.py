@@ -53,13 +53,13 @@ def get_task_bucket(todo: Todo) -> TaskBuckets:
 
 def get_all_occurrences_till_today_with_next(todo: Todo):
     occurences = []
-    currentTime = pytz.utc.localize(datetime.utcnow()).astimezone(__get_ui_time_zone())
+    currentTime = pytz.utc.localize(datetime.utcnow()).astimezone(__get_ui_time_zone()).replace(hour=0, minute=0, second=0, microsecond=0)
     todo_due_date_local = pytz.utc.localize(todo['due_date']).astimezone(__get_ui_time_zone())
     occurences.append(todo_due_date_local.strftime(date_format))
 
     frequency_model = recur.parse_frequency(todo["frequency"])
     next_due_date = recur.get_next_occurrence(frequency_model, todo_due_date_local)
-    while next_due_date <= currentTime:
+    while next_due_date < currentTime:
         occurences.append(next_due_date.strftime(date_format))
         next_due_date = recur.get_next_occurrence(frequency_model, next_due_date)
 
@@ -105,7 +105,7 @@ def get_task_view_model(todo: Todo, todo_logs_map, accept_languages) -> TodoList
     frequency_model = recur.parse_frequency(todo["frequency"])
     if frequency_model:
         if not todo["trackHabit"]:
-            next_due_date = recur.get_next_occurrence_after(frequency_model, todo_due_date_local, currentTime)
+            next_due_date = recur.get_last_occurrence_before_or_immediate_next(frequency_model, todo_due_date_local, currentTime)
         else:
             next_due_date = recur.get_next_occurrence(frequency_model, todo_due_date_local)
 

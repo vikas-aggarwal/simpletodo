@@ -4,7 +4,7 @@ Feature: Interact with Tasks
     Given the user is on task list page
     When user already has a non-habit task "NonHabitDone" with frequency "Daily" and due date as "01-Apr-2018"
     And user marks the task "NonHabitDone" as "Done"
-    Then the due date of the task "NonHabitDone" should change to "tomorrow"
+    Then the due date of the task "NonHabitDone" should change to "today"
 
   Scenario: Mark a non-habit task with frequency not supported as done
     Given the user is on task list page
@@ -146,5 +146,5 @@ Feature: Interact with Tasks
     When user already has a habit task "HabitTask" with frequency "Every 2 days" and due date as "10" days ago
     And user clicks on Manage button on the task "HabitTask"
     And user marks all the occurrences as Done and submit
-    Then the due date of the task "HabitTask" should change to "2" days from today
-    Then Habit report should have "6" green bars from today
+    Then the due date of the task "HabitTask" should change to "0" days from today
+    Then Habit report should have "5" green bars from today
