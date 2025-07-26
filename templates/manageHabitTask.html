@@ -21,7 +21,7 @@
 			</ul>
 			</div>
 			{% endif %}
-			<form name="manageHabitTaskForm" class="taskForm" method="post" action="{{url_for('manageHabitTask', todo_id=data.taskData.todo_id)}}">
+			<form name="manageHabitTaskForm" class="taskForm" method="post" action="{{url_for('manageHabitTask', todo_id=data.taskData.todo_id)}}?{% if data.filterString %}query={{data.filterString}}{% endif %}{% if data.till %}&till={{data.till}}{% endif %}{% if data.groupBy %}&groupBy={{data.groupBy}}{% endif %}">
         <div>
         {% for occur in data.occurrences %}
         <div>

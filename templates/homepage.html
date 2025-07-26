@@ -102,7 +102,7 @@
 		   <label class="button_labels" for="{{todo['todo_id']}}_skip">Skip ({{todo["skip_count"]}})</label>
 		 </div>
 		 {% if todo["next_due_date"] %}
-		 <a href="{{url_for('manageHabitTaskPage', todo_id=todo['todo_id'])}}"  data-turbo-frame="overlay">Manage</a>
+		 <a href="{{url_for('manageHabitTaskPage', todo_id=todo['todo_id'])}}?{% if filterString %}query={{filterString}}{% endif %}{% if till %}&till={{till}}{% endif %}{% if groupBy %}&groupBy={{groupBy}}{% endif %}"  data-turbo-frame="overlay">Manage</a>
 		 {% endif %}
 		 {% endif %}
 		 

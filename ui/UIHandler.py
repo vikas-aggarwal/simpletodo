@@ -298,7 +298,10 @@ def __manage_habit_task_page(todo_id):
     taskOccurences = task_utils.get_all_occurrences_till_today_with_next(todo)
     return render_template("manageHabitTask.html",
                            data={"taskData": todo and task_utils.get_task_view_model(todo, {}, request.accept_languages),
-                                 "errors": "", "occurrences": taskOccurences})
+                                 "errors": "", "occurrences": taskOccurences,
+                                 "till": request.args.get("till"), "groupBy": request.args.get("groupBy"),
+                                 "filterString": request.args.get("query")
+                                 })
 
 def __manage_habit_task(todo_id):
     formData = request.form
@@ -314,5 +317,12 @@ def __manage_habit_task(todo_id):
         check_type(todo_data, TodoTaskDoneOrSkipModel)
         print(todo_data)
         __database.process_todo_action(todo_data)
-    return redirect(url_for("home"), 302)
+    queryParms=""
+    if request.args.get("query"):
+        queryParms = queryParms+"query="+request.args.get("query")
+    if request.args.get("till"):
+        queryParms = queryParms+"&till="+request.args.get("till")
+    if request.args.get("groupBy"):
+        queryParms = queryParms+"&groupBy="+request.args.get("groupBy")
+    return redirect(url_for("home")+"?"+queryParms, 302)
 
