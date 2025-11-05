@@ -5,7 +5,7 @@ from db import dbManager
 from ui import UIHandler as ui
 from ui import TaskUtils
 from datetime import datetime
-import pytz
+from zoneinfo import ZoneInfo
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 APP = Flask(__name__)
@@ -24,7 +24,7 @@ def all_todos():
 def all_todos_current():
     """Gets all todos from data source, sorted by due date in ascending order"""
     # Get current date, move to midnight and convert to UTC
-    current_date = pytz.utc.localize(datetime.utcnow()).astimezone(TaskUtils.__get_ui_time_zone()).replace(hour=23, minute=59, second=59, microsecond=0).astimezone(pytz.UTC).replace(tzinfo=None)
+    current_date = datetime.utcnow().replace(ZoneInfo("UTC")).astimezone(TaskUtils.__get_ui_time_zone()).replace(hour=23, minute=59, second=59, microsecond=0).astimezone(ZoneInfo("UTC")).replace(tzinfo=None)
     data = TODO_DATA.get_all_todos_before_date(None, ["due_date"], current_date)
     return jsonify(json.loads(dumps(data, json_options=LEGACY_JSON_OPTIONS)))
 

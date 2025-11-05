@@ -1,5 +1,5 @@
 from ui import TaskUtils as task_utils
-import pytz
+from zoneinfo import ZoneInfo
 from TodoTypes import PayloadError, TodoUpdatePayload, CategoryCreateEditPayload
 from typing import Union
 import re
@@ -76,7 +76,7 @@ def validateCreateEditPayload(formData, todo_id=None) -> Union[PayloadError, Tod
         data['timeSlot'] = int(formData['slot'])
 
     if 'dueDate' in formData and formData['dueDate'] != "":
-        data['due_date'] = task_utils.get_local_datetime_object(formData["dueDate"]).astimezone(pytz.UTC).replace(tzinfo=None)
+        data['due_date'] = task_utils.get_local_datetime_object(formData["dueDate"]).astimezone(ZoneInfo("UTC")).replace(tzinfo=None)
 
     if formData.get("remindBeforeDays") and formData.get("remindBeforeDays") == "":
         data["remindBeforeDays"] = None

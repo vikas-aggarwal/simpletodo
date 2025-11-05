@@ -18,6 +18,8 @@ def userOnTaskListPage(context):
 
 @when(u'user clicks on New')
 def userClicksOnNew(context):
+    context.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#new_task")))
+    context.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#new_task")))
     new_button_link = context.browser.find_element(By.ID, "new_task")
     new_button_link.click()
 
@@ -30,6 +32,7 @@ def userClicksOnSubmit(context):
 @then(u'a new task should be created')
 def newTaskStep(context,expectedTasksCount="1"):
     driver = context.browser # type: selenium.webdriver.Firefox
+    context.wait.until(EC.presence_of_element_located((By.CLASS_NAME, "task")))
     task_count = len(driver.find_elements(By.CLASS_NAME,"task"))
     context.foundNewTask = []
     assert_that(task_count).is_equal_to(int(expectedTasksCount))

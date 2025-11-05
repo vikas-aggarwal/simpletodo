@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, date
 from db.dbManager import DBManager
 from util import commons, recur, thermalPrintImageGenerator
 from runtime_type_checker import check_type
-import pytz
+from zoneinfo import ZoneInfo
 import calendar
 from typing import List
 
@@ -54,14 +54,14 @@ def __filter_task():
 def __habit_report():
     month = request.args.get("month")
     year = request.args.get("year")
-    start_date = datetime(int(year), int(month), 1,0,0,0,0, tzinfo=task_utils.__get_ui_time_zone()).astimezone(pytz.UTC).replace(tzinfo=None)
+    start_date = datetime(int(year), int(month), 1,0,0,0,0, tzinfo=task_utils.__get_ui_time_zone()).astimezone(ZoneInfo("UTC")).replace(tzinfo=None)
     if int(month) != 12:
         end_date = (datetime(int(year), int(month)+1, 1, tzinfo=task_utils.__get_ui_time_zone()) + timedelta(days=-1))
     else:
         end_date = (datetime(int(year)+1, 1, 1, tzinfo=task_utils.__get_ui_time_zone()) + timedelta(days=-1))
 
     end_day = end_date.day
-    end_date = end_date.astimezone(pytz.UTC).replace(tzinfo=None)
+    end_date = end_date.astimezone(ZoneInfo("UTC")).replace(tzinfo=None)
     todo_logs_entry = __database.get_todo_logs(start_date, end_date)
     todo_logs_entry_by_id = task_utils.get_task_logs_entry_by_id(todo_logs_entry)
     return render_template("habitReport.html", entries=todo_logs_entry_by_id, month=month, year=year, start_day=1, end_day=end_day)
@@ -147,10 +147,10 @@ def __home_page(errors=None):
         filters = []
 
     if request.args.get("till") and request.args.get("till") == "today":
-        current_date = pytz.utc.localize(datetime.utcnow()).astimezone(task_utils.__get_ui_time_zone()).replace(hour=23, minute=59, second=59, microsecond=0).astimezone(pytz.UTC).replace(tzinfo=None)
+        current_date = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC")).astimezone(task_utils.__get_ui_time_zone()).replace(hour=23, minute=59, second=59, microsecond=0).astimezone(ZoneInfo("UTC")).replace(tzinfo=None)
         allTodos: List[Todo] = __database.get_all_todos_before_date(filters, ["due_date"], current_date)
     elif request.args.get("till") and request.args.get("till") == "this_month":
-        current_date = pytz.utc.localize(datetime.utcnow()).astimezone(task_utils.__get_ui_time_zone()).replace(hour=23, minute=59, second=59, microsecond=0).astimezone(pytz.UTC).replace(tzinfo=None)
+        current_date = datetime.utcnow().replace(tzinfo=ZoneInfo("UTC")).astimezone(task_utils.__get_ui_time_zone()).replace(hour=23, minute=59, second=59, microsecond=0).astimezone(ZoneInfo("UTC")).replace(tzinfo=None)
         current_date = current_date.replace(day=calendar.monthrange(current_date.year, current_date.month)[1])
         allTodos: List[Todo] = __database.get_all_todos_before_date(filters, ["due_date"], current_date)
     else:    
@@ -239,9 +239,9 @@ def __generate_todo_plan_task_list(startDate, endDate):
     for todo in data:
         
         if todo["due_date"]:
-            todo_due_date_local = pytz.utc.localize(todo["due_date"]).astimezone(task_utils.__get_ui_time_zone())
+            todo_due_date_local = todo["due_date"].replace(tzinfo=ZoneInfo("UTC")).astimezone(task_utils.__get_ui_time_zone())
         else:
-            todo_due_date_local = datetime.now(pytz.UTC).astimezone(task_utils.__get_ui_time_zone())
+            todo_due_date_local = datetime.now(ZoneInfo("UTC")).astimezone(task_utils.__get_ui_time_zone())
         
         todo_due = todo_due_date_local.date()
 
