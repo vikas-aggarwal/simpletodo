@@ -4,10 +4,10 @@ from TodoTypes import PayloadError, TodoUpdatePayload, CategoryCreateEditPayload
 from typing import Union
 import re
 
-slots = {"1": "Post Wake up",
-         "2": "Before Bath",
+slots = {"1": "Early Morning",
+         "2": "Before Breakfast",
          "3": "Before Lunch",
-         "4": "Post Tea",
+         "4": "Evening",
          "5": "Before Dinner",
          "6": "Before Sleep",
          "None": "Anytime",}

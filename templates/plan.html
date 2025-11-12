@@ -14,6 +14,7 @@
         <div class="taskList">
             <h3 class="page_title">{{ currentDate }} - {{data.dayOfWeekMapping[currentDate]}}</h3>
             {% for x in data.tasks[currentDate] %}
+            <h4 class="slotHeader">{{data.slots[x]}}</h4>
             <ul {% if x == 'None' %} style="color: blue" {% endif %}>
             {% for task in data.tasks.get(currentDate).get(x) %} 
                 <li><h4 class="task">{{task.task or "Untitled"}}</h4></li>

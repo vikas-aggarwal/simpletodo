@@ -17,6 +17,11 @@ body {
     border-right: 1px solid black;
 }
 
+.slotHeader {
+    text-align: center;
+    background-color: lightgrey;
+}
+
 h3 {
    border-bottom: 1px solid black; 
 }

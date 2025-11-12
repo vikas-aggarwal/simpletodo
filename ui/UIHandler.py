@@ -265,7 +265,7 @@ def __generate_todo_plan():
     endDateFromRequest = request.args.get("endDate")
 
     startDate = date.today() if startDateFromRequest is None else datetime.strptime(startDateFromRequest, "%Y-%m-%d").date()
-    endDate = startDate + timedelta(days=7) if endDateFromRequest is None else datetime.strptime(endDateFromRequest, "%Y-%m-%d").date()
+    endDate = startDate + timedelta(days=6) if endDateFromRequest is None else datetime.strptime(endDateFromRequest, "%Y-%m-%d").date()
 
     dayOfWeekMapping={}
     currentDate = startDate.replace() # cloning
